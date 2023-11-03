@@ -1,1 +1,83 @@
-hello
+<!DOCTYPE html>
+<html>
+<head>
+
+<link href='https://fonts.googleapis.com/css?family=Azeret Mono' rel='stylesheet'>
+
+<style>
+body
+{
+	font-family: 'Azeret Mono', monospace;
+}
+div.growing
+{
+	display:inline;
+	transition: all .1s ease-in-out;
+    transform: scale(95%);
+    background-color:white;
+    border-radius: 16px;
+    aspect-ratio: 1;
+    width: 30%;
+    overflow: hidden;
+}
+.growing:hover
+{
+	transition: all .1s ease-in-out;
+    transform: scale(100%);
+}
+img.round
+{
+	display: inline;
+    width: inherit;
+    overflow: hidden;
+}
+div.section
+{
+	display:block;
+    border-radius: 8px;
+    background-color: black;
+	font-size: 32px;
+    font-weight: 900;
+    padding-left:8px;
+    color: orange;
+    height: auto;
+    padding: 16px;
+}
+div.subsection
+{
+	font-size: 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    padding-left:16px;
+    color: cyan;
+    border: 2px solid black;
+    padding: 16px;
+}
+div.subsectiontext
+{
+	font-size: 14px;
+    color: white;
+    padding: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="section">SHADER WORK
+	<div class="subsection">CROSS-SECTION
+		<div>
+			<div class="growing"><img class="round" src="img_work_tanzle_a_1.jpg"></div>
+			<div class="growing"><img class="round" src="img_work_tanzle_a_2.jpg"></div>
+			<div class="growing"><img class="round" src="img_work_tanzle_a_3.jpg"></div>
+			<div class="subsectiontext">
+            	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+            </div>
+		</div>
+    </div>
+</div>
+
+</body>
+</html>
+
+

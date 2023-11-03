@@ -7,7 +7,9 @@
 <style>
 body
 {
+	background-color:black;
 	font-family: 'Azeret Mono', monospace;
+    padding: 12px;
 }
 img.round
 {
@@ -30,13 +32,22 @@ div.section
 {
 	display:block;
     border-radius: 8px;
-    background-color: black;
+    background-color: #242424;
 	font-size: 32px;
     font-weight: 900;
     padding-left:8px;
     color: orange;
     height: auto;
     padding: 16px;
+}
+div
+{
+	transition: all .1s ease-in-out;
+}
+div:hover
+{
+	transition: all .1s ease-in-out;
+	transform: translate(8px);
 }
 div.subsection
 {
@@ -45,7 +56,6 @@ div.subsection
     font-weight: 600;
     padding-left:16px;
     color: cyan;
-    border: 2px solid black;
     padding: 16px;
 }
 div.subsectiontext

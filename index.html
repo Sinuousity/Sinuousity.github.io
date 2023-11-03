@@ -9,7 +9,7 @@ body
 {
 	font-family: 'Azeret Mono', monospace;
 }
-div.growing
+img.round
 {
 	display:inline;
 	transition: all .1s ease-in-out;
@@ -18,18 +18,13 @@ div.growing
     border-radius: 16px;
     aspect-ratio: 1;
     width: 30%;
+    max-width: 200px;
     overflow: hidden;
 }
-.growing:hover
+img.round:hover
 {
 	transition: all .1s ease-in-out;
     transform: scale(100%);
-}
-img.round
-{
-	display: inline;
-    width: inherit;
-    overflow: hidden;
 }
 div.section
 {
@@ -67,9 +62,9 @@ div.subsectiontext
 <div class="section">SHADER WORK
 	<div class="subsection">CROSS-SECTION
 		<div>
-			<div class="growing"><img class="round" src="img_work_tanzle_a_1.jpg"></div>
-			<div class="growing"><img class="round" src="img_work_tanzle_a_2.jpg"></div>
-			<div class="growing"><img class="round" src="img_work_tanzle_a_3.jpg"></div>
+			<img class="round" src="img_5terre.jpg">
+			<img class="round" src="img_5terre.jpg">
+			<img class="round" src="img_5terre.jpg">
 			<div class="subsectiontext">
             	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
             </div>
@@ -79,5 +74,3 @@ div.subsectiontext
 
 </body>
 </html>
-
-

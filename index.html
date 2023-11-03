@@ -19,9 +19,10 @@ img.round
     background-color:white;
     border-radius: 16px;
     aspect-ratio: 1;
-    width: 30%;
-    max-width: 200px;
+    width: 32%;
+    max-width: 256px;
     overflow: hidden;
+    margin: auto;
 }
 img.round:hover
 {
@@ -33,28 +34,32 @@ div.section
 	display:block;
     border-radius: 8px;
     background-color: #242424;
-	font-size: 32px;
+	font-size: 38px;
     font-weight: 900;
-    padding-left:8px;
+    padding: 16px;
+    padding-left:48px;
     color: orange;
     height: auto;
-    padding: 16px;
+    max-width: 800px;
+    margin: auto;
+    text-align: center;
 }
 div.subsection
 {
 	transition: all .45s ease-in-out;
-	font-size: 16px;
+	font-size: 20px;
     border-radius: 8px;
     font-weight: 600;
     padding-left:16px;
     color: cyan;
     padding: 16px;
     background-image: linear-gradient(135deg, #ffffff00, #ffffff11);
+    margin-top: 16px;
+    text-align: left;
 }
 div.subsection:hover
 {
 	transition: all .15s ease-in-out;
-	--transform: translate(8px);
     background-position: 100px;
 }
 div.subsectiontext
@@ -68,18 +73,10 @@ div.subsectiontext
 
 <body>
 
-<div class="section">SHADER WORK
-	<div class="subsection">CROSS-SECTION
-		<div>
-			<img class="round" src="img_work_tanzle_a_1.jpg">
-			<img class="round" src="img_work_tanzle_a_2.jpg">
-			<img class="round" src="img_work_tanzle_a_3.jpg">
-			<div class="subsectiontext">
-            			blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-            		</div>
-		</div>
-    	</div>
-	<div class="subsection">CROSS-SECTION
+<div class="section">
+	SHADER WORK
+	<div class="subsection">
+    	CROSS-SECTION
 		<div>
 			<img class="round" src="img_work_tanzle_a_1.jpg">
 			<img class="round" src="img_work_tanzle_a_2.jpg">
@@ -87,9 +84,42 @@ div.subsectiontext
 			<div class="subsectiontext">
             	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
             </div>
-	</div>
+		</div>
+    </div>
+	<div class="subsection">
+    	X-Ray
+		<div>
+			<img class="round" src="img_work_tanzle_a_1.jpg">
+			<img class="round" src="img_work_tanzle_a_2.jpg">
+			<img class="round" src="img_work_tanzle_a_3.jpg">
+			<div class="subsectiontext">
+            	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+            </div>
+		</div>
+    </div>
+	<div class="subsection">
+    	Hologram
+		<div>
+			<img class="round" src="img_5terre.jpg">
+			<img class="round" src="img_5terre.jpg">
+			<img class="round" src="img_5terre.jpg">
+			<div class="subsectiontext">
+            	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+            </div>
+		</div>
+    </div>
+	<div class="subsection">
+    	Recursive Mirror
+		<div>
+			<img class="round" src="img_5terre.jpg">
+			<div class="subsectiontext">
+            	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+            </div>
+		</div>
     </div>
 </div>
 
 </body>
 </html>
+
+

@@ -20,14 +20,13 @@
 	pointer-events:none;
 }
 
-
 .noscroll {
   overflow: hidden;
 }
 
-
 html
 {
+	width: 100%;
 	height: 100%;
 	overflow:hidden;
 }
@@ -37,14 +36,27 @@ body
 	background-color: black;
 	font-family: 'JetBrains Mono', monospace;
 	padding: 12px;
+	width: 100%;
 	height: 100%;
 	overflow:hidden;
 }
 
 .content
 {
+	width: 100%;
 	max-height: 100%;
     overflow-y: auto;
+	text-align: center;
+}
+
+a.titlelink, a.titlelink:visited
+{
+	font-size: 16px;
+	font-weight: 900;
+	color: gray;
+	text-align: center;
+	text-decoration: none;
+	margin-bottom:16px;
 }
 
 img.round
@@ -68,13 +80,21 @@ img.round:hover
 
 video
 {
+	transition: all .1s ease-in-out;
+	transform: scale(92%);
 	border-radius: 8px;
-    object-fit: fill;
+    object-fit: cover;
 	max-width: 33.333%;
 	overflow: hidden;
 	aspect-ratio: 1;
 	margin: 0 auto;
 	width: 32%;
+}
+video:hover
+{
+	transition: all .1s ease-in-out;
+	border-radius: 10px;
+	transform: scale(100%);
 }
 
 div.section
@@ -84,12 +104,14 @@ div.section
 	background-color: #242424;
 	font-size: 38px;
 	font-weight: 900;
-	padding: 16px;
-	padding-left:48px;
+	padding:16px;
 	color: orange;
     height: auto;
     max-width: 800px;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 8px;
+    margin-bottom: 0px;
     text-align: center;
 }
 div.subsection
@@ -176,17 +198,38 @@ img.showcase
 
 <body>
 	<div id="content" class="content">
+		<a class="titlelink" href="index.html">RELOAD</a>
 		<div id ="portfolio" class="section">
 		SHADER WORK
-			<div class="subsection">Sci-Fi Signs
+			<div class="subsection">SCI-FI SIGNS
 				<div>
+					<div class="subsectiontext">
+						An artist customisable and parameter heavy sci-fi visual effect package that makes animated holograms incredibly easy to add to any project.<br>
+					</div>
+
+					<video class="round" autoplay muted loop>
+						<source src="SSigns_Example2.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+						
 					<img onclick="showshowcase(this)" class="round" src="SSFS_Screen2.png">
+
+					<video class="round" autoplay muted loop>
+						<source src="SSigns_v13.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+
 					<img onclick="showshowcase(this)" class="round" src="SSFS_Screen3.jpg">
 					<img onclick="showshowcase(this)" class="round" src="SSFS_Screen4.jpg">
 					<img onclick="showshowcase(this)" class="round" src="SSFS_Screen5.jpg">
+
 					<div class="subsectiontext">
-								blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-							</div>
+						Visit the
+							<a class="titlelink" href="https://assetstore.unity.com/packages/vfx/shaders/sinuous-sci-fi-signs-26856">
+								Asset Store listing
+							</a>
+						for this shader to see more examples.
+					</div>
 				</div>
 			</div>
 
@@ -196,68 +239,113 @@ img.showcase
 					<img onclick="showshowcase(this)" class="round" src="img_work_tanzle_a_2.jpg">
 					<img onclick="showshowcase(this)" class="round" src="img_work_tanzle_a_3.jpg">
 					<div class="subsectiontext">
-								blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-							</div>
+						One of my earliest tech art contract works, a shader to show a cross section of any mesh.
+					</div>
 				</div>
 			</div>
 
-			<div class="subsection">X-Ray
+			<div class="subsection">X-RAY
 				<div>
 					<img onclick="showshowcase(this)" class="round" src="XRay1.jpg">
 					<img onclick="showshowcase(this)" class="round" src="XRay3.jpg">
 					<img onclick="showshowcase(this)" class="round" src="XRay4.jpg">
 					<div class="subsectiontext">
-								blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-							</div>
+						Another early work, a shader to visualize the interior of any mesh.
+					</div>
 				</div>
 			</div>
 
-			<div class="subsection">Fluid-likes
+			<div class="subsection">FLUID-LIKES
 				<div>
 					<img onclick="showshowcase(this)" class="round" src="fluid.png">
 					<img onclick="showshowcase(this)" class="round" src="gooball.png">
 					<img onclick="showshowcase(this)" class="round" src="rev_waterball.png">
 					<div class="subsectiontext">
-						blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+						Left, a fluid volume featuring depth fog, screen-space refraction, and animated surface waves.<br>
+						Middle and right, fluid like surfaces that respond to ripples in 3D space.
 					</div>
 				</div>
 			</div>
 
-			<div class="subsection">Animated Tentacles
+			<div class="subsection">ANIMATED TENTACLE
 				<div>
-					<video class="round" controls>
-						<source src="tentacle3.mp4" type="video/mp4">
+					<video class="round" autoplay muted loop>
+						<source src="tentacle1.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
-					<video class="round" controls>
+					<video class="round" autoplay muted loop>
 						<source src="tentacle4.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 					<div class="subsectiontext">
-						blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+						A pulsing tentacle that uses parallax to create the illusion of a dense fluid beneath its surface.
 					</div>
 				</div>
 			</div>
 
-			<div class="subsection">Cookable Donuts
+			<div class="subsection">FRYABLE DONUTS
 				<div>
+					<div class="subsectiontext">
+						A procedural donut shader for a VR demo.<br>
+						Submersing a donut in cooking oil would 'cook' that part of the donut.<br>
+						A donut left in the oil too long would naturally be burnt.
+					</div>
 					<img onclick="showshowcase(this)" class="round" src="donut_1.jpg">
 					<img onclick="showshowcase(this)" class="round" src="donut_2.jpg">
 					<img onclick="showshowcase(this)" class="round" src="donut_3.jpg">
 					<img onclick="showshowcase(this)" class="round" src="donut_4.jpg">
+				</div>
+			</div>
+
+			<div class="subsection">PROJECT REVENANTS ( WORKING TITLE )
+				<div>
 					<div class="subsectiontext">
-						blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+						Some additional graphics and design work for a hobby project.<br>
+						Development on this project is currentlyon hold, but you can
+						see <a class="titlelink" href="https://www.instagram.com/the_revenants_game/">more WIP content</a>.
 					</div>
+					<img onclick="showshowcase(this)" class="round" src="rev_01.png">
+					<img onclick="showshowcase(this)" class="round" src="rev_02.png">
+					<img onclick="showshowcase(this)" class="round" src="rev_03.png">
+					<img onclick="showshowcase(this)" class="round" src="rev_04.png">
 				</div>
 			</div>
 
 			<div class="subsection">More
 				<div>
-					<img onclick="showshowcase(this)" class="round" src="forcefield.jpg">
+					
+					<video class="round" autoplay muted loop>
+						<source src="Aberration.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+
 					<img onclick="showshowcase(this)" class="round" src="InfinimirrorFeatures.jpg">
+					<video class="round" autoplay muted loop>
+						<source src="HoloShader1.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+
+					<img onclick="showshowcase(this)" class="round" src="forcefield.jpg">
+					<video class="round" autoplay muted loop>
+						<source src="SS_Revive.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+					
 					<img onclick="showshowcase(this)" class="round" src="pixelated.png">
+					<video class="round" autoplay muted loop>
+						<source src="Loading1.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+					
+					<video class="round" autoplay muted loop>
+						<source src="RandomGalaxies.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+
 					<div class="subsectiontext">
-						A forcefield shader. A recursive mirror shader. A targeted pixelation shader with voxel option.
+						Post-processing. Recursive mirrors. Holograms. Forcefields.
+						Dynamic, procedural skyboxes. Pixelization and voxelization. Loading animations. Procedural galaxies.
+						I have made countless shaders filling a variety of design and visual effects needs.
 					</div>
 				</div>
 			</div>

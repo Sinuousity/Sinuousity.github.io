@@ -6,7 +6,13 @@
 
 <style>
 
-div.gone
+.nomouse
+{
+	user-select:none;
+	pointer-events:none;
+}
+
+.gone
 {
 	transition: all .15s ease-in-out;
 	opacity:0%;
@@ -14,11 +20,31 @@ div.gone
 	pointer-events:none;
 }
 
+
+.noscroll {
+  overflow: hidden;
+}
+
+
+html
+{
+	height: 100%;
+	overflow:hidden;
+}
+
 body
 {
 	background-color: black;
 	font-family: 'JetBrains Mono', monospace;
 	padding: 12px;
+	height: 100%;
+	overflow:hidden;
+}
+
+.content
+{
+	max-height: 100%;
+    overflow-y: auto;
 }
 
 img.round
@@ -93,42 +119,40 @@ div.subsectiontext
 }
 
 
-div.showcase
-{
-	background-image: linear-gradient(90deg, #00000000, #000000FF,#000000FF,#000000FF, #000000FF,#000000FF,#000000FF, #00000000);
-	position: fixed;
-	visibility: visible;
-	top: 0;
-	left: 10%;
-	width: 80%;
-	height: 100%;
-	margin: auto;
-	text-align: center;
-}
 div.showcaseback
 {
 	transition: all .15s ease-in-out;
-	background-color: #00000000;
+	background-color: #00000001;
+	position: fixed;
+	visibility: visible;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 100%;
+}
+div.showcase
+{
+	background-color:#000000CC;
 	position: fixed;
 	visibility: visible;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
+	margin: auto;
+	text-align: center;
 }
 img.showcase
 {
-	display:inline;
-	border-radius: 16px;
-	width: 50%;
-	max-width: 1024px;
-	max-height: 512px;
-	overflow: hidden;
-	margin: auto;
-    object-fit: cover;
+	border-radius: 12px;
 	position: absolute;
-	top: 25%;
-	left: 25%;
+	max-width:80%;
+	max-height:80%;
+	top: 50%;
+	left: 50%;
+	-ms-transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
+	object-fit:contain;
 }
 </style>
 
@@ -136,12 +160,14 @@ img.showcase
 <script>
 	function showshowcase(imagesrc)
 	{
-		document.getElementById("showcase").setAttribute("class","showcaseback");
-		document.getElementById("showcaseimg").setAttribute("src",imagesrc.getAttribute("src"));
+		document.getElementById("showcaseimg").setAttribute("src", imagesrc.getAttribute("src"));
+		document.getElementById("showcase").setAttribute("class", "showcaseback");
+		document.getElementById("content").addClass("noscroll");
 	}
 	function hideshowcase()
 	{
-		document.getElementById("showcase").setAttribute("class","gone");
+		document.getElementById("showcase").setAttribute("class", "gone");
+		document.getElementById("content").removeClass("noscroll");
 	}
 </script>
 
@@ -149,98 +175,96 @@ img.showcase
 </head>
 
 <body>
-<div class="section">
-SHADER WORK
-	<div class="subsection">
-    		Sci-Fi Signs
-		<div>
-			<img onclick="showshowcase(this)" class="round" src="SSFS_Screen2.png">
-			<img onclick="showshowcase(this)" class="round" src="SSFS_Screen3.jpg">
-			<img onclick="showshowcase(this)" class="round" src="SSFS_Screen4.jpg">
-			<img onclick="showshowcase(this)" class="round" src="SSFS_Screen5.jpg">
-			<div class="subsectiontext">
-            			blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-            		</div>
+	<div id="content" class="content">
+		<div id ="portfolio" class="section">
+		SHADER WORK
+			<div class="subsection">Sci-Fi Signs
+				<div>
+					<img onclick="showshowcase(this)" class="round" src="SSFS_Screen2.png">
+					<img onclick="showshowcase(this)" class="round" src="SSFS_Screen3.jpg">
+					<img onclick="showshowcase(this)" class="round" src="SSFS_Screen4.jpg">
+					<img onclick="showshowcase(this)" class="round" src="SSFS_Screen5.jpg">
+					<div class="subsectiontext">
+								blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+							</div>
+				</div>
+			</div>
+
+			<div class="subsection">CROSS-SECTION
+				<div>
+					<img onclick="showshowcase(this)" class="round" src="img_work_tanzle_a_1.jpg">
+					<img onclick="showshowcase(this)" class="round" src="img_work_tanzle_a_2.jpg">
+					<img onclick="showshowcase(this)" class="round" src="img_work_tanzle_a_3.jpg">
+					<div class="subsectiontext">
+								blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+							</div>
+				</div>
+			</div>
+
+			<div class="subsection">X-Ray
+				<div>
+					<img onclick="showshowcase(this)" class="round" src="XRay1.jpg">
+					<img onclick="showshowcase(this)" class="round" src="XRay3.jpg">
+					<img onclick="showshowcase(this)" class="round" src="XRay4.jpg">
+					<div class="subsectiontext">
+								blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+							</div>
+				</div>
+			</div>
+
+			<div class="subsection">Fluid-likes
+				<div>
+					<img onclick="showshowcase(this)" class="round" src="fluid.png">
+					<img onclick="showshowcase(this)" class="round" src="gooball.png">
+					<img onclick="showshowcase(this)" class="round" src="rev_waterball.png">
+					<div class="subsectiontext">
+						blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+					</div>
+				</div>
+			</div>
+
+			<div class="subsection">Animated Tentacles
+				<div>
+					<video class="round" controls>
+						<source src="tentacle3.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+					<video class="round" controls>
+						<source src="tentacle4.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+					<div class="subsectiontext">
+						blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+					</div>
+				</div>
+			</div>
+
+			<div class="subsection">Cookable Donuts
+				<div>
+					<img onclick="showshowcase(this)" class="round" src="donut_1.jpg">
+					<img onclick="showshowcase(this)" class="round" src="donut_2.jpg">
+					<img onclick="showshowcase(this)" class="round" src="donut_3.jpg">
+					<img onclick="showshowcase(this)" class="round" src="donut_4.jpg">
+					<div class="subsectiontext">
+						blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
+					</div>
+				</div>
+			</div>
+
+			<div class="subsection">More
+				<div>
+					<img onclick="showshowcase(this)" class="round" src="forcefield.jpg">
+					<img onclick="showshowcase(this)" class="round" src="InfinimirrorFeatures.jpg">
+					<img onclick="showshowcase(this)" class="round" src="pixelated.png">
+					<div class="subsectiontext">
+						A forcefield shader. A recursive mirror shader. A targeted pixelation shader with voxel option.
+					</div>
+				</div>
+			</div>
+
 		</div>
 	</div>
-	<div class="subsection">
-    		CROSS-SECTION
-		<div>
-			<img onclick="showshowcase(this)" class="round" src="img_work_tanzle_a_1.jpg">
-			<img onclick="showshowcase(this)" class="round" src="img_work_tanzle_a_2.jpg">
-			<img onclick="showshowcase(this)" class="round" src="img_work_tanzle_a_3.jpg">
-			<div class="subsectiontext">
-            			blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-            		</div>
-		</div>
-	</div>
-	<div class="subsection">
-    		X-Ray
-		<div>
-			<img onclick="showshowcase(this)" class="round" src="XRay1.jpg">
-			<img onclick="showshowcase(this)" class="round" src="XRay3.jpg">
-			<img onclick="showshowcase(this)" class="round" src="XRay4.jpg">
-			<div class="subsectiontext">
-            			blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-            		</div>
-		</div>
-	</div>
-
-	<div class="subsection">
-		Fluid-likes
-		<div>
-			<img onclick="showshowcase(this)" class="round" src="fluid.png">
-			<img onclick="showshowcase(this)" class="round" src="gooball.png">
-			<img onclick="showshowcase(this)" class="round" src="rev_waterball.png">
-			<div class="subsectiontext">
-            	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-            </div>
-		</div>
-    </div>
-
-	<div class="subsection">
-		Animated Tentacles
-		<div>
-			<video class="round" controls>
-				<source src="tentacle3.mp4" type="video/mp4">
-				Your browser does not support HTML video. :(
-			</video>
-			<video class="round" controls>
-				<source src="tentacle4.mp4" type="video/mp4">
-				Your browser does not support HTML video. :(
-			  </video>
-			<div class="subsectiontext">
-            	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-            </div>
-		</div>
-    </div>
-
-	<div class="subsection">
-		Cookable Donuts
-		<div>
-			<img onclick="showshowcase(this)" class="round" src="donut_1.jpg">
-			<img onclick="showshowcase(this)" class="round" src="donut_2.jpg">
-			<img onclick="showshowcase(this)" class="round" src="donut_3.jpg">
-			<img onclick="showshowcase(this)" class="round" src="donut_4.jpg">
-			<div class="subsectiontext">
-            	blah blah blah blah blahblah blah blah blah blahblah blah blah blah blah
-            </div>
-		</div>
-    </div>
-
-	<div class="subsection">
-    		More
-		<div>
-			<img onclick="showshowcase(this)" class="round" src="forcefield.jpg">
-			<img onclick="showshowcase(this)" class="round" src="InfinimirrorFeatures.jpg">
-			<img onclick="showshowcase(this)" class="round" src="pixelated.png">
-			<div class="subsectiontext">
-            	A forcefield shader. A recursive mirror shader. A targeted pixelation shader with voxel option.
-            </div>
-		</div>
-	</div>
-
-</div>
+</body>
 
 
 
@@ -252,5 +276,4 @@ SHADER WORK
 
 
 
-</body>
 </html>

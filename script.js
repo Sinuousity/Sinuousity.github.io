@@ -25,6 +25,7 @@
 	{
 		gone_all();
 		var page = document.getElementById("portfolio_aboutme");
+		$(page).removeClass("gone");
 		$(page).addClass("section");
 		var tlink_about = document.getElementById("tlink_about");
 		tlink_about.setAttribute("class", "titlelink_selected");
@@ -35,6 +36,7 @@
 	{
 		gone_all();
 		var page = document.getElementById("portfolio_shaders");
+		$(page).removeClass("gone");
 		$(page).addClass("section");
 		var tlink_shaders = document.getElementById("tlink_shaders");
 		tlink_shaders.setAttribute("class", "titlelink_selected");
@@ -44,6 +46,7 @@
 	{
 		gone_all();
 		var page = document.getElementById("portfolio_links");
+		$(page).removeClass("gone");
 		$(page).addClass("section");
 		var tlink_links = document.getElementById("tlink_links");
 		tlink_links.setAttribute("class", "titlelink_selected");
@@ -69,7 +72,7 @@
 			document.getElementById("showcase").setAttribute("class", "showcasecontainer");
 		}
 
-		var content_e = document.getElementById("content");
+		var content_e = document.getElementById("body");
 		$(content_e).addClass("noscroll");
 	}
 
@@ -80,6 +83,6 @@
 		var video = document.getElementById("showcase_video");
 		video.pause();
 
-		var content_e = document.getElementById("content");
+		var content_e = document.getElementById("body");
 		$(content_e).removeClass("noscroll");
 	}

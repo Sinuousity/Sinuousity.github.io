@@ -38,6 +38,10 @@ body::-webkit-scrollbar
 {
 	display: none;
 }
+.content::-webkit-scrollbar
+{
+	display: none;
+}
 
 .content
 {
@@ -47,7 +51,8 @@ body::-webkit-scrollbar
 	height: 100%;
 	max-height: 100%;
 	text-align: center;
-	padding:16px;
+	padding-top:16px;
+	padding-bottom:16px;
 }
 
 a.titlelink, a.titlelink:visited
@@ -127,10 +132,13 @@ video.round:hover
 div.section
 {
 	position: relative;
-	width: 80%;
+	width: 90%;
     max-width: 800px;
 	height: auto;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 16px;
+    margin-bottom: 32px;
 
 	border-radius: 12px;
 	background-color: #151515;
@@ -144,10 +152,13 @@ div.section
 div.sectioncentered
 {
 	position: relative;
-	width: 80%;
+	width: 90%;
     max-width: 800px;
 	height: auto;
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 16px;
+    margin-bottom: 32px;
 
 	border-radius: 12px;
 	background-color: #151515;

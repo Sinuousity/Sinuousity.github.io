@@ -84,11 +84,19 @@ a.titlelink_selected, a.titlelink_selected:visited
 
 a.subsectiontextlink, a.subsectiontextlink:visited
 {
+	transition: all .15s ease-in-out;
 	font-size: 14px;
 	font-weight: 900;
 	color: rgb(129, 168, 219);
 	text-align: center;
-	text-decoration: underline;
+	text-decoration: none;
+	border-bottom:black solid 0px;
+}
+a.subsectiontextlink:hover, a.subsectiontextlink:visited:hover
+{
+	transition: all .15s ease-in-out;
+	color: white;
+	border-bottom:white solid 2px;
 }
 
 img.round
@@ -141,11 +149,9 @@ div.section
     margin-bottom: 32px;
 	padding:16px;
 
-
 	border-radius: 12px;
 	background-color: #151515;
 	font-size: 38px;
-	font-weight: 900;
 	color: orange;
     text-align: center;
 }
@@ -165,7 +171,6 @@ div.sectioncentered
 	border-radius: 12px;
 	background-color: #151515;
 	font-size: 38px;
-	font-weight: 900;
 	color: orange;
     text-align: center;
 }

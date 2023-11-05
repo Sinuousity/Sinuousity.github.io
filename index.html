@@ -12,9 +12,12 @@
 
 <body id="body">
 	<div id="content" class="content">
-		<a class="titlelink_selected" id="tlink_about" onclick="goto_about()">ABOUT</a>
-		<a class="titlelink" id="tlink_shaders" onclick="goto_shaders()">SHADERS</a>
-		<a class="titlelink" id="tlink_links" onclick="goto_links()">LINKS</a>
+
+		<div id="pagelinks" class="pagelinkgroup">
+			<a class="titlelink_selected" id="tlink_about" onclick="goto_about()">ABOUT</a>
+			<a class="titlelink" id="tlink_shaders" onclick="goto_shaders()">SHADERS</a>
+			<a class="titlelink" id="tlink_links" onclick="goto_links()">LINKS</a>
+		</div>
 		
 		<div id ="portfolio_aboutme" class="section"> THOMAS RASOR
 			<div class="subsection"> ABOUT ME
@@ -33,41 +36,39 @@
 			</div>
 		</div>
 		
-		<div id ="portfolio_links" class="gone"> LINKS
-			<div class="subsection">
-				<div>
-					<div class="subsectiontext">
-						<a class="titlelink" href="https://www.linkedin.com/in/thomas-r-8379a387/">LinkedIn</a>
-					</div>
-				</div>
+		<div id ="portfolio_links" class="gone">
+			<div class="pagelink">
+				<a class="divlink" href="https://www.linkedin.com/in/thomas-r-8379a387/"></a>
+				<img class="pagelinkimg" src="https://static.licdn.com/aero-v1/sc/h/an86sbagr48vf1s7k8llw6h6b">
 			</div>
+			<div class="pagelink">
+				<a class="divlink" href="https://assetstore.unity.com/publishers/10375"></a>
+				<img class="pagelinkimg" src="https://unity-assetstorev2-prd.storage.googleapis.com/cdn-origin/assets/as/views/common/components/Logo/src/unity-assetstore-logo-new.50ac708aeae28b8b6bf369ece5875fa5.svg">
+			</div>
+			
 		</div>
 
-		<div id ="portfolio_shaders" class="gone"> SHADER WORK
+		<div id ="portfolio_shaders" class="gone">
 			<div class="subsection">SCI-FI SIGNS
 				<div>
-					<div class="subsectiontext">
-						An artist customisable and parameter heavy sci-fi visual effect package 
-						that makes adding animated holograms to any project incredibly easy.<br>
-					</div>
-		
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="SSigns_Example2.mp4" type="video/mp4">
+						<source src="videos/SSigns_Example2.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 						
-					<img onclick="showshowcase(this, 'image')" class="round" src="SSFS_Screen2.png">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/SSFS_Screen2.png">
 		
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="SSigns_v13.mp4" type="video/mp4">
+						<source src="videos/SSigns_v13.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 		
-					<img onclick="showshowcase(this, 'image')" class="round" src="SSFS_Screen3.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="SSFS_Screen4.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="SSFS_Screen5.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/SSFS_Screen3.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/SSFS_Screen4.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/SSFS_Screen5.jpg">
 		
 					<div class="subsectiontext">
+						An artist customisable and parameter heavy sci-fi visual effect package that makes adding animated holograms to any project incredibly easy.<br>
 						Visit the
 							<a class="titlelink" href="https://assetstore.unity.com/packages/vfx/shaders/sinuous-sci-fi-signs-26856">
 								Asset Store listing
@@ -79,9 +80,9 @@
 		
 			<div class="subsection">CROSS-SECTION
 				<div>
-					<img onclick="showshowcase(this, 'image')" class="round" src="img_work_tanzle_a_1.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="img_work_tanzle_a_2.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="img_work_tanzle_a_3.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/img_work_tanzle_a_1.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/img_work_tanzle_a_2.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/img_work_tanzle_a_3.jpg">
 					<div class="subsectiontext">
 						One of my earliest tech art contract works, a shader to show a cross section of any mesh.
 					</div>
@@ -90,9 +91,9 @@
 		
 			<div class="subsection">X-RAY
 				<div>
-					<img onclick="showshowcase(this, 'image')" class="round" src="XRay1.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="XRay3.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="XRay4.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/XRay1.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/XRay3.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/XRay4.jpg">
 					<div class="subsectiontext">
 						Another early work, a shader to visualize the interior of any mesh.
 					</div>
@@ -101,9 +102,9 @@
 		
 			<div class="subsection">FLUID-LIKES
 				<div>
-					<img onclick="showshowcase(this, 'image')" class="round" src="fluid.png">
-					<img onclick="showshowcase(this, 'image')" class="round" src="gooball.png">
-					<img onclick="showshowcase(this, 'image')" class="round" src="rev_waterball.png">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/fluid.png">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/gooball.png">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/rev_waterball.png">
 					<div class="subsectiontext">
 						Left, a fluid volume featuring depth fog, screen-space refraction, and animated surface waves.<br>
 						Middle and right, fluid like surfaces that respond to ripples in 3D space.
@@ -114,11 +115,11 @@
 			<div class="subsection">ANIMATED TENTACLE
 				<div>
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="tentacle1.mp4" type="video/mp4">
+						<source src="videos/tentacle1.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="tentacle4.mp4" type="video/mp4">
+						<source src="videos/tentacle4.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 					<div class="subsectiontext">
@@ -129,29 +130,41 @@
 		
 			<div class="subsection">FRYABLE DONUTS
 				<div>
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/donut_1.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/donut_2.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/donut_3.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/donut_4.jpg">
 					<div class="subsectiontext">
 						A procedural donut shader for a VR demo.<br>
 						Submersing a donut in cooking oil would 'cook' that part of the donut.<br>
 						A donut left in the oil too long would naturally be burnt.
 					</div>
-					<img onclick="showshowcase(this, 'image')" class="round" src="donut_1.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="donut_2.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="donut_3.jpg">
-					<img onclick="showshowcase(this, 'image')" class="round" src="donut_4.jpg">
 				</div>
 			</div>
 		
 			<div class="subsection">PROJECT REVENANTS ( WORKING TITLE )
 				<div>
+
+					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
+						<source src="videos/rev_tentacles.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+
+					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
+						<source src="videos/rev_printer.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
+
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/rev_01.png">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/rev_02.png">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/rev_03.png">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/rev_04.png">
+					
 					<div class="subsectiontext">
 						Some additional graphics and design work for a hobby project.<br>
 						Development on this project is currently on hold, but you can 
 						see <a class="titlelink" href="https://www.instagram.com/the_revenants_game/">more WIP content</a> on the Instagram page.
 					</div>
-					<img onclick="showshowcase(this, 'image')" class="round" src="rev_01.png">
-					<img onclick="showshowcase(this, 'image')" class="round" src="rev_02.png">
-					<img onclick="showshowcase(this, 'image')" class="round" src="rev_03.png">
-					<img onclick="showshowcase(this, 'image')" class="round" src="rev_04.png">
 				</div>
 			</div>
 		
@@ -159,38 +172,41 @@
 				<div>
 					
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="Aberration.mp4" type="video/mp4">
+						<source src="videos/Aberration.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 		
-					<img onclick="showshowcase(this, 'image')" class="round" src="InfinimirrorFeatures.jpg">
+					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
+						<source src="videos/Infinite Mirror_edit.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
 
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="HoloShader.mp4" type="video/mp4">
+						<source src="videos/HoloShader.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 		
-					<img onclick="showshowcase(this, 'image')" class="round" src="forcefield.jpg">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/forcefield.jpg">
 
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="SS_Revive.mp4" type="video/mp4">
+						<source src="videos/SS_Revive.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 					
-					<img onclick="showshowcase(this, 'image')" class="round" src="pixelated.png">
+					<img onclick="showshowcase(this, 'image')" class="round" src="images/pixelated.png">
 
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="Loading1.mp4" type="video/mp4">
+						<source src="videos/Loading1.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 					
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="RandomGalaxies.mp4" type="video/mp4">
+						<source src="videos/RandomGalaxies.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 					
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
-						<source src="radial_menu.mp4" type="video/mp4">
+						<source src="videos/radial_menu.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 
@@ -210,7 +226,7 @@
 
 <div id="showcase" class="gone" onclick="hideshowcase()">
 	<div class="showcase" onclick="hideshowcase()">
-		<img id="showcaseimg" class="showcaseitem" src="forcefield.jpg" onclick="hideshowcase()">
+		<img id="showcaseimg" class="showcaseitem" src="images/forcefield.jpg" onclick="hideshowcase()">
 	</div>
 </div>
 

@@ -1,274 +1,79 @@
 <!DOCTYPE html>
 <html>
-<head>
 
+<head>
+<link rel="stylesheet" href="style.css">
 <link href='https://fonts.googleapis.com/css?family=JetBrains Mono' rel='stylesheet'>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-<style>
-
-.nomouse
-{
-	user-select:none;
-	pointer-events:none;
-}
-
-.gone
-{
-	transition: all .15s ease-in-out;
-	opacity:0%;
-	user-select:none;
-	pointer-events:none;
-}
-
-.noscroll {
-  overflow: hidden;
-}
-
-html
-{
-	width: 100%;
-	height: 100%;
-	overflow:hidden;
-}
-
-body
-{
-	background-color: black;
-	font-family: 'JetBrains Mono', monospace;
-	padding: 12px;
-	width: 100%;
-	height: 100%;
-	overflow:hidden;
-}
-
-.content
-{
-	width: 100%;
-	max-height: 100%;
-    overflow-y: auto;
-	text-align: center;
-}
-
-a.titlelink, a.titlelink:visited
-{
-	font-size: 16px;
-	font-weight: 900;
-	color: gray;
-	text-align: center;
-	text-decoration: none;
-	margin-bottom:16px;
-}
-
-img.round
-{
-	transition: all .1s ease-in-out;
-	transform: scale(92%);
-	border-radius: 8px;
-    object-fit: cover;
-	max-width: 33.333%;
-	overflow: hidden;
-	aspect-ratio: 1;
-	margin: 0 auto;
-	width: 32%;
-}
-img.round:hover
-{
-	transition: all .1s ease-in-out;
-	border-radius: 10px;
-	transform: scale(100%);
-}
-
-video
-{
-	transition: all .1s ease-in-out;
-	transform: scale(92%);
-	border-radius: 8px;
-    object-fit: cover;
-	max-width: 33.333%;
-	overflow: hidden;
-	aspect-ratio: 1;
-	margin: 0 auto;
-	width: 32%;
-}
-video:hover
-{
-	transition: all .1s ease-in-out;
-	border-radius: 10px;
-	transform: scale(100%);
-}
-
-div.section
-{
-	display:block;
-	border-radius: 8px;
-	background-color: #242424;
-	font-size: 38px;
-	font-weight: 900;
-	padding:16px;
-	color: orange;
-    height: auto;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 8px;
-    margin-bottom: 0px;
-    text-align: center;
-}
-div.subsection
-{
-	align-content: center;
-	transition: all .15s ease-in-out;
-	font-size: 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    padding-left:16px;
-    color: cyan;
-    padding: 16px;
-    background-image: linear-gradient(135deg, #ffffff00, #ffffff11);
-    margin-top: 16px;
-    text-align: left;
-}
-div.subsection:hover
-{
-	transition: all .15s ease-in-out;
-	background-position: 100px;
-}
-div.subsectiontext
-{
-	font-size: 14px;
-	color: white;
-	padding: 16px;
-}
-
-
-div.showcaseback
-{
-	transition: all .15s ease-in-out;
-	background-color: #00000001;
-	position: fixed;
-	visibility: visible;
-	top: 0px;
-	left: 0px;
-	width: 100%;
-	height: 100%;
-}
-div.showcase
-{
-	background-color:#000000CC;
-	position: fixed;
-	visibility: visible;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	margin: auto;
-	text-align: center;
-}
-img.showcase
-{
-	border-radius: 12px;
-	position: absolute;
-	max-width:80%;
-	max-height:80%;
-	top: 50%;
-	left: 50%;
-	-ms-transform: translate(-50%, -50%);
-	transform: translate(-50%, -50%);
-	object-fit:contain;
-}
-video.showcase
-{
-	border-radius: 12px;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	max-width:80%;
-	max-height:80%;
-	top: 50%;
-	left: 50%;
-	-ms-transform: translate(-50%, -50%);
-	transform: translate(-50%, -50%);
-	object-fit:contain;
-}
-</style>
-
-
-<script>
-	function showshowcase(e, type)
-	{
-		if(type == 'video')
-		{
-			var video_src_new = e.children[0].src;
-			e.pause();
-			document.getElementById("showcasevid").src = video_src_new;
-			document.getElementById("showcase_video").setAttribute("class", "showcaseback");
-			e.load();
-		}
-		else
-		{
-			var image_src_new = e.src;
-			document.getElementById("showcaseimg").src = image_src_new;
-			document.getElementById("showcase").setAttribute("class", "showcaseback");
-		}
-
-		var content_e = document.getElementById("content");
-		$(content_e).addClass("noscroll");
-	}
-
-	function hideshowcase()
-	{
-		document.getElementById("showcase").setAttribute("class", "gone");
-		document.getElementById("showcase_video").setAttribute("class", "gone");
-		
-		var content_e = document.getElementById("content");
-		$(content_e).removeClass("noscroll");
-	}
-</script>
-
-
+<script src="script.js"></script>
 </head>
 
 <!--<div id="debug_text" style="color:white">DEBUG TEXT</div>-->
 
 <body>
 	<div id="content" class="content">
-		<a class="titlelink" href="index.html">RELOAD</a>
-		<div id ="portfolio" class="section">
-		SHADER WORK
+		<a class="titlelink_selected" id="tlink_about" onclick="goto_about()">ABOUT</a>
+		<a class="titlelink" id="tlink_shaders" onclick="goto_shaders()">SHADERS</a>
+		<a class="titlelink" id="tlink_links" onclick="goto_links()">LINKS</a>
+		
+		<div id ="portfolio_aboutme" class="section"> THOMAS RASOR
+			<div class="subsection"> ABOUT ME
+				<div>
+					<div class="subsectiontext">
+						Primarily self-taught, I have spent over a decade working in the Unity game engine.<br><br>
+						Although my specialty is GPU programming, I have worked on every aspect of game design.<br>
+						I have experience with complex visual effects, gameplay scripting, multiplayer networking, sound design, 3D modelling, animation, graphic design, UI / UX, and more.<br>
+						I have worked on VR demo applications as well as building and training neural networks.<br><br><br>
+						I also made this website.
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id ="portfolio_links" class="gone"> LINKS
+			<div class="subsection">
+				<div>
+					<div class="subsectiontext">
+						<a href="www.google.com">www.google.com</a>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id ="portfolio_shaders" class="gone"> SHADER WORK
 			<div class="subsection">SCI-FI SIGNS
 				<div>
 					<div class="subsectiontext">
 						An artist customisable and parameter heavy sci-fi visual effect package 
 						that makes adding animated holograms to any project incredibly easy.<br>
 					</div>
-
+		
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
 						<source src="SSigns_Example2.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 						
 					<img onclick="showshowcase(this, 'image')" class="round" src="SSFS_Screen2.png">
-
+		
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
 						<source src="SSigns_v13.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
-
+		
 					<img onclick="showshowcase(this, 'image')" class="round" src="SSFS_Screen3.jpg">
 					<img onclick="showshowcase(this, 'image')" class="round" src="SSFS_Screen4.jpg">
 					<img onclick="showshowcase(this, 'image')" class="round" src="SSFS_Screen5.jpg">
-
+		
 					<div class="subsectiontext">
 						Visit the
 							<a class="titlelink" href="https://assetstore.unity.com/packages/vfx/shaders/sinuous-sci-fi-signs-26856">
 								Asset Store listing
 							</a>
-						for this shader to see more examples.
+						for this shader to see more examples and information.
 					</div>
 				</div>
 			</div>
-
+		
 			<div class="subsection">CROSS-SECTION
 				<div>
 					<img onclick="showshowcase(this, 'image')" class="round" src="img_work_tanzle_a_1.jpg">
@@ -279,7 +84,7 @@ video.showcase
 					</div>
 				</div>
 			</div>
-
+		
 			<div class="subsection">X-RAY
 				<div>
 					<img onclick="showshowcase(this, 'image')" class="round" src="XRay1.jpg">
@@ -290,7 +95,7 @@ video.showcase
 					</div>
 				</div>
 			</div>
-
+		
 			<div class="subsection">FLUID-LIKES
 				<div>
 					<img onclick="showshowcase(this, 'image')" class="round" src="fluid.png">
@@ -302,7 +107,7 @@ video.showcase
 					</div>
 				</div>
 			</div>
-
+		
 			<div class="subsection">ANIMATED TENTACLE
 				<div>
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
@@ -318,7 +123,7 @@ video.showcase
 					</div>
 				</div>
 			</div>
-
+		
 			<div class="subsection">FRYABLE DONUTS
 				<div>
 					<div class="subsectiontext">
@@ -332,7 +137,7 @@ video.showcase
 					<img onclick="showshowcase(this, 'image')" class="round" src="donut_4.jpg">
 				</div>
 			</div>
-
+		
 			<div class="subsection">PROJECT REVENANTS ( WORKING TITLE )
 				<div>
 					<div class="subsectiontext">
@@ -346,7 +151,7 @@ video.showcase
 					<img onclick="showshowcase(this, 'image')" class="round" src="rev_04.png">
 				</div>
 			</div>
-
+		
 			<div class="subsection">More
 				<div>
 					
@@ -354,20 +159,23 @@ video.showcase
 						<source src="Aberration.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
-
+		
 					<img onclick="showshowcase(this, 'image')" class="round" src="InfinimirrorFeatures.jpg">
+
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
 						<source src="HoloShader.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
-
+		
 					<img onclick="showshowcase(this, 'image')" class="round" src="forcefield.jpg">
+
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
 						<source src="SS_Revive.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
 					
 					<img onclick="showshowcase(this, 'image')" class="round" src="pixelated.png">
+
 					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
 						<source src="Loading1.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
@@ -377,35 +185,36 @@ video.showcase
 						<source src="RandomGalaxies.mp4" type="video/mp4">
 						Your browser does not support HTML video. :(
 					</video>
+					
+					<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
+						<source src="radial_menu.mp4" type="video/mp4">
+						Your browser does not support HTML video. :(
+					</video>
 
+					
+		
 					<div class="subsectiontext">
 						Post-processing. Recursive mirrors. Holograms. Forcefields.
-						Dynamic procedural skyboxes. Selective pixelization and voxelization. Loading animations. Procedural galaxies.
+						Dynamic procedural skyboxes. Selective pixelization and voxelization. Loading animations. Procedural galaxies. Animated user interfaces.
 						I have made countless shaders filling a variety of design and visual effects needs.
 					</div>
 				</div>
 			</div>
-
 		</div>
+
 	</div>
 </body>
 
-
-
 <div id="showcase" class="gone" onclick="hideshowcase()">
 	<div class="showcase" onclick="hideshowcase()">
-		<img id="showcaseimg" class="showcase" src="forcefield.jpg" onclick="hideshowcase()">
+		<img id="showcaseimg" class="showcaseitem" src="forcefield.jpg" onclick="hideshowcase()">
 	</div>
 </div>
 
-<div id="showcase_video" class="gone" onclick="hideshowcase()">
-	<div class="showcase" onclick="hideshowcase()">
-		<video class="showcase" id="showcasevid" autoplay muted loop src="" type="video/mp4" onclick="hideshowcase()">
-			Your browser does not support HTML video. :(
-		</video>
+<div id="showcase_video_container" class="gone" onclick="hideshowcase()">
+	<div class="showcase"  class="showcaseitem" onclick="hideshowcase()">
+		<video id="showcase_video" class="showcaseitem" autoplay muted loop src="" type="video/mp4" onclick="hideshowcase()"> Your browser does not support HTML video. :( </video>
 	</div>
 </div>
-
-
 
 </html>

@@ -47,7 +47,7 @@
 	
 
 
-	function showshowcase(e, type)
+	function showshowcase(e, type, desc = "")
 	{
 		if(type == 'video')
 		{
@@ -56,6 +56,7 @@
 			video.pause();
 			video.src = video_src_new;
 			document.getElementById("showcase_video_container").setAttribute("class", "showcasecontainer");
+			document.getElementById("showcase_video_desc").innerHTML = desc;
 			video.load();
 		}
 		else
@@ -63,6 +64,7 @@
 			var image_src_new = e.src;
 			document.getElementById("showcaseimg").src = image_src_new;
 			document.getElementById("showcase").setAttribute("class", "showcasecontainer");
+			document.getElementById("showcase_image_desc").innerHTML = desc;
 		}
 
 		var content_e = document.getElementById("body");

@@ -12,10 +12,6 @@
 		tlink_shaders.setAttribute("class", "titlelink");
 		tlink_links.setAttribute("class", "titlelink");
 
-		$(page_about).removeClass("section");
-		$(page_shaders).removeClass("section");
-		$(page_links).removeClass("section");
-
 		$(page_about).addClass("gone");
 		$(page_shaders).addClass("gone");
 		$(page_links).addClass("gone");
@@ -26,7 +22,6 @@
 		gone_all();
 		var page = document.getElementById("portfolio_aboutme");
 		$(page).removeClass("gone");
-		$(page).addClass("section");
 		var tlink_about = document.getElementById("tlink_about");
 		tlink_about.setAttribute("class", "titlelink_selected");
 
@@ -37,7 +32,6 @@
 		gone_all();
 		var page = document.getElementById("portfolio_shaders");
 		$(page).removeClass("gone");
-		$(page).addClass("section");
 		var tlink_shaders = document.getElementById("tlink_shaders");
 		tlink_shaders.setAttribute("class", "titlelink_selected");
 	}
@@ -47,7 +41,6 @@
 		gone_all();
 		var page = document.getElementById("portfolio_links");
 		$(page).removeClass("gone");
-		$(page).addClass("section");
 		var tlink_links = document.getElementById("tlink_links");
 		tlink_links.setAttribute("class", "titlelink_selected");
 	}

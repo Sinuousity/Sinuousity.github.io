@@ -14,13 +14,19 @@
 	display: none;
 }
 
+html
+{
+	height:100%;
+}
+
 body
 {
 	background-color: black;
 	font-family: 'JetBrains Mono', monospace;
-	padding: 12px;
 	width: 100%;
+	height: 100%;
 	overflow-x:hidden;
+	margin:0px;
 }
 
 .pagelinkgroup
@@ -35,10 +41,13 @@ body::-webkit-scrollbar
 
 .content
 {
+	position:fixed;
+	overflow-y:auto;
 	width: 100%;
 	height: 100%;
 	max-height: 100%;
 	text-align: center;
+	padding:16px;
 }
 
 a.titlelink, a.titlelink:visited
@@ -52,7 +61,8 @@ a.titlelink, a.titlelink:visited
 	padding: 16px;
 	margin-bottom:16px;
 	position:relative;
-	top: 8px
+	top: 8px;
+	cursor: pointer;
 }
 a.titlelink_selected, a.titlelink_selected:visited
 {
@@ -63,7 +73,8 @@ a.titlelink_selected, a.titlelink_selected:visited
 	padding: 16px;
 	text-shadow:  0px  0px  3px white;
 	position:relative;
-	top: 4px
+	top: 4px;
+	cursor: pointer;
 }
 
 a.subsectiontextlink, a.subsectiontextlink:visited
@@ -115,37 +126,77 @@ video:hover
 
 div.section
 {
-	display: block;
+	position: relative;
+	width: 80%;
+    max-width: 800px;
+	height: auto;
+    margin: auto;
+
 	border-radius: 12px;
 	background-color: #151515;
 	font-size: 38px;
 	font-weight: 900;
 	padding:16px;
 	color: orange;
-    height: auto;
-    max-width: 800px;
-    margin: auto;
     text-align: center;
 }
+
+div.sectioncentered
+{
+	position: relative;
+	width: 80%;
+    max-width: 800px;
+	height: auto;
+    margin: auto;
+
+	border-radius: 12px;
+	background-color: #151515;
+	font-size: 38px;
+	font-weight: 900;
+	padding:16px;
+	color: orange;
+    text-align: center;
+}
+
 
 div.subsection
 {
 	align-content: center;
 	transition: all .15s ease-in-out;
 	font-size: 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    padding-left:16px;
-    color: cyan;
-    padding: 16px;
-    background-image: linear-gradient(135deg, #ffffff00, #ffffff11);
-    margin-top: 16px;
-    text-align: left;
+	border-radius: 8px;
+	font-weight: 600;
+	padding-left:16px;
+	color: cyan;
+	padding: 16px;
+	background-image: linear-gradient(135deg, #ffffff00, #ffffff11);
+	margin-top: 16px;
+	text-align: center;
 }
-div.subsection:hover
+
+@media (hover: hover)
 {
-	transition: all .15s ease-in-out;
-	background-position: 100px;
+	div.subsection
+	{
+		align-content: center;
+		transition: all .15s ease-in-out;
+		font-size: 20px;
+		border-radius: 8px;
+		font-weight: 600;
+		padding-left:16px;
+		color: cyan;
+		padding: 16px;
+		background-image: linear-gradient(135deg, #ffffff00, #ffffff11);
+		margin-top: 16px;
+		text-align: center;
+		filter:grayscale(75%);
+	}
+	div.subsection:hover
+	{
+		transition: all .15s ease-in-out;
+		background-position: 100px;
+		filter:grayscale(0%);
+	}
 }
 
 a.divlink
@@ -159,6 +210,7 @@ a.divlink
 
 div.subsectiontext
 {
+    text-align: center;
 	font-size: 14px;
 	color: white;
 	padding: 16px;

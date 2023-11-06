@@ -27,6 +27,8 @@ body
 	height: 100%;
 	overflow-x:hidden;
 	margin:0px;
+	letter-spacing: 2px;
+	word-spacing: 4px;
 }
 
 .pagelinkgroup
@@ -57,40 +59,49 @@ body::-webkit-scrollbar
 
 a.titlelink, a.titlelink:visited
 {
-	transition: all .07s ease-in-out;
+	z-index: 10;
+	position:relative;
+	top: 8px;
+	padding:8px;
+	margin: 8px;
 	font-size: 26px;
 	font-weight: 900;
 	color: gray;
 	text-align: center;
 	text-decoration: none;
-	padding: 16px;
-	margin-bottom:16px;
-	position:relative;
-	top: 8px;
 	cursor: pointer;
+	border-top: white solid 0px;
+	border-bottom: white solid 0px;
+	transition: all .07s ease-in-out;
 }
 a.titlelink_selected, a.titlelink_selected:visited
 {
-	transition: all .07s ease-in-out;
-	font-size: 26px;
-	color: white;
-	margin-bottom:16px;
-	padding: 16px;
-	text-shadow:  0px  0px  3px white;
+	z-index: 10;
 	position:relative;
 	top: 4px;
+	padding:0px;
+	margin:16px;
+	font-size: 26px;
+	color: white;
 	cursor: pointer;
+	text-shadow:  0px  0px  3px white;
+	border-bottom: white solid 2px;
+	border-top: white solid 0px;
+
+	transition: all .07s ease-in-out;
 }
 
 a.subsectiontextlink, a.subsectiontextlink:visited
 {
-	transition: all .15s ease-in-out;
-	font-size: 14px;
+	font-size: 16px;
 	font-weight: 900;
 	color: rgb(129, 168, 219);
 	text-align: center;
 	text-decoration: none;
 	border-bottom:black solid 0px;
+	border-top:black solid 0px;
+
+	transition: all .15s ease-in-out;
 }
 a.subsectiontextlink:hover, a.subsectiontextlink:visited:hover
 {

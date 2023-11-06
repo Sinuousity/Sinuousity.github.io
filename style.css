@@ -105,11 +105,11 @@ img.round
 	transform: scale(92%);
 	border-radius: 8px;
     object-fit: cover;
-	max-width: 33.333%;
+	max-width: 31%;
 	overflow: hidden;
 	aspect-ratio: 1;
 	margin: 0 auto;
-	width: 32%;
+	width: 31%;
 }
 img.round:hover
 {
@@ -124,11 +124,11 @@ video.round
 	transform: scale(92%);
 	border-radius: 8px;
     object-fit: cover;
-	max-width: 33.333%;
+	max-width: 31%;
 	overflow: hidden;
 	aspect-ratio: 1;
 	margin: 0 auto;
-	width: 32%;
+	width: 31%;
 }
 video.round:hover
 {

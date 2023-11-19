@@ -14,6 +14,7 @@ var e_showcase_img;
 var e_showcase_vid;
 
 
+var skip_fade = false;
 var shader_sections;
 var shader_current_id = 0;
 
@@ -37,6 +38,22 @@ function on_body_load()
 	e_showcase_vid = document.getElementById("showcase_vid");
 
 	hideshowcase();
+
+	if (localStorage)
+	{
+		var last_page = localStorage.getItem("page");
+		if (last_page != null)
+		{
+			skip_fade = true;
+			switch (last_page)
+			{
+				case "about": goto_about(); break;
+				case "shaders": goto_shaders(); break;
+				case "links": goto_links(); break;
+			}
+			skip_fade = false;
+		}
+	}
 }
 
 
@@ -57,6 +74,7 @@ function gone_all()
 
 function goto_about()
 {
+	localStorage.setItem("page", "about");
 	reset_title_links();
 	e_tlink_about.className = "titlelink_selected";
 	next_content = function ()
@@ -69,6 +87,7 @@ function goto_about()
 
 function goto_shaders()
 {
+	localStorage.setItem("page", "shaders");
 	reset_title_links();
 	e_tlink_shaders.className = "titlelink_selected";
 	next_content = function ()
@@ -81,6 +100,7 @@ function goto_shaders()
 
 function goto_links()
 {
+	localStorage.setItem("page", "links");
 	reset_title_links();
 	e_tlink_links.className = "titlelink_selected";
 	next_content = function ()
@@ -105,7 +125,15 @@ function fade_content_to()
 	clearTimeout(delayid_content_fade);
 	clearInterval(animid_content_fade_out);
 	clearInterval(animid_content_fade_in);
-	animid_content_fade_out = setInterval(fade_out_content, 15);
+
+	if (skip_fade)
+	{
+		next_content();
+	}
+	else
+	{
+		animid_content_fade_out = setInterval(fade_out_content, 15);
+	}
 }
 
 function fade_out_content()

@@ -298,6 +298,8 @@ div.subsectiontext
 }
 
 
+
+
 div.showcasecontainer
 {
 	transition: all .15s ease-in-out;
@@ -309,6 +311,7 @@ div.showcasecontainer
 	width: 100%;
 	height: 100%;
 	backdrop-filter: blur(10px) grayscale(100%) contrast(80%);
+	z-index: 10;
 }
 
 div.showcase

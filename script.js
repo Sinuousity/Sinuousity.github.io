@@ -39,21 +39,30 @@ function on_body_load()
 
 	hideshowcase();
 
+	var found_last = false;
 	if (localStorage)
 	{
 		var last_page = localStorage.getItem("page");
 		if (last_page != null)
 		{
+			found_last = true;
 			skip_fade = true;
 			switch (last_page)
 			{
 				case "about": goto_about(); break;
 				case "shaders": goto_shaders(); break;
 				case "links": goto_links(); break;
+				default: found_last = false; break;
 			}
-			skip_fade = false;
 		}
 	}
+
+	if (!found_last)
+	{
+		skip_fade = true;
+		goto_about();
+	}
+	skip_fade = false;
 }
 
 

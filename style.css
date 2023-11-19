@@ -184,11 +184,14 @@ img.round
 	aspect-ratio: 1;
 	margin: 0 auto;
 	width: 28%;
+	border: transparent solid 2px;
+	cursor: zoom-in;
 }
 
 img.round:hover
 {
 	transition: all .1s ease-in-out;
+	border-color: var(--col-highlight);
 	border-radius: 10px;
 	transform: scale(100%);
 }
@@ -204,11 +207,14 @@ video.round
 	aspect-ratio: 1;
 	margin: 0 auto;
 	width: 28%;
+	border: transparent solid 2px;
+	cursor: zoom-in;
 }
 
 video.round:hover
 {
 	transition: all .1s ease-in-out;
+	border-color: var(--col-highlight);
 	border-radius: 10px;
 	transform: scale(100%);
 }

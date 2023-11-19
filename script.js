@@ -1,83 +1,182 @@
+var e_page_about;
+var e_page_shaders;
+var e_page_links;
 
-	function gone_all()
-	{
-		var page_about = document.getElementById("portfolio_aboutme");
-		var page_shaders = document.getElementById("portfolio_shaders");
-		var page_links = document.getElementById("portfolio_links");
-		var tlink_about = document.getElementById("tlink_about");
-		var tlink_shaders = document.getElementById("tlink_shaders");
-		var tlink_links = document.getElementById("tlink_links");
+var e_content;
 
-		tlink_about.setAttribute("class", "titlelink");
-		tlink_shaders.setAttribute("class", "titlelink");
-		tlink_links.setAttribute("class", "titlelink");
+var e_tlink_about;
+var e_tlink_shaders;
+var e_tlink_links;
 
-		$(page_about).addClass("gone");
-		$(page_shaders).addClass("gone");
-		$(page_links).addClass("gone");
-	}
+var e_showcase_container;
+var e_showcase_desc;
+var e_showcase_img;
+var e_showcase_vid;
 
-	function goto_about()
+
+var shader_sections;
+var shader_current_id = 0;
+
+
+
+function on_body_load()
+{
+	e_content = document.getElementById("content");
+
+	e_page_about = document.getElementById("portfolio_about");
+	e_page_shaders = document.getElementById("portfolio_shaders");
+	e_page_links = document.getElementById("portfolio_links");
+
+	e_tlink_about = document.getElementById("tlink_about");
+	e_tlink_shaders = document.getElementById("tlink_shaders");
+	e_tlink_links = document.getElementById("tlink_links");
+
+	e_showcase_container = document.getElementById("showcase_container");
+	e_showcase_desc = document.getElementById("showcase_desc");
+	e_showcase_img = document.getElementById("showcase_img");
+	e_showcase_vid = document.getElementById("showcase_vid");
+
+	hideshowcase();
+}
+
+
+
+function reset_title_links()
+{
+	e_tlink_about.className = "titlelink";
+	e_tlink_shaders.className = "titlelink";
+	e_tlink_links.className = "titlelink";
+}
+
+function gone_all()
+{
+	e_page_about.className = "gone";
+	e_page_shaders.className = "gone";
+	e_page_links.className = "gone";
+}
+
+function goto_about()
+{
+	reset_title_links();
+	e_tlink_about.className = "titlelink_selected";
+	next_content = function ()
 	{
 		gone_all();
-		var page = document.getElementById("portfolio_aboutme");
-		$(page).removeClass("gone");
-		var tlink_about = document.getElementById("tlink_about");
-		tlink_about.setAttribute("class", "titlelink_selected");
-
+		e_page_about.className = "section";
 	}
+	fade_content_to();
+}
 
-	function goto_shaders()
+function goto_shaders()
+{
+	reset_title_links();
+	e_tlink_shaders.className = "titlelink_selected";
+	next_content = function ()
 	{
 		gone_all();
-		var page = document.getElementById("portfolio_shaders");
-		$(page).removeClass("gone");
-		var tlink_shaders = document.getElementById("tlink_shaders");
-		tlink_shaders.setAttribute("class", "titlelink_selected");
+		e_page_shaders.className = "section";
 	}
+	fade_content_to();
+}
 
-	function goto_links()
+function goto_links()
+{
+	reset_title_links();
+	e_tlink_links.className = "titlelink_selected";
+	next_content = function ()
 	{
 		gone_all();
-		var page = document.getElementById("portfolio_links");
-		$(page).removeClass("gone");
-		var tlink_links = document.getElementById("tlink_links");
-		tlink_links.setAttribute("class", "titlelink_selected");
+		e_page_links.className = "section";
 	}
-	
+	fade_content_to();
+}
 
 
-	function showshowcase(e, type, desc = "")
+
+var animid_content_fade_out;
+var animid_content_fade_in;
+var delayid_content_fade;
+var content_opacity = 0.0;
+var next_content;
+function fade_content_to()
+{
+	content_opacity = 1.0;
+	e_content.style.opacity = content_opacity;
+	clearTimeout(delayid_content_fade);
+	clearInterval(animid_content_fade_out);
+	clearInterval(animid_content_fade_in);
+	animid_content_fade_out = setInterval(fade_out_content, 15);
+}
+
+function fade_out_content()
+{
+	content_opacity -= 0.1;
+	e_content.style.opacity = content_opacity;
+
+	if (content_opacity <= 0.0)
 	{
-		if(type == 'video')
-		{
-			var video_src_new = e.children[0].src;
-			var video = document.getElementById("showcase_video");
-			video.pause();
-			video.src = video_src_new;
-			document.getElementById("showcase_video_container").setAttribute("class", "showcasecontainer");
-			document.getElementById("showcase_video_desc").innerHTML = desc;
-			video.load();
-		}
-		else
-		{
-			var image_src_new = e.src;
-			document.getElementById("showcaseimg").src = image_src_new;
-			document.getElementById("showcase").setAttribute("class", "showcasecontainer");
-			document.getElementById("showcase_image_desc").innerHTML = desc;
-		}
+		content_opacity = 0.0;
+		e_content.style.opacity = content_opacity;
+		clearInterval(animid_content_fade_out);
 
-		var content_e = document.getElementById("body");
-		$(content_e).addClass("noscroll");
+		next_content();
+		clearTimeout(delayid_content_fade);
+		delayid_content_fade = setTimeout(
+			function ()
+			{
+				clearInterval(animid_content_fade_in);
+				animid_content_fade_in = setInterval(fade_in_content, 15);
+			},
+			100
+		);
 	}
+}
 
-	function hideshowcase()
+function fade_in_content()
+{
+	content_opacity += 0.1;
+	e_content.style.opacity = content_opacity;
+
+	if (content_opacity >= 1.0)
 	{
-		document.getElementById("showcase").setAttribute("class", "gone");
-		document.getElementById("showcase_video_container").setAttribute("class", "gone");
-		var video = document.getElementById("showcase_video");
-		video.pause();
-
-		var content_e = document.getElementById("body");
-		$(content_e).removeClass("noscroll");
+		content_opacity = 1.0;
+		e_content.style.opacity = content_opacity;
+		clearInterval(animid_content_fade_in);
 	}
+}
+
+
+
+
+
+function showshowcase(e, type, desc = "")
+{
+	if (type == 'video')
+	{
+		e_showcase_vid.className = "showcaseitem";
+		e_showcase_vid.pause();
+		e_showcase_vid.src = e.children[0].src;
+		e_showcase_vid.load();
+	}
+	else
+	{
+		e_showcase_img.className = "showcaseitem";
+		e_showcase_img.src = e.src;
+	}
+
+	e_showcase_desc.innerHTML = desc;
+	e_showcase_container.className = "showcasecontainer";
+
+	document.body.className = "body noscroll";
+}
+
+function hideshowcase()
+{
+	e_showcase_vid.pause();
+
+	e_showcase_container.className = "gone";
+	e_showcase_vid.className = "gone";
+	e_showcase_img.className = "gone";
+
+	document.body.className = "body";
+}

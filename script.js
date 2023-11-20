@@ -60,7 +60,7 @@ function on_body_load()
 		}
 
 		var last_shader = Number(localStorage.getItem("shader_index"));
-		if (last_shader == null) shader_current_id = 1;
+		if (last_shader == null || last_shader < 1) shader_current_id = 1;
 		else shader_current_id = last_shader;
 	}
 

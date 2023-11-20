@@ -2,6 +2,7 @@
 <html>
 
 <head>
+	<title>Thomas Rasor</title>
 	<link href='https://fonts.googleapis.com/css?family=Inria Sans' rel='stylesheet'>
 	<link rel="stylesheet" href="style.css">
 	<script src="script.js" defer></script>
@@ -41,8 +42,12 @@
 			</div>
 
 			<div id="portfolio_shaders" class="section gone">
+				<div id="shader-nav">
+					<div class="shader-nav-button" onclick="shader_prev()">PREV</div>
+					<div class="shader-nav-button" onclick="shader_next()">NEXT</div>
+				</div>
 
-				<div class="subsection">SCI-FI SIGNS
+				<div class="subsection" id="shader-ssfs">SCI-FI SIGNS
 					<div>
 						<video class="round" autoplay muted loop onclick="showshowcase(this, 'video', 'An example sign provided with the project, video')">
 							<source src="videos/ssfs_video_02.mp4" type="video/mp4">
@@ -65,13 +70,13 @@
 							<br>
 							Visit the
 							<a class="subsectiontextlink" href="https://assetstore.unity.com/packages/vfx/shaders/sinuous-sci-fi-signs-26856" target="_blank">
-								Asset Store</a>
-							for more examples and information.
+								Unity Asset Store</a>
+							for more examples and information or to buy.
 						</div>
 					</div>
 				</div>
 
-				<div class="subsection">CROSS-SECTION
+				<div class="subsection" id="shader-cross">CROSS-SECTION
 					<div>
 						<img onclick="showshowcase(this, 'image')" class="round" src="images/img_work_tanzle_a_1.jpg">
 						<img onclick="showshowcase(this, 'image')" class="round" src="images/img_work_tanzle_a_2.jpg">
@@ -82,7 +87,7 @@
 					</div>
 				</div>
 
-				<div class="subsection">X-RAY
+				<div class="subsection" id="shader-xray">X-RAY
 					<div>
 						<img onclick="showshowcase(this, 'image')" class="round" src="images/XRay1.jpg">
 						<img onclick="showshowcase(this, 'image')" class="round" src="images/XRay3.jpg">
@@ -93,7 +98,7 @@
 					</div>
 				</div>
 
-				<div class="subsection">FRYABLE DONUTS
+				<div class="subsection" id="shader-donuts">FRYABLE DONUTS
 					<div>
 						<img onclick="showshowcase(this, 'image', 'Donut, raw')" class="round" src="images/donut_1.jpg">
 						<img onclick="showshowcase(this, 'image', 'Donut, partially fried')" class="round" src="images/donut_2.jpg">
@@ -107,7 +112,7 @@
 					</div>
 				</div>
 
-				<div class="subsection">FLUID-LIKES
+				<div class="subsection" id="shader-fluid">FLUID-LIKES
 					<div>
 						<img onclick="showshowcase(this, 'image', 'A fluid volume featuring depth fog, screen-space refraction, and animated surface waves')" class="round" src="images/fluid.png">
 						<img onclick="showshowcase(this, 'image', 'Fluid surfaces that respond to ripples in 3D space')" class="round" src="images/gooball.png">
@@ -119,7 +124,7 @@
 					</div>
 				</div>
 
-				<div class="subsection">PULSATING TENTACLE
+				<div class="subsection" id="shader-tentacles">PULSATING TENTACLE
 					<div>
 						<video class="round" autoplay muted loop onclick="showshowcase(this, 'video', 'Variation A')">
 							<source src="videos/tentacle1.mp4" type="video/mp4">
@@ -135,7 +140,7 @@
 					</div>
 				</div>
 
-				<div class="subsection">PROJECT REVENANTS ( WORKING TITLE )
+				<div class="subsection" id="shader-revenants">PROJECT REVENANTS ( WORKING TITLE )
 					<div>
 
 						<video class="round" autoplay muted loop onclick="showshowcase(this, 'video', 'Procedurally animated tentacles')">
@@ -161,7 +166,7 @@
 					</div>
 				</div>
 
-				<div class="subsection">MORE
+				<div class="subsection" id="shader-more">MORE
 					<div>
 
 						<video class="round" autoplay muted loop onclick="showshowcase(this, 'video')">
@@ -213,7 +218,7 @@
 					</div>
 				</div>
 
-				<div class="subsection">THE END
+				<div class="subsection" id="shader-addendum">THE END
 					<div class="subsectiontext">
 						These are just a handful of the visual effects I have created, but should do well to represent the level of quality that I hold my efforts to.
 					</div>

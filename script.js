@@ -1,5 +1,6 @@
 var e_page_about;
 var e_page_shaders;
+var e_page_shaders_children;
 var e_page_links;
 
 var e_content;
@@ -15,8 +16,8 @@ var e_showcase_vid;
 
 
 var skip_fade = false;
-var shader_sections;
-var shader_current_id = 0;
+var shader_current_id = 1;
+var shader_count = 1;
 
 
 
@@ -27,6 +28,9 @@ function on_body_load()
 	e_page_about = document.getElementById("portfolio_about");
 	e_page_shaders = document.getElementById("portfolio_shaders");
 	e_page_links = document.getElementById("portfolio_links");
+
+	e_page_shaders_children = e_page_shaders.children;
+	shader_count = e_page_shaders_children.length;
 
 	e_tlink_about = document.getElementById("tlink_about");
 	e_tlink_shaders = document.getElementById("tlink_shaders");
@@ -39,30 +43,65 @@ function on_body_load()
 
 	hideshowcase();
 
-	var found_last = false;
+	var has_last_page = false;
 	if (localStorage)
 	{
 		var last_page = localStorage.getItem("page");
 		if (last_page != null)
 		{
-			found_last = true;
-			skip_fade = true;
+			has_last_page = true;
 			switch (last_page)
 			{
 				case "about": goto_about(); break;
 				case "shaders": goto_shaders(); break;
 				case "links": goto_links(); break;
-				default: found_last = false; break;
+				default: has_last_page = false; break;
 			}
 		}
+
+		var last_shader = Number(localStorage.getItem("shader_index"));
+		if (last_shader == null) shader_current_id = 1;
+		else shader_current_id = last_shader;
 	}
 
-	if (!found_last)
-	{
-		skip_fade = true;
-		goto_about();
-	}
+	skip_fade = true;
+	if (!has_last_page) goto_about();
 	skip_fade = false;
+
+	refresh_shader_sections();
+}
+
+
+
+function refresh_shader_sections()
+{
+	hide_shader_sections();
+	e_page_shaders_children[shader_current_id].className = "subsection";
+	localStorage.setItem("shader_index", shader_current_id);
+}
+
+function hide_shader_sections()
+{
+	for (let i = 0; i < shader_count; i++)
+	{
+		var section = e_page_shaders_children[i];
+		section.className = "gone";
+	}
+	e_page_shaders_children[0].className = "shader-nav";
+}
+
+function shader_prev()
+{
+	shader_current_id = shader_current_id - 1;
+	if (shader_current_id < 1) shader_current_id = shader_count - 1;
+	refresh_shader_sections();
+}
+
+function shader_next()
+{
+	shader_current_id = shader_current_id + 1;
+	if (shader_current_id >= shader_count) shader_current_id = 1;
+	refresh_shader_sections();
 }
 
 

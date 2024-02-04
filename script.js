@@ -8,6 +8,7 @@ const project_overview =
 		[
 			{
 				path: "showcase-tech_art_compressed.mp4",
+				proxy: "showcase-tech_art-proxy.mp4",
 				desc: "",
 				has_audio: true
 			}
@@ -323,14 +324,25 @@ function onGalleryBack()
 
 function onGalleryItemClicked(id)
 {
-	e_gallery_items[id].style.borderTop = "transparent solid 2px";
-	e_gallery_items[id].style.borderBottom = "transparent solid 2px";
+	var e_content = e_gallery_items[id];
+	var e_content_display = e_gallery_item_displays[id];
+
+	e_content.style.borderTop = "transparent solid 2px";
+	e_content.style.borderBottom = "transparent solid 2px";
 
 	if (project_selected > -1)
 	{
-		if (gallery_id_selected == id)
+		var project = portfolio_projects[project_selected];
+		var content = project.content[id];
+
+		if (gallery_id_selected == id) // deselecting content
 		{
 			gallery_id_selected = -1;
+			if (content.path.endsWith(".mp4") && content.proxy)
+			{
+				console.log("using proxy: " + content.proxy);
+				e_content_display.children[0].src = content.proxy;
+			}
 			if (portfolio_projects[project_selected].content.length < 2)
 			{
 				project_selected = -1;
@@ -339,17 +351,42 @@ function onGalleryItemClicked(id)
 				create_gallery_projects();
 			}
 		}
-		else 
+		else // selecting content
 		{
 			gallery_id_selected = id;
+			if (content.path.endsWith(".mp4"))
+			{
+				console.log("using full res: " + content.proxy);
+				e_content_display.children[0].src = content.path;
+			}
 		}
 	}
 	else
 	{
 		e_gallery_back.style.display = "block";
 		project_selected = id;
-		clear_gallery_items();
-		create_gallery_project_images();
+		var project = portfolio_projects[project_selected];
+
+		if (project.content.length == 1)
+		{
+			gallery_id_selected = 0;
+			var content = project.content[gallery_id_selected];
+
+			clear_gallery_items();
+			create_gallery_project_images();
+
+			if (content.path.endsWith(".mp4"))
+			{
+				console.log("using full res: " + content.path);
+				var e_display = e_gallery_item_displays[gallery_id_selected];
+				e_display.children[0].src = project.path + content.path;
+			}
+		}
+		else
+		{
+			clear_gallery_items();
+			create_gallery_project_images();
+		}
 	}
 }
 
@@ -448,7 +485,24 @@ function create_gallery_item(item_id, img_src, text, desc)
 	e_gallery_item.addEventListener("mouseleave", on_gallery_item_exited);
 	e_gallery_item.title = desc;
 
-	if (img_src.endsWith(".mp4"))
+	var projectSelected = project_selected > -1;
+
+	var project = null;
+	var content = null;
+	if (projectSelected) 
+	{
+		project = portfolio_projects[project_selected];
+		content = project.content[item_id];
+	}
+	else
+	{
+		project = portfolio_projects[item_id];
+		content = project.content[portfolio_projects[item_id].showcase_id];
+	}
+
+	var contentIsVideo = img_src.endsWith(".mp4");
+
+	if (contentIsVideo)
 	{
 		var e_gallery_item_video = document.createElement("video");
 		e_gallery_item_video.className = "gallery-item-image";
@@ -460,14 +514,15 @@ function create_gallery_item(item_id, img_src, text, desc)
 		e_gallery_item_video.volume = 0.5;
 
 		var e_video_src = document.createElement("source");
-		e_video_src.src = img_src;
+		if (content.proxy && gallery_id_selected < 0) e_video_src.src = project.path + content.proxy;
+		else e_video_src.src = img_src;
 		e_video_src.type = "video/mp4";
 		e_gallery_item_video.appendChild(e_video_src);
 
 		e_gallery_item.appendChild(e_gallery_item_video);
 		e_gallery_item_displays.push(e_gallery_item_video);
 
-		if (project_selected > -1 && portfolio_projects[project_selected].content[item_id].has_audio)
+		if (projectSelected && content.has_audio)
 		{
 			var e_gallery_item_mute = document.createElement("img");
 			e_gallery_item_mute.addEventListener("mouseenter", on_mute_toggle_entered);
@@ -493,8 +548,6 @@ function create_gallery_item(item_id, img_src, text, desc)
 	e_gallery_item_lbl.innerText = text;
 	e_gallery_item.appendChild(e_gallery_item_lbl);
 	e_gallery_item_labels.push(e_gallery_item_lbl);
-
-
 
 	e_gallery_items.push(e_gallery_item);
 

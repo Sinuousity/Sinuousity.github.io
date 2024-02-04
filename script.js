@@ -7,7 +7,7 @@ const project_overview =
 	content:
 		[
 			{
-				path: "showcase-tech_art.mp4",
+				path: "showcase-tech_art_compressed.mp4",
 				desc: "",
 				has_audio: true
 			}

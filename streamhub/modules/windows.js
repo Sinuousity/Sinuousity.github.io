@@ -81,20 +81,11 @@ export class ServiceCredentialWindow extends DraggableWindow
 		txt_clientId.style.lineHeight = "2rem";
 		txt_clientId.children[1].className += " hover-obscure";
 
-		/*
-		// Client Secret not necessary for reading chat
-		var txt_clientSecret = this.AddTextField("Client Secret", GlobalSettings.instance.text_twitchClientSecret, (e) => { GlobalSettings.instance.text_twitchClientSecret = e.value; });
-		txt_clientSecret.style.height = "2rem";
-		txt_clientSecret.style.lineHeight = "2rem";
-		txt_clientSecret.children[1].className += " hover-obscure";
-		*/
-
 		var hasAccessToken = GlobalSettings.instance.text_twitchAccessToken != "";
 		var lbl_twitchAccessToken = this.AddTextReadonly("Access Token", hasAccessToken ? "GOT ACCESS TOKEN!" : "INVALID ACCESS TOKEN - PLEASE RENEW");
 		lbl_twitchAccessToken.style.height = "2rem";
 		lbl_twitchAccessToken.style.lineHeight = "2rem";
-		lbl_twitchAccessToken.style.color = hasAccessToken ? "#00ff00cc" : "#ffcc00cc";
-		//if (hasAccessToken) lbl_twitchAccessToken.children[1].className += " hover-obscure";
+		lbl_twitchAccessToken.children[1].children[0].style.color = hasAccessToken ? "#00ff00cc" : "#ffcc00cc";
 
 		var btn_twitchAccessToken = this.AddButton("", "Renew Access Token", () =>
 		{

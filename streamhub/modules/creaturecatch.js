@@ -7,7 +7,6 @@ import { UserInput } from "./userinput.js";
 
 console.info("Module Added: Creature Catching");
 
-
 export class CreatureAppearance
 {
 	constructor()

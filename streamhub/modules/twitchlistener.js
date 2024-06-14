@@ -52,20 +52,27 @@ export class TwitchListener
 		this.connected = false;
 		this.joinedChannel = "";
 
-		this.ws.onopen = () =>
+		try
 		{
-			this.ws.send("PASS oauth:" + GlobalSettings.instance.text_twitchAccessToken);
-			this.ws.send("NICK " + GlobalSettings.instance.text_twitchUsername);
-			window.setTimeout(
-				() =>
-				{
-					this.ws.send("CAP REQ :twitch.tv/tags");
-					this.ws.send("JOIN #" + GlobalSettings.instance.text_twitchChannel);
-				}, 42
-			);
+			this.ws.onopen = () =>
+			{
+				this.ws.send("PASS oauth:" + GlobalSettings.instance.text_twitchAccessToken);
+				this.ws.send("NICK " + GlobalSettings.instance.text_twitchUsername);
+				window.setTimeout(
+					() =>
+					{
+						this.ws.send("CAP REQ :twitch.tv/tags");
+						this.ws.send("JOIN #" + GlobalSettings.instance.text_twitchChannel);
+					}, 42
+				);
 
-			this.connected = true;
-		};
+				this.connected = true;
+			};
+		} catch (error)
+		{
+			this.connected = false;
+			return;
+		}
 
 		this.ws.onmessage = (event) =>
 		{
@@ -120,7 +127,7 @@ export class TwitchListener
 		this.ws.send("JOIN #" + GlobalSettings.instance.text_twitchChannel);
 	}
 
-	CheckWindowLocationHashForAccessToken()
+	static CheckWindowLocationHashForAccessToken()
 	{
 		var got_access_token = window.location.hash.match(rgx_twitch_access_token);
 		if (got_access_token != null)

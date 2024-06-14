@@ -1,0 +1,181 @@
+﻿@keyframes slide-in-left
+{
+	from
+	{
+		opacity: 0%;
+		translate: 200% 0%;
+	}
+	to
+	{
+		opacity: 100%;
+		translate: 0% 0%;
+	}
+}
+
+
+.inventory-window-content
+{
+	z-index: 1;
+	cursor: default;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+
+	position: absolute;
+	top: 2.6rem;
+	right: 0.5rem;
+	left: 0.5rem;
+	bottom: 0.5rem;
+
+	text-align: left;
+	color: #ffffff80;
+}
+
+.inventory-window-content > input
+{
+	height: 1.5rem;
+	line-height: 1.5rem;
+	flex-grow: 0.0;
+	flex-shrink: 1.0;
+
+	border-radius: 0.4rem;
+
+	padding-left: 1rem;
+
+	background-color: #00000030;
+
+	border-color: transparent;
+}
+.inventory-window-content > input:hover
+{
+	padding-left: 1.5rem;
+}
+
+
+.viewer-list
+{
+	z-index: 1;
+	cursor: default;
+
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1.0;
+
+	position: relative;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.viewer-list-button
+{
+	height: 2.4rem;
+	line-height: 2.4rem;
+	padding-left: 1rem;
+	transition-property: font-size, opacity, background-color, padding-left;
+}
+.viewer-list-button:hover
+{
+	padding-left: 1.5rem;
+	font-size: 1.1rem;
+}
+
+.viewer-info-overlay
+{
+	z-index: 5;
+	position: absolute;
+	top: 2.1rem;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 0.5rem;
+	background-color: #0f0f0fa0;
+
+	animation: slide-in-left 0.2s;
+}
+
+.viewer-item-row
+{
+	position: relative;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	height: 2rem;
+	line-height: 2rem;
+	font-size: 1rem;
+
+	border-radius: 0.25rem;
+}
+.viewer-item-row:hover
+{
+	padding-left: 1rem;
+	background-color: #ffffff20;
+}
+
+.viewer-item-button:hover
+{
+	padding: 0;
+	outline-width: 2px;
+}
+.viewer-item-button
+{
+	position: absolute;
+
+	aspect-ratio: 1;
+	top: 0.1rem;
+	bottom: 0.1rem;
+	right: 0.1rem;
+	width: auto;
+	height: auto;
+
+	padding: 0;
+
+	line-height: 1.6rem;
+	font-size: 0.6rem;
+	text-align: center;
+
+	outline-offset: -3px;
+	outline-style: inset;
+	outline-width: 0px;
+	outline-color: gray
+}
+
+.viewer-info-summary
+{
+	position: absolute;
+	bottom: 0.1rem;
+	left: 2rem;
+	right: 0;
+	height: 1rem;
+	line-height: 1rem;
+	font-size: 0.65rem;
+}
+.viewer-info-summary span
+{
+	all: unset;
+	position: relative;
+	display: inline-block;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	text-align: center;
+}
+
+.window-section-title span
+{
+	all: unset;
+	position: relative;
+	display: inline-block;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	text-align: center;
+	font-size: 0.7rem;
+}
+
+.viewer-list-button span
+{
+	all: unset;
+	position: relative;
+	display: inline-block;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	text-align: center;
+	font-size: 0.7rem;
+}

@@ -7,7 +7,7 @@ console.info("Module Added: Twitch Listener");
 const url_twitch_host = "irc.twitch.tv";
 const url_twitch_tmi = "tmi.twitch.tv";
 
-const url_twitch_ws = "wss://irc-ws.chat.twitch.tv:80";
+const url_twitch_ws = "wss://irc-ws.chat.twitch.tv:443";
 
 const url_twitch_id = "https://id.twitch.tv";
 const url_twitch_oauth = url_twitch_id + "/oauth2";

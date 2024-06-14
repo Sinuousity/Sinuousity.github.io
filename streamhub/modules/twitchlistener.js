@@ -7,7 +7,7 @@ console.info("Module Added: Twitch Listener");
 const url_twitch_host = "irc.twitch.tv";
 const url_twitch_tmi = "tmi.twitch.tv";
 
-const url_twitch_ws = "ws://irc-ws.chat.twitch.tv:80";
+const url_twitch_ws = "wss://irc-ws.chat.twitch.tv:80";
 
 const url_twitch_id = "https://id.twitch.tv";
 const url_twitch_oauth = url_twitch_id + "/oauth2";
@@ -17,8 +17,6 @@ const url_twitch_oauth_authorize = url_twitch_oauth + "/authorize";
 const url_twitch_api = "https://api.twitch.tv";
 const url_twitch_kraken = url_twitch_api + "/kraken";
 const url_twitch_helix = url_twitch_api + "/helix";
-
-const url_local_redirect = "http://localhost:23754/";
 
 const rgx_twitch_access_token = /\#access\_token\=([\w]+)/;
 const rgx_twitch_privmsg = /\:(.+)\!\1\@\1\.tmi\.twitch\.tv PRIVMSG \#([^\s]+) \:(.+)/;
@@ -30,6 +28,8 @@ export class TwitchListener
 
 	static GetAuthURL()
 	{
+		var redirect = TwitchListener.GetRedirectUri();
+		redirect = redirect.replace("http://", "https://");
 		var user_auth_url = url_twitch_oauth_authorize;
 		user_auth_url += "?response_type=token";
 		user_auth_url += "&client_id=" + GlobalSettings.instance.text_twitchClientId;

@@ -279,7 +279,7 @@ export class RaffleOverlay
 			return;
 		}
 
-		this.e_zone_root.style.opacity = RaffleState.instance.open ? "100%" : "0%";
+		this.e_zone_root.style.opacity = (RaffleState.instance.open || RaffleState.instance.names.length > 0) ? "100%" : "0%";
 
 		this.e_zone_title.innerText = RaffleState.instance.title;
 		this.e_zone_subtitle.innerText = RaffleState.instance.open ? "OPEN" : "CLOSED";

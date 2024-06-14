@@ -2,7 +2,7 @@ import { GlobalSettings } from "./globalsettings.js";
 import { WindowManager } from "./windowmanager.js";
 import { UserInput } from "./userinput.js";
 
-console.info("Module Added: Window Core");
+console.info("[ +Module ] Window Core");
 
 export class WindowBase
 {
@@ -495,6 +495,14 @@ export class WindowBase
 	}
 }
 
+export class PopupWindow extends WindowBase
+{
+	constructor(title, pos_x, pos_y)
+	{
+		super(title, pos_x, pos_y);
+	}
+}
+
 export class DraggableWindow extends WindowBase
 {
 	constructor(title, pos_x, pos_y)
@@ -541,8 +549,8 @@ export class DraggableWindow extends WindowBase
 		var dragDeltaX = UserInput.instance.mousePositionX - this.drag_start_pos_x;
 		var dragDeltaY = UserInput.instance.mousePositionY - this.drag_start_pos_y;
 
-		dragDeltaX = Math.sign(dragDeltaX) * Math.round(Math.abs(dragDeltaX) * 0.2) * 5.0;
-		dragDeltaY = Math.sign(dragDeltaY) * Math.round(Math.abs(dragDeltaY) * 0.2) * 5.0;
+		//dragDeltaX = Math.sign(dragDeltaX) * Math.round(Math.abs(dragDeltaX) * 0.2) * 5.0;
+		//dragDeltaY = Math.sign(dragDeltaY) * Math.round(Math.abs(dragDeltaY) * 0.2) * 5.0;
 
 		if (dragDeltaX == 0.0 && dragDeltaY == 0.0) return;
 
@@ -552,8 +560,8 @@ export class DraggableWindow extends WindowBase
 		this.position_x += dragDeltaX;
 		this.position_y += dragDeltaY;
 
-		this.position_x = Math.round(this.position_x * 0.2) * 5.0;
-		this.position_y = Math.round(this.position_y * 0.2) * 5.0;
+		//this.position_x = Math.round(this.position_x * 0.2) * 5.0;
+		//this.position_y = Math.round(this.position_y * 0.2) * 5.0;
 
 		this.position_x = Math.max(0, this.position_x);
 		this.position_y = Math.max(0, this.position_y);

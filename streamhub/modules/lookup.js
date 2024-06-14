@@ -1,4 +1,4 @@
-console.info("Module Added: Lookup");
+console.info("[ +Module ] Lookup");
 
 export class Lookup
 {

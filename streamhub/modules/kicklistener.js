@@ -1,9 +1,9 @@
 import { Lookup } from "./lookup.js";
 import { RemoteDataConnection } from "./remotedata.js";
 import { ChatCollector } from "./chatcollector.js";
-import { GlobalSettings } from "./globalsettings.js";
+import { GlobalSettings, OptionManager } from "./globalsettings.js";
 
-console.info("Module Added: Kick Listener");
+console.info("[ +Module ] Kick Listener");
 
 const rgx_kick_message_emote = /\[emote\:(\d+)\:(\w+)\]/g;
 
@@ -35,7 +35,7 @@ export class KickState extends RemoteDataConnection
 		this.RefreshChannel();
 	}
 
-	static GetTargetChannelName() { return GlobalSettings.instance.text_kickChannel; }
+	static GetTargetChannelName() { return OptionManager.GetOptionValue("kick.channel"); }
 	static IsString(thing) { return typeof thing === 'string'; }
 
 	RefreshChannel()
@@ -58,7 +58,7 @@ export class KickState extends RemoteDataConnection
 	{
 		const url_kick_v2_channels = "https://kick.com/api/v2/channels/";
 
-		if (GlobalSettings.instance.bool_listenToKick)
+		if (OptionManager.GetOptionValue("kick.listen"))
 		{
 			if (!this.gotChannelData)
 			{
@@ -96,7 +96,7 @@ export class KickState extends RemoteDataConnection
 			}
 		}
 
-		if (GlobalSettings.instance.bool_listenToKick)
+		if (OptionManager.GetOptionValue("kick.listen"))
 			ChatCollector.Append(username, message, "kick", color);
 	}
 
@@ -122,3 +122,6 @@ export class KickState extends RemoteDataConnection
 		return true;
 	}
 }
+
+OptionManager.AppendOption("kick.listen", false, "Listen To Kick");
+OptionManager.AppendOption("kick.channel", "", "Join Channel");

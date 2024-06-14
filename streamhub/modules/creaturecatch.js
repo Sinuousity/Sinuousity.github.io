@@ -5,7 +5,7 @@ import { CreatureRoster } from "./creatures.js";
 import "./storedobject.js";
 import { UserInput } from "./userinput.js";
 
-console.info("Module Added: Creature Catching");
+console.info("[ +Module ] Creature Catching");
 
 export class CreatureAppearance
 {

@@ -1,4 +1,4 @@
-console.info("Module Added: Remote Data");
+console.info("[ +Module ] Remote Data");
 
 export class RemoteDataConnection
 {

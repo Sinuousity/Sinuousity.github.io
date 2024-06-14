@@ -1,4 +1,4 @@
-console.info("Module Added: User Input");
+console.info("[ +Module ] User Input");
 
 export class UserInput
 {

@@ -529,6 +529,10 @@
 	text-align: center;
 }
 
+.window-control input:hover
+{
+	scale: 105%;
+}
 .window-control input
 {
 	cursor: pointer;
@@ -542,6 +546,14 @@
 	height: auto;
 	margin: 0;
 	padding: 0;
+}
+.window-control input:disabled
+{
+	cursor: inherit !important;
+	color: #ffffffc0 !important;
+	background-color: #ffffff70 !important;
+	opacity: 30% !important;
+	scale: 80% !important;
 }
 
 
@@ -604,6 +616,7 @@
 .window-control input[type="button"]:hover
 {
 	background-color: rgb(206, 206, 206);
+	scale: 105%;
 }
 
 .window-content input[type="color"]::-webkit-color-swatch-wrapper

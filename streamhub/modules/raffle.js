@@ -1,8 +1,9 @@
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 import { Notifications } from "./notifications.js";
+import { OptionManager } from "./globalsettings.js";
 
-console.info("Module Added: Raffle");
+console.info("[ +Module ] Raffle");
 
 const key_raffle_state_store = "raffle_state_store";
 
@@ -240,15 +241,83 @@ export class RaffleSettingsWindow extends DraggableWindow
 		super("Raffle", pos_x, pos_y);
 		super.window_kind = "Raffle";
 
+		this.e_window_root.style.minHeight = "300px";
+		this.e_window_root.style.minWidth = "300px";
+
 		this.CreateContentContainer();
 		this.SetIcon("confirmation_number");
+		this.SetTitle("Raffle Options");
 
 		this.e_form = {};
 		this.e_info = {};
 		this.e_raffle_toggle = {};
-		this.CreateForm();
 
-		this.SetTitle("Raffle");
+		this.CreateControlsColumn();
+
+		this.e_control_title = this.AddTextField(
+			"Raffle Title",
+			OptionManager.GetOptionValue("raffle.title", "New Raffle"),
+			e => { OptionManager.SetOptionValue("raffle.title", e.value); }
+		);
+		this.e_control_title.style.lineHeight = "2rem";
+		this.e_control_title.style.height = "2rem";
+
+		this.e_control_keyword = this.AddTextField(
+			"Join Key Phrase",
+			OptionManager.GetOptionValue("raffle.keyword", "joinraffle"),
+			e => { OptionManager.SetOptionValue("raffle.title", e.value); }
+		);
+		this.e_control_keyword.style.lineHeight = "2rem";
+		this.e_control_keyword.style.height = "2rem";
+
+		this.txt_addName = this.AddTextField("Manual Add", "", e =>
+		{
+			this.e_btn_addName.children[1].children[0].disabled = e.value == "";
+		});
+		this.txt_addName.children[1].children[0].placeholder = "Enter Username";
+		this.txt_addName.style.lineHeight = "2rem";
+		this.txt_addName.style.height = "2rem";
+
+		this.e_btn_addName = this.AddButton("", "Add", e =>
+		{
+			RaffleState.instance.AddName(this.txt_addName.value, true);
+			Notifications.instance.Add("Raffle Name Added : " + this.txt_addName.value, "#00ff0030");
+			//onSubmitRaffleName(txt_add_name.value);
+			this.txt_addName.value = "";
+		}, false);
+		this.e_btn_addName.children[1].children[0].disabled = true;
+		this.e_btn_addName.style.lineHeight = "2rem";
+		this.e_btn_addName.style.height = "2rem";
+
+		this.e_btn_toggleOpen = this.AddControlButton("Join From Chat", RaffleState.instance.open ? "Close" : "Open", e =>
+		{
+			RaffleState.instance.ToggleOpen();
+			this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc00aa" : "#00ffccaa";
+			this.e_btn_toggleOpen.value = RaffleState.instance.open ? "Close" : "Open";
+			Notifications.instance.Add(RaffleState.instance.open ? "Raffle Open" : "Raffle Closed", "#ffff0030");
+		}, false);
+		this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc00aa" : "#00ffccaa";
+
+		var e_btn_clearNames = this.AddControlButton("Clear All Names", "Clear", e =>
+		{
+			RaffleState.instance.ClearNames();
+			Notifications.instance.Add("Raffle Names Cleared", "#ffff0030");
+		}, false);
+		e_btn_clearNames.style.backgroundColor = "#ff330066";
+		e_btn_clearNames.style.color = "#ffffffaa";
+
+
+		//this.CreateForm();
+
+	}
+
+	AddControlButton(label, buttonText, action, dirtiesSettings = false)
+	{
+		var e_ctrl = this.AddButton(label, buttonText, action, dirtiesSettings);
+		var e_btn = e_ctrl.children[1].children[0];
+		e_ctrl.style.lineHeight = "2rem";
+		e_ctrl.style.height = "2rem";
+		return e_btn;
 	}
 
 	CreateForm()

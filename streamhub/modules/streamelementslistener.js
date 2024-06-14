@@ -1,4 +1,4 @@
-console.info("Module Added: StreamElements Listener");
+console.info("[ +Module ] StreamElements Listener");
 
 export class StreamElements
 {

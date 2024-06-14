@@ -1,8 +1,7 @@
-import { RemoteDataConnection } from "./remotedata.js";
-import { GlobalSettings } from "./globalsettings.js";
+import { OptionManager } from "./globalsettings.js";
 import { ChatCollector } from "./chatcollector.js";
 
-console.info("Module Added: Twitch Listener");
+console.info("[ +Module ] Twitch Listener");
 
 const url_twitch_host = "irc.twitch.tv";
 const url_twitch_tmi = "tmi.twitch.tv";
@@ -32,7 +31,7 @@ export class TwitchListener
 		redirect = redirect.replace("http://", "https://");
 		var user_auth_url = url_twitch_oauth_authorize;
 		user_auth_url += "?response_type=token";
-		user_auth_url += "&client_id=" + GlobalSettings.instance.text_twitchClientId;
+		user_auth_url += "&client_id=" + OptionManager.GetOptionValue("twitch.bot.clientId", "");
 		user_auth_url += "&redirect_uri=" + TwitchListener.GetRedirectUri();
 		user_auth_url += "&scope=chat%3Aread+chat%3Aedit";
 		return user_auth_url;
@@ -56,13 +55,13 @@ export class TwitchListener
 		{
 			this.ws.onopen = () =>
 			{
-				this.ws.send("PASS oauth:" + GlobalSettings.instance.text_twitchAccessToken);
-				this.ws.send("NICK " + GlobalSettings.instance.text_twitchUsername);
+				this.ws.send("PASS oauth:" + OptionManager.GetOptionValue("twitch.bot.accessToken", ""));
+				this.ws.send("NICK " + OptionManager.GetOptionValue("twitch.bot.username", "nobody"));
 				window.setTimeout(
 					() =>
 					{
 						this.ws.send("CAP REQ :twitch.tv/tags");
-						this.ws.send("JOIN #" + GlobalSettings.instance.text_twitchChannel);
+						this.ws.send("JOIN #" + OptionManager.GetOptionValue("twitch.channel", "twitch"));
 					}, 42
 				);
 
@@ -90,7 +89,7 @@ export class TwitchListener
 			var privmsg_check = event.data.match(rgx_twitch_privmsg);
 			if (privmsg_check)
 			{
-				if (GlobalSettings.instance.bool_listenToTwitch)
+				if (OptionManager.GetOptionValue("twitch.listen", false))
 				{
 					var color_check = event.data.match(rgx_twitch_usercolor);
 					if (color_check)
@@ -104,27 +103,35 @@ export class TwitchListener
 				}
 				return;
 			}
-			console.log(`TwitchWS [${event.type}] :: ${event.data}`);
+
+			if (event.data.includes(":tmi.twitch.tv NOTICE * :Invalid NICK"))
+			{
+				console.warn(`[ Twitch ] Please Set Your Bot Username In Authentication Settings!`);
+
+			}
+			console.log(`[ Twitch ] ( ${event.type} ) ${event.data}`);
 		};
 
 		this.ws.onclose = () =>
 		{
-			console.warn("Twitch WebSocket Closed");
+			console.warn("[ Twitch ] Connection Closed");
 			this.connected = false;
 		};
 
 		this.ws.onerror = (error) =>
 		{
-			console.error("Twitch WS Error", error.toString());
+			console.error("[ Twitch ] Connection Error", error.toString());
 		};
 	}
 
 	UpdateChannel()
 	{
-		if (GlobalSettings.instance.text_twitchChannel == this.joinedChannel) return;
+		if (!this.connected) return;
+		if (OptionManager.GetOptionValue("twitch.channel", "") == this.joinedChannel) return;
+
 		if (this.joinedChannel != null && this.joinedChannel.length > 0) this.ws.send("PART #" + this.joinedChannel);
-		this.joinedChannel = GlobalSettings.instance.text_twitchChannel;
-		this.ws.send("JOIN #" + GlobalSettings.instance.text_twitchChannel);
+		this.joinedChannel = OptionManager.GetOptionValue("twitch.channel", "");
+		this.ws.send("JOIN #" + this.joinedChannel);
 	}
 
 	static CheckWindowLocationHashForAccessToken()
@@ -132,11 +139,18 @@ export class TwitchListener
 		var got_access_token = window.location.hash.match(rgx_twitch_access_token);
 		if (got_access_token != null)
 		{
-			GlobalSettings.instance.text_twitchAccessToken = got_access_token[1];
-			GlobalSettings.instance.StoreState();
+			OptionManager.SetOptionValue("twitch.bot.accessToken", got_access_token[1]);
 
 			//fetch("accesstoken" + got_access_token[1], { method: "POST" });
 			window.location.hash = "";
 		}
 	}
 }
+
+
+
+OptionManager.AppendOption("twitch.listen", false, "Listen To Twitch");
+OptionManager.AppendOption("twitch.channel", "", "Join Channel");
+OptionManager.AppendOption("twitch.bot.username", "", "Bot Username");
+OptionManager.AppendOption("twitch.bot.clientId", "", "Bot Client ID");
+OptionManager.AppendOption("twitch.bot.accessToken", "", "Access Token");

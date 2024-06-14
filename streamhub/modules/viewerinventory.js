@@ -1,9 +1,8 @@
-import { Lookup } from "./lookup.js";
 import { StoredObject } from "./storedobject.js";
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 
-console.info("Module Added: Viewer Inventories");
+console.info("[ +Module ] Viewer Inventories");
 
 
 export class ViewerInventorySlot

@@ -1,5 +1,5 @@
 import { DraggableWindow } from "./windowcore.js";
-console.info("Module Added: Window Manager");
+console.info("[ +Module ] Window Manager");
 
 const key_window_state_store = "window_state_store";
 

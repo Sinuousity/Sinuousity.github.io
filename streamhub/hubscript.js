@@ -1,4 +1,5 @@
 ﻿import { GlobalSettings } from "./modules/globalsettings.js";
+import { DebugWindow } from "./modules/debugwindow.js";
 import { WindowManager } from "./modules/windowmanager.js";
 import { TwitchListener } from "./modules/twitchlistener.js";
 import { KickState } from "./modules/kicklistener.js";
@@ -13,22 +14,24 @@ export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExist
 
 
 const hub_version = "v0.2.0";
-const resetStoredWindowState = false;
+const resetStoredState = false;
 var e_background_log = {};
 var e_menu_windows = {};
 var e_site_tag = {};
 
-console.info("Module Added: Hub Core");
+console.info("[ +Module ] Hub Core");
 OnBodyLoad();
 //(() => { OnBodyLoad(); })(); // lol nice
 
 function OnBodyLoad()
 {
 	FindBuiltInElements();
-	SetLogProxies();
 	SetWindowMenuOptions();
 	RestoreLocalStorageContent();
+
 	TwitchListener.CheckWindowLocationHashForAccessToken();
+	KickState.instance.RefreshChannel();
+
 	RestoreWindowState();
 	//AddCssReloadButton();
 	UpdateSiteTag();
@@ -51,18 +54,33 @@ function UpdateSiteTag()
 
 function RestoreLocalStorageContent()
 {
+	GlobalSettings.RestoreOrGetInitialState(true);
+
+	if (GlobalSettings.instance.bool_resetAllData)
+	{
+		RaffleState.instance.TryStore();
+		ItemLibrary.instance.Store();
+		ViewerInventoryManager.instance.Store();
+		CreatureRoster.instance.Store();
+	}
+
+	if (GlobalSettings.instance.bool_resetAllData || GlobalSettings.instance.bool_resetAllSettings)
+	{
+		GlobalSettings.instance = new GlobalSettings();
+		GlobalSettings.instance.StoreState();
+	}
+
 	RaffleState.instance.TryRestore();
 	ItemLibrary.instance.Restore();
 	ViewerInventoryManager.instance.Restore();
 	CreatureRoster.instance.Restore();
 	GlobalSettings.RestoreOrGetInitialState();
-	KickState.instance.RefreshChannel();
 }
 
 function RestoreWindowState()
 {
 	WindowManager.instance.ClearAll();
-	if (resetStoredWindowState) WindowManager.instance.TryStoreState();
+	if (resetStoredState) WindowManager.instance.TryStoreState();
 	WindowManager.instance.TryRestoreState();
 }
 
@@ -107,22 +125,5 @@ function ReloadCss()
 		var l = all_links[li];
 		if (l.rel != "stylesheet") continue;
 		l.href += "";
-	}
-}
-
-function SetLogProxies()
-{
-	//console logging proxies for appending to in-html log
-	console.warn = proxy(console, console.warn, "warn >> ");
-	console.error = proxy(console, console.error, "error >> ");
-}
-
-function proxy(context, method, message)
-{
-	return function ()
-	{
-		var fullMessage = [message].concat(Array.prototype.slice.apply(arguments));
-		if (e_background_log) e_background_log.innerHTML = fullMessage.join(' ') + "<br>" + e_background_log.innerHTML;
-		method.apply(context, fullMessage);
 	}
 }

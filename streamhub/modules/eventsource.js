@@ -1,4 +1,4 @@
-console.info("Module Added: Event Sources");
+console.info("[ +Module ] Event Sources");
 
 export class EventSourceSubscription
 {

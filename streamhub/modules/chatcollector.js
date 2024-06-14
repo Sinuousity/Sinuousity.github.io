@@ -2,7 +2,7 @@ import { WindowManager } from "./windowmanager.js";
 import { EventSource } from "./eventsource.js";
 import { ChatWindow } from "./windows.js";
 
-console.info("Module Added: Chat Collector");
+console.info("[ +Module ] Chat Collector");
 
 export class MultiChatMessage
 {

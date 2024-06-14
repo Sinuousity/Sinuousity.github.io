@@ -1,4 +1,4 @@
-console.info("Module Added: Notifications");
+console.info("[ +Module ] Notifications");
 
 export class Notifications
 {

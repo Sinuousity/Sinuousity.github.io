@@ -3,7 +3,7 @@ import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 import "./storedobject.js";
 
-console.info("Module Added: Creatures");
+console.info("[ +Module ] Creatures");
 
 export class Creature
 {

@@ -1,4 +1,4 @@
-console.info("Module Added: Stored Objects");
+console.info("[ +Module ] Stored Objects");
 
 class RunningTimeout
 {

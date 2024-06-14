@@ -5,7 +5,7 @@ import "./storedobject.js";
 import { ViewerInventoryManager } from "./viewerinventory.js";
 import { Notifications } from "./notifications.js";
 
-console.info("Module Added: Item Library");
+console.info("[ +Module ] Item Library");
 
 export class ItemLibrary extends StoredObject
 {

@@ -134,6 +134,41 @@
 }
 
 
+
+
+
+
+.raffle-entry-name
+{
+	position: absolute;
+	left: 50%;
+	bottom: 2rem;
+	transform: translate(-50%, 0%);
+
+	text-align: center;
+	color: white;
+	font-size: 2rem;
+	line-height: 2rem;
+}
+.raffle-entry-root
+{
+	position: absolute;
+	top: 4rem;
+	bottom: 4rem;
+	aspect-ratio: 1.0;
+	width: auto;
+	background-color: #ffffff10;
+	border-radius: 1rem;
+}
+
+
+
+
+
+
+
+
+
 .raffle-entries-box-closer
 {
 	z-index: 100;

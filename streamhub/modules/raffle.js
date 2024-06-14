@@ -126,7 +126,7 @@ export class RaffleState
 	AddName(newName, force = false)
 	{
 		if (!force && (this.running || !this.open)) return;
-		if (this.names.indexOf(newName) < 0) return;
+		if (this.names.indexOf(newName) > -1) return;
 		this.names.push(newName);
 		this.TryStore();
 	}
@@ -178,9 +178,25 @@ export class RaffleState
 	}
 }
 
+export class RaffleOverlayEntry
+{
+	constructor(username)
+	{
+		this.username = username;
+		this.e_root = document.createElement("div");
+		this.e_root.className = "raffle-entry-root"
+
+		this.e_name = document.createElement("div");
+		this.e_name.innerText = username;
+		this.e_name.className = "raffle-entry-name";
+		this.e_root.appendChild(this.e_name);
+	}
+}
+
 export class RaffleOverlay
 {
 	static instance = new RaffleOverlay();
+
 
 	constructor()
 	{
@@ -206,13 +222,49 @@ export class RaffleOverlay
 
 		document.body.appendChild(this.e_zone_root);
 
+		this.e_entries = [];
+
 		this.updateTimeoutId = -1;
 		this.UpdateElements();
+
+		this.slidePosition = 0.0;
+		this.slideIndex = 0;
+		this.intervalId_Animation = window.setInterval(() => { this.UpdateEntryPositions(); }, 15);
+	}
+
+	UpdateEntryPositions()
+	{
+		const deltaTime = 15.0 / 1000.0;
+		this.slidePosition += deltaTime;
+		if (this.slidePosition <= -1.0)
+		{
+			this.slidePosition += 1.0;
+			this.slideIndex += 1;
+		}
+		if (this.slidePosition >= 1.0)
+		{
+			this.slidePosition -= 1.0;
+			this.slideIndex -= 1;
+		}
+
+		for (var nameIndex in RaffleState.instance.names)
+		{
+			var offsetIndex = nameIndex - this.slideIndex;
+			while (offsetIndex < 0) offsetIndex += RaffleState.instance.names.length;
+			while (offsetIndex >= RaffleState.instance.names.length) offsetIndex -= RaffleState.instance.names.length;
+			this.e_entries[nameIndex].e_root.style.transform = `translate(${(-50 + (this.slidePosition + offsetIndex) * 100)}%, 0%)`;
+		}
 	}
 
 	UpdateElements()
 	{
-		if (this.updateTimeoutId != -1) return;
+		console.log("raffle overlay update requested");
+
+		if (this.updateTimeoutId != -1) 
+		{
+			console.log("raffle overlay aborted : already waiting");
+			return;
+		}
 
 		if (RaffleState.instance == null) 
 		{
@@ -223,6 +275,7 @@ export class RaffleOverlay
 					this.UpdateElements();
 				}, 25
 			);
+			console.log("raffle overlay aborted : RaffleState.instance == null");
 			return;
 		}
 
@@ -231,6 +284,18 @@ export class RaffleOverlay
 		this.e_zone_title.innerText = RaffleState.instance.title;
 		this.e_zone_subtitle.innerText = RaffleState.instance.open ? "OPEN" : "CLOSED";
 		this.e_zone_subtitle.style.color = RaffleState.instance.open ? "lightgreen" : "red";
+
+		this.e_entries = [];
+		this.e_names_root.innerHTML = "";
+		for (var nameIndex in RaffleState.instance.names)
+		{
+			var name = RaffleState.instance.names[nameIndex];
+			var entry = new RaffleOverlayEntry(name);
+			entry.e_root.style.transform = `translate(${(-50 + nameIndex * 96)}%, 0%)`;
+			this.e_names_root.appendChild(entry.e_root);
+
+			this.e_entries.push(entry);
+		}
 	}
 }
 
@@ -257,7 +322,13 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_control_title = this.AddTextField(
 			"Raffle Title",
 			OptionManager.GetOptionValue("raffle.title", "New Raffle"),
-			e => { OptionManager.SetOptionValue("raffle.title", e.value); }
+			e =>
+			{
+				var trimmedValue = e.value.trim();
+				OptionManager.SetOptionValue("raffle.title", trimmedValue);
+				RaffleState.instance.SetTitle(trimmedValue);
+			},
+			true
 		);
 		this.e_control_title.style.lineHeight = "2rem";
 		this.e_control_title.style.height = "2rem";
@@ -265,18 +336,27 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_control_keyword = this.AddTextField(
 			"Join Key Phrase",
 			OptionManager.GetOptionValue("raffle.keyword", "joinraffle"),
-			e => { OptionManager.SetOptionValue("raffle.title", e.value); }
+			e =>
+			{
+				var trimmedValue = e.value.trim();
+				OptionManager.SetOptionValue("raffle.keyword", trimmedValue);
+				RaffleState.instance.SetKeyword(trimmedValue);
+			},
+			true
 		);
 		this.e_control_keyword.style.lineHeight = "2rem";
 		this.e_control_keyword.style.height = "2rem";
 
-		this.txt_addName = this.AddTextField("Manual Add", "", e =>
-		{
-			this.e_btn_addName.children[1].children[0].disabled = e.value == "";
-		});
-		this.txt_addName.children[1].children[0].placeholder = "Enter Username";
-		this.txt_addName.style.lineHeight = "2rem";
-		this.txt_addName.style.height = "2rem";
+		this.e_control_addName = this.AddTextField(
+			"Manual Add",
+			"",
+			e => { this.e_btn_addName.children[1].children[0].disabled = e.value == ""; },
+			false
+		);
+		this.txt_addName = this.e_control_addName.children[1].children[0];
+		this.txt_addName.placeholder = "Enter Username";
+		this.e_control_addName.style.lineHeight = "2rem";
+		this.e_control_addName.style.height = "2rem";
 
 		this.e_btn_addName = this.AddButton("", "Add", e =>
 		{
@@ -292,19 +372,28 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_btn_toggleOpen = this.AddControlButton("Join From Chat", RaffleState.instance.open ? "Close" : "Open", e =>
 		{
 			RaffleState.instance.ToggleOpen();
-			this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc00aa" : "#00ffccaa";
+			this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc0050" : "#00ffcc50";
 			this.e_btn_toggleOpen.value = RaffleState.instance.open ? "Close" : "Open";
 			Notifications.instance.Add(RaffleState.instance.open ? "Raffle Open" : "Raffle Closed", "#ffff0030");
 		}, false);
-		this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc00aa" : "#00ffccaa";
+		this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc0050" : "#00ffcc50";
 
 		var e_btn_clearNames = this.AddControlButton("Clear All Names", "Clear", e =>
 		{
 			RaffleState.instance.ClearNames();
-			Notifications.instance.Add("Raffle Names Cleared", "#ffff0030");
+			Notifications.instance.Add("Raffle Names Cleared", "#ffff0050");
 		}, false);
-		e_btn_clearNames.style.backgroundColor = "#ff330066";
+		e_btn_clearNames.style.backgroundColor = "#ff330050";
 		e_btn_clearNames.style.color = "#ffffffaa";
+
+		this.e_btn_run = this.AddControlButton("Run Raffle", "Run", e =>
+		{
+			RaffleState.instance.TryRun();
+			this.e_btn_run.disabled = RaffleState.instance.running;
+		}, false);
+		this.e_btn_run.disabled = RaffleState.instance.running;
+		this.e_btn_run.style.backgroundColor = "#00ff0050";
+		this.e_btn_run.style.color = "#ffffffaa";
 
 
 		//this.CreateForm();
@@ -436,3 +525,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 }
 
 WindowManager.instance.windowTypes.push({ key: "Raffle", icon: "confirmation_number", model: (x, y) => { return new RaffleSettingsWindow(x, y); } });
+
+
+OptionManager.AppendOption("raffle.title", "New Raffle", "Title");
+OptionManager.AppendOption("raffle.keyword", "joinraffle", "Join Key Phrase");

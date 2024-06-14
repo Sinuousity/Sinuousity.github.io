@@ -532,6 +532,7 @@
 .window-control input:hover
 {
 	scale: 105%;
+	opacity: 100%;
 }
 .window-control input
 {
@@ -546,6 +547,7 @@
 	height: auto;
 	margin: 0;
 	padding: 0;
+	opacity: 50%;
 }
 .window-control input:disabled
 {
@@ -611,11 +613,12 @@
 	font-weight: bold;
 	letter-spacing: 0.7px;
 	font-size: 0.75rem;
-	background-color: #8080808a;
+	background-color: #8080802c;
+	color: #ffffff50;
 }
 .window-control input[type="button"]:hover
 {
-	background-color: rgb(206, 206, 206);
+	background-color: rgba(105, 105, 105, 0.918);
 	scale: 105%;
 }
 

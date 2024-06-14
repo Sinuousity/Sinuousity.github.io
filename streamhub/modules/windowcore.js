@@ -281,7 +281,7 @@ export class WindowBase
 		return e_control;
 	}
 
-	AddToggle(label, checked, changeAction)
+	AddToggle(label, checked, changeAction, dirtiesSettings = true)
 	{
 		var e_control = this.AddControl(label);
 
@@ -292,11 +292,15 @@ export class WindowBase
 		e_input.type = "checkbox";
 		e_input.checked = checked;
 
+		const willDirtySettings = dirtiesSettings;
 		var onToggle = () =>
 		{
 			changeAction(e_input);
-			GlobalSettings.instance.ApplyState();
-			GlobalSettings.instance.MarkDirty();
+			if (willDirtySettings)
+			{
+				GlobalSettings.instance.ApplyState();
+				GlobalSettings.instance.MarkDirty();
+			}
 		};
 		e_input.addEventListener("change", onToggle);
 
@@ -306,7 +310,7 @@ export class WindowBase
 		return e_control;
 	}
 
-	AddSlider(label, initialValue, minValue, maxValue, changeAction)
+	AddSlider(label, initialValue, minValue, maxValue, changeAction, dirtiesSettings = true)
 	{
 		var e_control = this.AddControl(label);
 
@@ -319,11 +323,15 @@ export class WindowBase
 		e_input.max = maxValue + "%";
 		e_input.value = initialValue;
 
+		const willDirtySettings = dirtiesSettings;
 		var onChanged = () =>
 		{
 			changeAction(e_input);
-			GlobalSettings.instance.ApplyState();
-			GlobalSettings.instance.MarkDirty();
+			if (willDirtySettings)
+			{
+				GlobalSettings.instance.ApplyState();
+				GlobalSettings.instance.MarkDirty();
+			}
 		};
 		e_input.addEventListener("change", onChanged);
 
@@ -333,7 +341,7 @@ export class WindowBase
 		return e_control;
 	}
 
-	AddTextField(label, initialValue, changeAction)
+	AddTextField(label, initialValue, changeAction, dirtiesSettings = true)
 	{
 		var e_control = this.AddControl(label);
 
@@ -345,11 +353,15 @@ export class WindowBase
 		e_input.value = initialValue;
 		e_input.placeholder = label;
 
+		const willDirtySettings = dirtiesSettings;
 		var onChanged = () =>
 		{
 			changeAction(e_input);
-			GlobalSettings.instance.ApplyState();
-			GlobalSettings.instance.MarkDirty();
+			if (willDirtySettings)
+			{
+				GlobalSettings.instance.ApplyState();
+				GlobalSettings.instance.MarkDirty();
+			}
 		};
 		e_input.addEventListener("change", onChanged);
 
@@ -359,7 +371,7 @@ export class WindowBase
 		return e_control;
 	}
 
-	AddDropDown(label, changeAction)
+	AddDropDown(label, changeAction, dirtiesSettings = true)
 	{
 		var e_control = this.AddControl(label);
 
@@ -369,11 +381,15 @@ export class WindowBase
 		var e_input = document.createElement("select");
 		e_input.name = "dropdown";
 
+		const willDirtySettings = dirtiesSettings;
 		var onChanged = () =>
 		{
 			changeAction(e_input);
-			GlobalSettings.instance.ApplyState();
-			GlobalSettings.instance.MarkDirty();
+			if (willDirtySettings)
+			{
+				GlobalSettings.instance.ApplyState();
+				GlobalSettings.instance.MarkDirty();
+			}
 		};
 		e_input.addEventListener("change", onChanged);
 

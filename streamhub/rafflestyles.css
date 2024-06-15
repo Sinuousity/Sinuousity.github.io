@@ -94,7 +94,7 @@
 	overflow: hidden;
 
 	mask-composite: intersect;
-	mask-image: linear-gradient(90deg, transparent 0%, white 1%, white 99%, transparent 100%);
+	mask-image: linear-gradient(90deg, transparent 0%, #ffffffa8 5%, white 8%, white 92%, #ffffffa8 95%, transparent 100%);
 }
 
 .rafflenameslide
@@ -126,6 +126,13 @@
 }
 
 
+
+.raffle-entry-root:nth-child(even) > .raffle-entry-name
+{
+	top: 2rem;
+	bottom: unset;
+}
+
 .raffle-entry-name
 {
 	position: absolute;
@@ -133,11 +140,22 @@
 	bottom: 2rem;
 	transform: translate(-50%, 0%);
 
+	max-width: 150%;
+
 	text-align: center;
 	color: white;
-	font-size: 1.7rem;
-	line-height: 2rem;
+	font-size: 1.5rem;
+	line-height: 1.5rem;
 	text-wrap: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	border-radius: 1rem;
+	padding: 1rem;
+	background-color: rgba(0, 0, 0, 0.6);
+
+	transition-property: opacity;
+	transition-duration: 0.269s;
+	transition-timing-function: ease-in-out;
 }
 
 

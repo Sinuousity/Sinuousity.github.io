@@ -22,7 +22,7 @@ export class ChatWindow extends DraggableWindow
 		var message_id = this.getMessageId(m);
 		var message_exists = this.messages.Contains(message_id);
 		if (message_exists) return;
-		this.messages.Add(message_id, m);
+		this.messages.Set(message_id, m);
 
 		if (this.messages.length >= this.max_entries)
 		{

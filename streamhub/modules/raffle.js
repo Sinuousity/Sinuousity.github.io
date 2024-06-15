@@ -4,6 +4,7 @@ import { Notifications } from "./notifications.js";
 import { OptionManager } from "./globalsettings.js";
 import { UserInput } from "./userinput.js";
 import { ChatCollector } from "./chatcollector.js";
+import { TwitchResources } from "./twitchlistener.js";
 
 console.info("[ +Module ] Raffle");
 
@@ -96,6 +97,7 @@ export class RaffleState
 					this[prop] = stored_state[prop];
 			}
 		}
+
 		RaffleOverlay.instance.CreateNameElements();
 	}
 
@@ -138,6 +140,7 @@ export class RaffleState
 		this.names.push(newName);
 		this.TryStore();
 		RaffleOverlay.instance.CreateNameElements();
+		TwitchResources.GetProfileData(newName);
 	}
 
 	RemoveName(oldName, force = false)
@@ -207,7 +210,6 @@ export class RaffleOverlay
 {
 	static instance = new RaffleOverlay();
 
-
 	constructor()
 	{
 		this.e_zone_root = document.createElement("div");
@@ -243,8 +245,8 @@ export class RaffleOverlay
 		this.e_names_slider.style.pointerEvents = "all";
 		this.e_names_slider.style.userSelect = "none";
 		this.e_names_slider.style.cursor = "grab";
-		this.e_names_slider.addEventListener("mousedown", () => { this.draggingEntries = true; });
-		window.addEventListener("mouseup", () => { this.draggingEntries = false; });
+		this.e_names_slider.addEventListener("mousedown", () => { this.draggingEntries = true; this.e_names_slider.style.cursor = "grabbing"; });
+		window.addEventListener("mouseup", () => { this.draggingEntries = false; this.e_names_slider.style.cursor = "grab"; });
 		this.e_names_root.appendChild(this.e_names_slider);
 
 		document.body.appendChild(this.e_zone_root);
@@ -274,6 +276,13 @@ export class RaffleOverlay
 		var deltaTime = (newTime - this.animationTime);
 		this.animationTime = newTime;
 
+		var nameCount = RaffleState.instance.names.length;
+		if (nameCount < 1)
+		{
+			requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
+			return;
+		}
+
 		var midoffset = 0.5 - this.slidePosition;
 		var stick = 1.0 - Math.min(1.0, Math.abs(this.slideVelocity));
 		this.slideVelocity -= Math.min(deltaTime * (stick * 0.5 + 0.25), 1.0) * this.slideVelocity;
@@ -282,13 +291,6 @@ export class RaffleOverlay
 		var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
 		if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.02;
-
-		var nameCount = RaffleState.instance.names.length;
-		if (nameCount < 1)
-		{
-			requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
-			return;
-		}
 
 		var cellCount = Math.min(6, nameCount);
 		var halfCount = cellCount * 0.5;
@@ -311,28 +313,44 @@ export class RaffleOverlay
 		var cellPad = 0.1 + 0.1 * (6 - cellCount);
 		var cellSize = this.e_names_slider.offsetHeight;
 		var cellRootWidth = this.e_names_root.offsetWidth;
-		var stretch = Math.pow(Math.abs(this.slideVelocity) * 0.01, 5) * 300.0;
+		var stretch = Math.pow(Math.abs(this.slideVelocity) * 0.01, 5) * 500.0;
 		var blur = Math.pow(Math.abs(this.slideVelocity) * 0.01, 2) * 100.0;
+		blur = Math.min(blur, 20);
 		cellPad += 0.1 * stretch;
 
 		for (var nameIndex = 0; nameIndex < cellCount; nameIndex++)
 		{
 			var offsetIndex = nameIndex - this.slideIndex;
+			var selected = offsetIndex == 0;
 			var offsetPosition = offsetIndex + (this.slidePosition - 0.5);
 			offsetPosition = RaffleOverlay.WrapIndex(offsetPosition, -halfCount, halfCount);
 			offsetPosition *= 1.0 + cellPad;
 
 			var relativeIndex = RaffleOverlay.WrapIndex(offsetIndex, -halfCount, halfCount);
 			var nameIdActual = RaffleOverlay.WrapIndex(this.slideIndexReal + relativeIndex, 0, nameCount);
-			this.e_entries[nameIndex].e_root.children[0].innerText = RaffleState.instance.names[nameIdActual];
+			var nameActual = RaffleState.instance.names[nameIdActual];
+			this.e_entries[nameIndex].username = nameActual;
+			this.e_entries[nameIndex].e_root.children[0].innerText = nameActual;
 
 			var scalePercentY = 100;
 			var scalePercentX = scalePercentY + stretch * 100.0;
+			var transitionDuration = Math.max(0.0, 0.1 - 0.5 * stretch);
+
 			this.e_entries[nameIndex].e_root.style.transform = `translate(-50%,0%) scale(${scalePercentX}%, ${scalePercentY}%)`;
 			this.e_entries[nameIndex].e_root.style.left = `${offsetPosition * cellSize + cellRootWidth * 0.5}px`;
+			this.e_entries[nameIndex].e_root.style.transitionDuration = transitionDuration + "s";
 			this.e_entries[nameIndex].e_root.style.outline = "solid transparent 3px";
 			this.e_entries[nameIndex].e_root.style.outlineOffset = "-16px";
 			this.e_entries[nameIndex].e_root.style.filter = `blur(${blur}px)`;
+
+			var userData = TwitchResources.GetCachedProfileData(nameActual)
+			if (userData) this.e_entries[nameIndex].e_root.style.backgroundImage = "url(" + userData.profile_image_url + ")";
+
+			var nameShow = 1.0 - 0.7 * Math.abs(relativeIndex);
+			this.e_entries[nameIndex].e_name.style.opacity = `${100 * nameShow}%`;
+			this.e_entries[nameIndex].e_name.style.maxWidth = selected ? "200%" : "80%";
+			this.e_entries[nameIndex].e_name.style.overflow = selected ? "visible" : "hidden";
+			this.e_entries[nameIndex].e_name.style.transform = `translate(-50%, 0%) scale(${70 + 30 * nameShow}%)`;
 			//this.e_entries[nameIndex].e_root.children[0].innerHTML = `name ${nameIdActual + 1}`;
 		}
 
@@ -373,6 +391,8 @@ export class RaffleOverlay
 			console.log("raffle overlay creation aborted : RaffleState.instance == null");
 			return;
 		}
+
+		TwitchResources.GetProfileDataMultiple(RaffleState.instance.names);
 
 		this.e_zone_root.style.opacity = (RaffleState.instance.open || RaffleState.instance.names.length > 0) ? "100%" : "0%";
 

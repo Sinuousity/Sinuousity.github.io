@@ -141,13 +141,34 @@
 }
 
 
+html
+{
+	z-index: -500000;
+	background-color: #1b1b1b;
+}
+
 body
 {
+	z-index: -400000;
+	overflow: hidden;
+
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+
+	background-size: cover;
+	background-blend-mode: screen;
+	background: radial-gradient(circle at -10% -10%, #2c2c2c 0px, #1b1b1b 500px);
 	background-color: #1b1b1b;
+
 	text-align: center;
 	font-size: 2rem;
 	font-family: 'Roboto';
-	overflow: hidden;
+
+	transform-style: preserve-3d !important;
+	transform-origin: 50% 50%;
 }
 
 
@@ -157,6 +178,7 @@ body
 
 .bodypattern
 {
+	z-index: -300000;
 	width: 200%;
 	background: radial-gradient(circle, #414141, #414141, #414141, #414141, #5f5f5f, #5f5f5f, #5f5f5f, #5f5f5f, #5f5f5f) repeat;
 	background-size: var(--bodypatternsize) var(--bodypatternsize);
@@ -170,7 +192,7 @@ body
 
 .effect-corner-glow
 {
-	z-index: -10;
+	z-index: -250000;
 	position: fixed;
 	bottom: 0;
 	top: 0;
@@ -188,7 +210,7 @@ body
 
 .logo
 {
-	z-index: -11;
+	z-index: -200000;
 	object-fit: contain;
 	filter: contrast(80%) blur(3px);
 	user-select: none;
@@ -201,6 +223,7 @@ body
 
 .site-tag
 {
+	z-index: -150000;
 	user-select: none;
 	pointer-events: none;
 	position: fixed;

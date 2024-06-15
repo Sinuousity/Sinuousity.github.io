@@ -404,6 +404,8 @@
 
 .window-content-chat
 {
+	overflow: visible;
+	text-overflow: ellipsis;
 	padding: 0.25rem;
 	padding-left: 0.75rem;
 	padding-right: 0.75rem;
@@ -421,6 +423,7 @@
 }
 .window-content-chat:hover
 {
+	overflow: visible;
 	color: white;
 	background-color: #6e6e6e33;
 	transform: translate(0.1rem, 0rem);
@@ -435,13 +438,16 @@
 }
 .window-content-chat i
 {
+	position: absolute;
+	top: -0.2rem;
 	cursor: default;
-	display: inline-block;
+	display: block;
 	text-align: center;
-	width: 2.5rem;
 	color: white;
-	font-size: 0.6rem;
+	font-size: 0.65rem;
 	font-style: normal;
+	text-overflow: clip;
+	text-wrap: nowrap;
 }
 
 .window-section-title

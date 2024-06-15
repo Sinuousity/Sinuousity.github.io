@@ -9,14 +9,25 @@ export class Lookup
 		this.length = 0;
 	}
 
-	Contains(key) { return this.keys.includes(key); }
-	Get(key) { return this.values[this.keys.indexOf(key)]; }
-
-	Add(key, value)
+	IndexOf(key) { return this.keys.indexOf(key); }
+	Contains(key) { return this.IndexOf(key) > -1; }
+	Get(key)
 	{
-		this.keys.push(key);
-		this.values.push(value);
-		this.length += 1;
+		var id = this.IndexOf(key);
+		if (id < 0) return null;
+		return this.values[id];
+	}
+	Set(key, value)
+	{
+		var id = this.IndexOf(key);
+		if (id < 0) 
+		{
+			this.keys.push(key);
+			this.values.push(value);
+			this.length += 1;
+			return;
+		}
+		this.values[id] = value;
 	}
 
 	Remove(key) { return RemoveAt(this.keys.indexOf(key)); }

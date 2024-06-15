@@ -133,10 +133,10 @@ export class GlobalSettings
 		GlobalSettings.instance.ClearDirty();
 
 		if (!initialLoad) console.log("global settings restored");
-		GlobalSettings.instance.ApplyState();
 
 		if (!initialLoad) OptionManager.Load();
 
+		GlobalSettings.instance.ApplyState();
 		return GlobalSettings.instance;
 	}
 

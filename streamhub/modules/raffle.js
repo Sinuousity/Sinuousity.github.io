@@ -2,6 +2,7 @@ import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 import { Notifications } from "./notifications.js";
 import { OptionManager } from "./globalsettings.js";
+import { UserInput } from "./userinput.js";
 
 console.info("[ +Module ] Raffle");
 
@@ -73,7 +74,7 @@ export class RaffleState
 			}
 		);
 		localStorage.setItem(key_raffle_state_store, json);
-		RaffleOverlay.instance.UpdateElements();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	TryRestore()
@@ -88,7 +89,7 @@ export class RaffleState
 					this[prop] = stored_state[prop];
 			}
 		}
-		RaffleOverlay.instance.UpdateElements();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	SetTitle(title)
@@ -202,22 +203,30 @@ export class RaffleOverlay
 	{
 		this.e_zone_root = document.createElement("div");
 		this.e_zone_root.className = "rafflezone";
+		this.e_zone_root.draggable = false;
 
 		this.e_zone_background = document.createElement("div");
 		this.e_zone_background.className = "rafflebackground";
+		this.e_zone_background.draggable = false;
 		this.e_zone_root.appendChild(this.e_zone_background);
 
 		this.e_zone_title = document.createElement("div");
 		this.e_zone_title.className = "raffletitle";
+		this.e_zone_title.draggable = false;
 		this.e_zone_root.appendChild(this.e_zone_title);
 
 		this.e_zone_subtitle = document.createElement("div");
 		this.e_zone_subtitle.className = "rafflesubtitle";
+		this.e_zone_subtitle.draggable = false;
 		this.e_zone_subtitle.addEventListener("click", () => { RaffleState.instance.ToggleOpen(); });
 		this.e_zone_root.appendChild(this.e_zone_subtitle);
 
 		this.e_names_root = document.createElement("div");
 		this.e_names_root.className = "rafflenameroot";
+		this.e_names_root.draggable = false;
+		this.e_names_root.style.pointerEvents = "all";
+		this.e_names_root.style.userSelect = "none";
+		this.e_names_root.style.cursor = "grab";
 		this.e_zone_root.appendChild(this.e_names_root);
 
 		document.body.appendChild(this.e_zone_root);
@@ -225,44 +234,93 @@ export class RaffleOverlay
 		this.e_entries = [];
 
 		this.updateTimeoutId = -1;
-		this.UpdateElements();
+		this.CreateNameElements();
 
-		this.slidePosition = 0.0;
+		this.slidePosition = 0.5;
+		this.slideVelocity = 0.0;
 		this.slideIndex = 0;
-		this.intervalId_Animation = window.setInterval(() => { this.UpdateEntryPositions(); }, 15);
+		this.slideIndexReal = 0;
+
+		this.intervalId_Animation = window.setInterval(() => { this.UpdateEntryPositions(); }, 20);
+
+		this.lastMousePositionX = UserInput.instance.mousePositionX;
 	}
 
 	UpdateEntryPositions()
 	{
-		const deltaTime = 15.0 / 1000.0;
-		this.slidePosition += deltaTime;
-		if (this.slidePosition <= -1.0)
+		const deltaTime = 20.0 / 1000.0;
+
+		var midoffset = 0.5 - this.slidePosition;
+		var stick = 1.0 - Math.min(1.0, Math.abs(this.slideVelocity) * 2);
+		this.slideVelocity -= Math.min(deltaTime * (stick * 0.25 + 0.25), 1.0) * this.slideVelocity;
+		this.slideVelocity += midoffset * deltaTime * 15.0 * stick;
+
+		var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
+		this.lastMousePositionX = UserInput.instance.mousePositionX;
+		if (UserInput.instance.pressedLeftMouse) this.slideVelocity += mouseDeltaX * 0.02;
+
+		var nameCount = RaffleState.instance.names.length;
+
+		var cellCount = Math.min(6, nameCount);
+		var halfCount = cellCount * 0.5;
+		this.slidePosition += deltaTime * this.slideVelocity;
+		while (this.slidePosition < 0.0)
 		{
 			this.slidePosition += 1.0;
 			this.slideIndex += 1;
+			this.slideIndexReal += 1;
 		}
-		if (this.slidePosition >= 1.0)
+		while (this.slidePosition > 1.0)
 		{
 			this.slidePosition -= 1.0;
 			this.slideIndex -= 1;
+			this.slideIndexReal -= 1;
+		}
+		this.slideIndex = RaffleOverlay.WrapIndex(this.slideIndex, 0, cellCount);
+		this.slideIndexReal = RaffleOverlay.WrapIndex(this.slideIndexReal, 0, nameCount);
+		var cellSpacing = 100 + 10 * (8 - cellCount);
+
+		for (var nameIndex = 0; nameIndex < cellCount; nameIndex++)
+		{
+			var offsetIndex = nameIndex - this.slideIndex + this.slidePosition;
+			offsetIndex = RaffleOverlay.WrapIndex(offsetIndex - 0.5, -halfCount, halfCount);
+			var offsetPercent = (185 + offsetIndex * cellSpacing);
+			offsetPercent = Math.round(offsetPercent * 100.0) * 0.01;
+
+			var colorR = (nameIndex * 1535.75425) % 255.0;
+			var colorG = (nameIndex * 2151.1355) % 255.0;
+			var colorB = (nameIndex * 1234.4731) % 255.0;
+			this.e_entries[nameIndex].e_root.style.backgroundColor = `rgba(${colorR},${colorG},${colorB},0.2)`;
+			var relativeIndex = RaffleOverlay.WrapIndex(nameIndex - this.slideIndex, -halfCount, halfCount);
+			var nameIdActual = RaffleOverlay.WrapIndex(this.slideIndexReal + relativeIndex, 0, nameCount);
+			this.e_entries[nameIndex].e_root.children[0].innerText = RaffleState.instance.names[nameIdActual];
+
+			var scalePercent = nameIndex == this.slideIndex ? 105 : 95;
+			this.e_entries[nameIndex].e_root.style.transform = `scale(${scalePercent}%)`;
+			this.e_entries[nameIndex].e_root.style.translate = `${offsetPercent}%  0%`;
+			this.e_entries[nameIndex].e_root.style.outline = "solid transparent 3px";
+			this.e_entries[nameIndex].e_root.style.outlineOffset = "-32px";
+			this.e_entries[nameIndex].e_root.style.filter = `blur(${this.slideVelocity * 0.1}px)`;
 		}
 
-		for (var nameIndex in RaffleState.instance.names)
-		{
-			var offsetIndex = nameIndex - this.slideIndex;
-			while (offsetIndex < 0) offsetIndex += RaffleState.instance.names.length;
-			while (offsetIndex >= RaffleState.instance.names.length) offsetIndex -= RaffleState.instance.names.length;
-			this.e_entries[nameIndex].e_root.style.transform = `translate(${(-50 + (this.slidePosition + offsetIndex) * 100)}%, 0%)`;
-		}
+		this.e_entries[this.slideIndex].e_root.style.outline = "solid orange 3px";
+		this.e_entries[this.slideIndex].e_root.style.outlineOffset = "4px";
 	}
 
-	UpdateElements()
+	static WrapIndex(id, minId, maxId)
 	{
-		console.log("raffle overlay update requested");
+		var idRange = maxId - minId;
+		if (idRange <= 0.0001) return minId;
+		while (id <= minId) id += idRange;
+		while (id >= maxId) id -= idRange;
+		return id;
+	}
 
+	CreateNameElements()
+	{
 		if (this.updateTimeoutId != -1) 
 		{
-			console.log("raffle overlay aborted : already waiting");
+			console.log("raffle overlay creation aborted : already waiting");
 			return;
 		}
 
@@ -272,10 +330,10 @@ export class RaffleOverlay
 				() =>
 				{
 					this.updateTimeoutId = -1;
-					this.UpdateElements();
+					this.CreateNameElements();
 				}, 25
 			);
-			console.log("raffle overlay aborted : RaffleState.instance == null");
+			console.log("raffle overlay creation aborted : RaffleState.instance == null");
 			return;
 		}
 
@@ -292,6 +350,7 @@ export class RaffleOverlay
 			var name = RaffleState.instance.names[nameIndex];
 			var entry = new RaffleOverlayEntry(name);
 			entry.e_root.style.transform = `translate(${(-50 + nameIndex * 96)}%, 0%)`;
+			entry.e_root.draggable = false;
 			this.e_names_root.appendChild(entry.e_root);
 
 			this.e_entries.push(entry);

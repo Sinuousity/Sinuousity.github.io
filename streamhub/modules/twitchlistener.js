@@ -17,6 +17,8 @@ const url_twitch_api = "https://api.twitch.tv";
 const url_twitch_kraken = url_twitch_api + "/kraken";
 const url_twitch_helix = url_twitch_api + "/helix";
 
+const url_twitch_users = url_twitch_helix + "/users";
+
 const rgx_twitch_access_token = /\#access\_token\=([\w]+)/;
 const rgx_twitch_privmsg = /\:(.+)\!\1\@\1\.tmi\.twitch\.tv PRIVMSG \#([^\s]+) \:(.+)/;
 const rgx_twitch_usercolor = /color\=(\#\w{6})\;/;

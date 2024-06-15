@@ -88,14 +88,11 @@
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	width: 100%;
+	width: 250%;
 	height: 50%;
 	transform: translate(-50%, -50%);
 
-	filter: blur(0px);
-
-	-webkit-mask-image: linear-gradient(#ffffff00, #ffffffff, #ffffff00);
-	mask-image: linear-gradient(#ffffff00, #ffffffff, #ffffff00);
+	mask: linear-gradient(90deg, transparent, white, white, white, transparent);
 }
 
 .rafflename
@@ -158,7 +155,12 @@
 	aspect-ratio: 1.0;
 	width: auto;
 	background-color: #ffffff10;
-	border-radius: 1rem;
+	border-radius: 0.25rem;
+
+	transition-property: transform, outline, outline-offset;
+	transition-duration: 0.15s;
+	transition-delay: 0.02s;
+	transition-timing-function: ease-in-out;
 }
 
 

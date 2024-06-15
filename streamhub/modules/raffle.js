@@ -3,6 +3,7 @@ import { WindowManager } from "./windowmanager.js";
 import { Notifications } from "./notifications.js";
 import { OptionManager } from "./globalsettings.js";
 import { UserInput } from "./userinput.js";
+import { ChatCollector } from "./chatcollector.js";
 
 console.info("[ +Module ] Raffle");
 
@@ -33,6 +34,12 @@ export class RaffleState
 		this.modifiedTimer = 0.0;
 		this.delayedStoreIntervalId = -1;
 
+		this.newMessageSubscription = ChatCollector.onMessageReceived.RequestSubscription(m => { this.CheckMessageForKeyPhrase(m); });
+	}
+
+	CheckMessageForKeyPhrase(m)
+	{
+		if (m.message.startsWith(this.keyword)) this.AddName(m.username, false);
 	}
 
 	MarkDirty()
@@ -324,7 +331,7 @@ export class RaffleOverlay
 			this.e_entries[nameIndex].e_root.style.transform = `translate(-50%,0%) scale(${scalePercentX}%, ${scalePercentY}%)`;
 			this.e_entries[nameIndex].e_root.style.left = `${offsetPosition * cellSize + cellRootWidth * 0.5}px`;
 			this.e_entries[nameIndex].e_root.style.outline = "solid transparent 3px";
-			this.e_entries[nameIndex].e_root.style.outlineOffset = "-32px";
+			this.e_entries[nameIndex].e_root.style.outlineOffset = "-16px";
 			this.e_entries[nameIndex].e_root.style.filter = `blur(${blur}px)`;
 			//this.e_entries[nameIndex].e_root.children[0].innerHTML = `name ${nameIdActual + 1}`;
 		}

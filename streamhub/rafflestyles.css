@@ -84,55 +84,46 @@
 .rafflenameroot
 {
 	clip-path: none;
-	overflow: visible;
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	width: min(1280px, 250%);
-	height: 50%;
+	width: min(1280px, 200%);
+	height: calc(40% + 100px);
 	transform: translate(-50%, -50%);
 
-	mask: linear-gradient(90deg, transparent, white, white, white, transparent);
+	overflow: hidden;
+
+	mask-composite: intersect;
+	mask-image: linear-gradient(90deg, transparent 0%, white 1%, white 99%, transparent 100%);
 }
 
-.rafflename
+.rafflenameslide
 {
-	display: block;
-	position: absolute;
-	overflow: visible;
 	clip-path: none;
-
-	pointer-events: all;
-	letter-spacing: 0.1rem;
-
-	background-color: white;
-	background-repeat: repeat;
-	background-clip: text;
-	background-size: 250%;
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-
-	text-shadow: black -2px 2px 2px;
-	text-shadow: #ffffff20 0px 0px 6px;
-
-	color: transparent;
-	font-weight: bold;
-	font-size: 1.5rem;
-	line-height: 3rem;
-	height: 3rem;
-	width: 100%;
-
-	transition-property: transform, color, background-color;
-	transition-duration: 0.1s;
-	transition-timing-function: ease-in-out;
-
-	animation: huerotate 2s infinite linear;
-	-webkit-animation: huerotate 2s infinite linear;
+	overflow: visible;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	bottom: 0;
+	height: 300px;
+	transform: translate(0%, -50%);
 }
 
 
+.raffle-entry-root
+{
+	position: absolute;
+	top: 0%;
+	bottom: 0%;
+	aspect-ratio: 1.0;
+	background-color: #ffffff10;
+	border-radius: 0.5rem;
 
-
+	transition-property: outline, outline-offset;
+	transition-duration: 0.169s;
+	transition-timing-function: ease-in-out;
+}
 
 
 .raffle-entry-name
@@ -144,26 +135,10 @@
 
 	text-align: center;
 	color: white;
-	font-size: 2rem;
+	font-size: 1.8rem;
 	line-height: 2rem;
 	text-wrap: nowrap;
 }
-.raffle-entry-root
-{
-	position: absolute;
-	top: 20%;
-	bottom: 20%;
-	aspect-ratio: 1.0;
-	width: auto;
-	background-color: #ffffff10;
-	border-radius: 0.5rem;
-
-	transition-property: outline, outline-offset;
-	transition-duration: 0.169s;
-	transition-timing-function: ease-in-out;
-}
-
-
 
 
 

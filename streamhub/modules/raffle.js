@@ -226,12 +226,19 @@ export class RaffleOverlay
 		this.e_names_root = document.createElement("div");
 		this.e_names_root.className = "rafflenameroot";
 		this.e_names_root.draggable = false;
-		this.e_names_root.style.pointerEvents = "all";
 		this.e_names_root.style.userSelect = "none";
-		this.e_names_root.style.cursor = "grab";
-		this.e_names_root.addEventListener("mousedown", () => { this.draggingEntries = true; });
 		window.addEventListener("mouseup", () => { this.draggingEntries = false; });
 		this.e_zone_root.appendChild(this.e_names_root);
+
+		this.e_names_slider = document.createElement("div");
+		this.e_names_slider.className = "rafflenameslide";
+		this.e_names_slider.draggable = false;
+		this.e_names_slider.style.pointerEvents = "all";
+		this.e_names_slider.style.userSelect = "none";
+		this.e_names_slider.style.cursor = "grab";
+		this.e_names_slider.addEventListener("mousedown", () => { this.draggingEntries = true; });
+		window.addEventListener("mouseup", () => { this.draggingEntries = false; });
+		this.e_names_root.appendChild(this.e_names_slider);
 
 		document.body.appendChild(this.e_zone_root);
 
@@ -261,15 +268,20 @@ export class RaffleOverlay
 		this.animationTime = newTime;
 
 		var midoffset = 0.5 - this.slidePosition;
-		var stick = 1.0 - Math.min(1.0, Math.abs(this.slideVelocity) * 2);
-		this.slideVelocity -= Math.min(deltaTime * (stick * 0.25 + 0.25), 1.0) * this.slideVelocity;
-		this.slideVelocity += midoffset * deltaTime * 15.0 * stick;
+		var stick = 1.0 - Math.min(1.0, Math.abs(this.slideVelocity));
+		this.slideVelocity -= Math.min(deltaTime * (stick * 0.5 + 0.25), 1.0) * this.slideVelocity;
+		this.slideVelocity += midoffset * Math.min(1.0, deltaTime * 20.0 * stick);
 
 		var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
 		if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.02;
 
 		var nameCount = RaffleState.instance.names.length;
+		if (nameCount < 1)
+		{
+			requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
+			return;
+		}
 
 		var cellCount = Math.min(6, nameCount);
 		var halfCount = cellCount * 0.5;
@@ -289,29 +301,32 @@ export class RaffleOverlay
 		this.slideIndex = RaffleOverlay.WrapIndex(this.slideIndex, 0, cellCount);
 		this.slideIndexReal = RaffleOverlay.WrapIndex(this.slideIndexReal, 0, nameCount);
 
-		var cellPad = 10 + 10 * (6 - cellCount);
-		var stretch = Math.pow(Math.abs(this.slideVelocity) * 0.01, 4) * 100.0;
+		var cellPad = 0.1 + 0.1 * (6 - cellCount);
+		var cellSize = this.e_names_slider.offsetHeight;
+		var cellRootWidth = this.e_names_root.offsetWidth;
+		var stretch = Math.pow(Math.abs(this.slideVelocity) * 0.01, 5) * 300.0;
 		var blur = Math.pow(Math.abs(this.slideVelocity) * 0.01, 2) * 100.0;
-		cellPad += 3.0 * Math.pow(Math.abs(this.slideVelocity) * 0.1, 2);
+		cellPad += 0.1 * stretch;
 
 		for (var nameIndex = 0; nameIndex < cellCount; nameIndex++)
 		{
-			var offsetIndex = nameIndex - this.slideIndex + this.slidePosition;
-			offsetIndex = RaffleOverlay.WrapIndex(offsetIndex - 0.5, -halfCount, halfCount);
+			var offsetIndex = nameIndex - this.slideIndex;
+			var offsetPosition = offsetIndex + (this.slidePosition - 0.5);
+			offsetPosition = RaffleOverlay.WrapIndex(offsetPosition, -halfCount, halfCount);
+			offsetPosition *= 1.0 + cellPad;
 
-			var offsetPercent = offsetIndex * (100 + cellPad) + 180;
-
-			var relativeIndex = RaffleOverlay.WrapIndex(nameIndex - this.slideIndex, -halfCount, halfCount);
+			var relativeIndex = RaffleOverlay.WrapIndex(offsetIndex, -halfCount, halfCount);
 			var nameIdActual = RaffleOverlay.WrapIndex(this.slideIndexReal + relativeIndex, 0, nameCount);
 			this.e_entries[nameIndex].e_root.children[0].innerText = RaffleState.instance.names[nameIdActual];
 
 			var scalePercentY = 100;
 			var scalePercentX = scalePercentY + stretch * 100.0;
-			this.e_entries[nameIndex].e_root.style.transform = `scale(${scalePercentX}%, ${scalePercentY}%)`;
-			this.e_entries[nameIndex].e_root.style.translate = `${offsetPercent}%  0%`;
+			this.e_entries[nameIndex].e_root.style.transform = `translate(-50%,0%) scale(${scalePercentX}%, ${scalePercentY}%)`;
+			this.e_entries[nameIndex].e_root.style.left = `${offsetPosition * cellSize + cellRootWidth * 0.5}px`;
 			this.e_entries[nameIndex].e_root.style.outline = "solid transparent 3px";
 			this.e_entries[nameIndex].e_root.style.outlineOffset = "-32px";
 			this.e_entries[nameIndex].e_root.style.filter = `blur(${blur}px)`;
+			//this.e_entries[nameIndex].e_root.children[0].innerHTML = `name ${nameIdActual + 1}`;
 		}
 
 		this.e_entries[this.slideIndex].e_root.style.outline = "solid orange 3px";
@@ -319,14 +334,14 @@ export class RaffleOverlay
 
 
 
-		requestAnimationFrame(this.UpdateEntryPositions.bind(this));
+		requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
 	}
 
 	static WrapIndex(id, minId, maxId)
 	{
 		var idRange = maxId - minId;
-		if (idRange <= 0.0001) return minId;
-		while (id <= minId) id += idRange;
+		if (idRange <= 1) return minId;
+		while (id < minId) id += idRange;
 		while (id >= maxId) id -= idRange;
 		return id;
 	}
@@ -359,12 +374,12 @@ export class RaffleOverlay
 		this.e_zone_subtitle.style.color = RaffleState.instance.open ? "lightgreen" : "red";
 
 		this.e_entries = [];
-		this.e_names_root.innerHTML = "";
-		for (var nameIndex in RaffleState.instance.names)
+		this.e_names_slider.innerHTML = "";
+		var cellCount = Math.min(6, RaffleState.instance.names.length);
+		for (var ii = 0; ii < cellCount; ii++)
 		{
-			var name = RaffleState.instance.names[nameIndex];
-			var entry = new RaffleOverlayEntry(name);
-			entry.e_root.style.transform = `translate(${(-50 + nameIndex * 96)}%, 0%)`;
+			var entry = new RaffleOverlayEntry("");
+			entry.e_root.style.transform = "translate(-50%, 0%)";
 
 			var colorR = Math.random() * 255.0;
 			var colorG = Math.random() * 255.0;
@@ -372,7 +387,7 @@ export class RaffleOverlay
 			entry.e_root.style.backgroundColor = `rgba(${colorR},${colorG},${colorB},0.2)`;
 
 			entry.e_root.draggable = false;
-			this.e_names_root.appendChild(entry.e_root);
+			this.e_names_slider.appendChild(entry.e_root);
 
 			this.e_entries.push(entry);
 		}

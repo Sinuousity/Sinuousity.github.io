@@ -118,11 +118,23 @@
 	bottom: 0%;
 	aspect-ratio: 1.0;
 	background-color: #ffffff10;
+	background-blend-mode: soft-light;
 	border-radius: 0.5rem;
 
 	transition-property: outline, outline-offset;
 	transition-duration: 0.169s;
 	transition-timing-function: ease-in-out;
+}
+.raffle-entry-root img
+{
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	border-radius: 0.5rem;
+
+	opacity: 80%;
 }
 
 
@@ -141,6 +153,9 @@
 	transform: translate(-50%, 0%);
 
 	max-width: 150%;
+	padding: 1rem;
+	padding-left: 2rem;
+	padding-right: 2rem;
 
 	text-align: center;
 	color: white;
@@ -150,10 +165,9 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	border-radius: 1rem;
-	padding: 1rem;
 	background-color: rgba(0, 0, 0, 0.6);
 
-	transition-property: opacity;
+	transition-property: opacity, transform;
 	transition-duration: 0.269s;
 	transition-timing-function: ease-in-out;
 }

@@ -97,7 +97,6 @@ export class RaffleState
 					this[prop] = stored_state[prop];
 			}
 		}
-
 		RaffleOverlay.instance.CreateNameElements();
 	}
 
@@ -197,11 +196,19 @@ export class RaffleOverlayEntry
 	{
 		this.username = username;
 		this.e_root = document.createElement("div");
-		this.e_root.className = "raffle-entry-root"
+		this.e_root.className = "raffle-entry-root";
+		this.e_root.draggable = false;
 
 		this.e_name = document.createElement("div");
 		this.e_name.innerText = username;
 		this.e_name.className = "raffle-entry-name";
+		this.e_name.draggable = false;
+
+		this.e_image = document.createElement("img");
+		this.e_image.src = "";
+		this.e_image.draggable = false;
+
+		this.e_root.appendChild(this.e_image);
 		this.e_root.appendChild(this.e_name);
 	}
 }
@@ -255,7 +262,7 @@ export class RaffleOverlay
 		this.draggingEntries = false;
 
 		this.updateTimeoutId = -1;
-		this.CreateNameElements();
+		//this.CreateNameElements();
 
 		this.slidePosition = 0.5;
 		this.slideVelocity = 0.0;
@@ -330,7 +337,7 @@ export class RaffleOverlay
 			var nameIdActual = RaffleOverlay.WrapIndex(this.slideIndexReal + relativeIndex, 0, nameCount);
 			var nameActual = RaffleState.instance.names[nameIdActual];
 			this.e_entries[nameIndex].username = nameActual;
-			this.e_entries[nameIndex].e_root.children[0].innerText = nameActual;
+			this.e_entries[nameIndex].e_name.innerText = nameActual;
 
 			var scalePercentY = 100;
 			var scalePercentX = scalePercentY + stretch * 100.0;
@@ -344,7 +351,10 @@ export class RaffleOverlay
 			this.e_entries[nameIndex].e_root.style.filter = `blur(${blur}px)`;
 
 			var userData = TwitchResources.GetCachedProfileData(nameActual)
-			if (userData) this.e_entries[nameIndex].e_root.style.backgroundImage = "url(" + userData.profile_image_url + ")";
+			if (userData) this.e_entries[nameIndex].e_image.src = userData.profile_image_url;
+			else this.e_entries[nameIndex].e_image.src = "";
+
+			this.e_entries[nameIndex].e_image.style.opacity = 0.75 - 0.1 * stretch;
 
 			var nameShow = 1.0 - 0.7 * Math.abs(relativeIndex);
 			this.e_entries[nameIndex].e_name.style.opacity = `${100 * nameShow}%`;
@@ -392,7 +402,7 @@ export class RaffleOverlay
 			return;
 		}
 
-		TwitchResources.GetProfileDataMultiple(RaffleState.instance.names);
+		window.setTimeout(() => { TwitchResources.GetProfileDataMultiple(RaffleState.instance.names); }, 1500);
 
 		this.e_zone_root.style.opacity = (RaffleState.instance.open || RaffleState.instance.names.length > 0) ? "100%" : "0%";
 

@@ -145,6 +145,10 @@ html
 {
 	z-index: -500000;
 	background-color: #1b1b1b;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 
 body

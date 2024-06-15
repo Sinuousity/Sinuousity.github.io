@@ -184,7 +184,14 @@ export class TwitchResources
 	static async GetProfileData(username)
 	{
 		console.log("twitch user data requested: " + username);
-		await TwitchResources.UserDataRequest(url_twitch_users + "?login=" + username);
+		try
+		{
+			await TwitchResources.UserDataRequest(url_twitch_users + "?login=" + username);
+		}
+		catch (e)
+		{
+			console.error(e.toString());
+		}
 	}
 
 	static async UserDataRequest(url)
@@ -192,29 +199,27 @@ export class TwitchResources
 		await fetch(
 			url,
 			{
-				method: 'GET',
+				method: "GET",
 				cache: "default",
-				withCredentials: 'true',
-				credentials: 'include',
 				headers: {
-					'Origin': 'https://sinuousity.github.io/streamhub/hub_index.html',
 					'Authorization': "Bearer " + OptionManager.GetOptionValue("twitch.bot.accessToken", "oops"),
-					'Client-Id': OptionManager.GetOptionValue("twitch.bot.clientId", "oops"),
-					'Content-Type': 'application/json'
+					'Client-Id': OptionManager.GetOptionValue("twitch.bot.clientId", "oops")
 				}
 			}
-		).then(
-			resp =>
+		).then(x => x.json()).then(
+			x =>
 			{
-				if (resp.ok)
+				if (!x || !x.data)
 				{
-					var data = JSON.parse(resp).data;
-					for (var ii = 0; ii < data.length; ii++)
-					{
-						TwitchResources.profileDataCache.Set(data[ii].login, data[ii]);
-					}
-					TwitchResources.onCacheUpdated.Invoke();
+					console.warn(x);
+					return;
 				}
+				var data = x.data;
+				for (var ii = 0; ii < data.length; ii++)
+				{
+					TwitchResources.profileDataCache.Set(data[ii].login, data[ii]);
+				}
+				TwitchResources.onCacheUpdated.Invoke();
 			}
 		);
 	}

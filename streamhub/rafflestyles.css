@@ -88,7 +88,7 @@
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	width: 250%;
+	width: min(1280px, 250%);
 	height: 50%;
 	transform: translate(-50%, -50%);
 
@@ -146,20 +146,20 @@
 	color: white;
 	font-size: 2rem;
 	line-height: 2rem;
+	text-wrap: nowrap;
 }
 .raffle-entry-root
 {
 	position: absolute;
-	top: 4rem;
-	bottom: 4rem;
+	top: 20%;
+	bottom: 20%;
 	aspect-ratio: 1.0;
 	width: auto;
 	background-color: #ffffff10;
-	border-radius: 0.25rem;
+	border-radius: 0.5rem;
 
-	transition-property: transform, outline, outline-offset;
-	transition-duration: 0.15s;
-	transition-delay: 0.02s;
+	transition-property: outline, outline-offset;
+	transition-duration: 0.169s;
 	transition-timing-function: ease-in-out;
 }
 

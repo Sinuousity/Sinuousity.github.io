@@ -74,7 +74,7 @@ export class RaffleState
 			}
 		);
 		localStorage.setItem(key_raffle_state_store, json);
-		RaffleOverlay.instance.CreateNameElements();
+		//RaffleOverlay.instance.CreateNameElements();
 	}
 
 	TryRestore()
@@ -130,6 +130,7 @@ export class RaffleState
 		if (this.names.indexOf(newName) > -1) return;
 		this.names.push(newName);
 		this.TryStore();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	RemoveName(oldName, force = false)
@@ -140,6 +141,7 @@ export class RaffleState
 		if (spliceId < 0) return;
 		this.names.splice(spliceId, 1);
 		this.TryStore();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	static msFrameDuration = 20;
@@ -227,11 +229,14 @@ export class RaffleOverlay
 		this.e_names_root.style.pointerEvents = "all";
 		this.e_names_root.style.userSelect = "none";
 		this.e_names_root.style.cursor = "grab";
+		this.e_names_root.addEventListener("mousedown", () => { this.draggingEntries = true; });
+		window.addEventListener("mouseup", () => { this.draggingEntries = false; });
 		this.e_zone_root.appendChild(this.e_names_root);
 
 		document.body.appendChild(this.e_zone_root);
 
 		this.e_entries = [];
+		this.draggingEntries = false;
 
 		this.updateTimeoutId = -1;
 		this.CreateNameElements();
@@ -241,14 +246,19 @@ export class RaffleOverlay
 		this.slideIndex = 0;
 		this.slideIndexReal = 0;
 
-		this.intervalId_Animation = window.setInterval(() => { this.UpdateEntryPositions(); }, 20);
+		this.animationStartTime = -1.0;
+		this.animationTime = 0.0;
+		requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
 
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
 	}
 
-	UpdateEntryPositions()
+	UpdateEntryPositions(timestamp)
 	{
-		const deltaTime = 20.0 / 1000.0;
+		if (this.animationStartTime <= 0) this.animationStartTime = timestamp;
+		var newTime = (timestamp - this.animationStartTime) / 1000.0;
+		var deltaTime = (newTime - this.animationTime);
+		this.animationTime = newTime;
 
 		var midoffset = 0.5 - this.slidePosition;
 		var stick = 1.0 - Math.min(1.0, Math.abs(this.slideVelocity) * 2);
@@ -257,7 +267,7 @@ export class RaffleOverlay
 
 		var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
-		if (UserInput.instance.pressedLeftMouse) this.slideVelocity += mouseDeltaX * 0.02;
+		if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.02;
 
 		var nameCount = RaffleState.instance.names.length;
 
@@ -278,33 +288,38 @@ export class RaffleOverlay
 		}
 		this.slideIndex = RaffleOverlay.WrapIndex(this.slideIndex, 0, cellCount);
 		this.slideIndexReal = RaffleOverlay.WrapIndex(this.slideIndexReal, 0, nameCount);
-		var cellSpacing = 100 + 10 * (8 - cellCount);
+
+		var cellPad = 10 + 10 * (6 - cellCount);
+		var stretch = Math.pow(Math.abs(this.slideVelocity) * 0.01, 4) * 100.0;
+		var blur = Math.pow(Math.abs(this.slideVelocity) * 0.01, 2) * 100.0;
+		cellPad += 3.0 * Math.pow(Math.abs(this.slideVelocity) * 0.1, 2);
 
 		for (var nameIndex = 0; nameIndex < cellCount; nameIndex++)
 		{
 			var offsetIndex = nameIndex - this.slideIndex + this.slidePosition;
 			offsetIndex = RaffleOverlay.WrapIndex(offsetIndex - 0.5, -halfCount, halfCount);
-			var offsetPercent = (185 + offsetIndex * cellSpacing);
-			offsetPercent = Math.round(offsetPercent * 100.0) * 0.01;
 
-			var colorR = (nameIndex * 1535.75425) % 255.0;
-			var colorG = (nameIndex * 2151.1355) % 255.0;
-			var colorB = (nameIndex * 1234.4731) % 255.0;
-			this.e_entries[nameIndex].e_root.style.backgroundColor = `rgba(${colorR},${colorG},${colorB},0.2)`;
+			var offsetPercent = offsetIndex * (100 + cellPad) + 180;
+
 			var relativeIndex = RaffleOverlay.WrapIndex(nameIndex - this.slideIndex, -halfCount, halfCount);
 			var nameIdActual = RaffleOverlay.WrapIndex(this.slideIndexReal + relativeIndex, 0, nameCount);
 			this.e_entries[nameIndex].e_root.children[0].innerText = RaffleState.instance.names[nameIdActual];
 
-			var scalePercent = nameIndex == this.slideIndex ? 105 : 95;
-			this.e_entries[nameIndex].e_root.style.transform = `scale(${scalePercent}%)`;
+			var scalePercentY = 100;
+			var scalePercentX = scalePercentY + stretch * 100.0;
+			this.e_entries[nameIndex].e_root.style.transform = `scale(${scalePercentX}%, ${scalePercentY}%)`;
 			this.e_entries[nameIndex].e_root.style.translate = `${offsetPercent}%  0%`;
 			this.e_entries[nameIndex].e_root.style.outline = "solid transparent 3px";
 			this.e_entries[nameIndex].e_root.style.outlineOffset = "-32px";
-			this.e_entries[nameIndex].e_root.style.filter = `blur(${this.slideVelocity * 0.1}px)`;
+			this.e_entries[nameIndex].e_root.style.filter = `blur(${blur}px)`;
 		}
 
 		this.e_entries[this.slideIndex].e_root.style.outline = "solid orange 3px";
 		this.e_entries[this.slideIndex].e_root.style.outlineOffset = "4px";
+
+
+
+		requestAnimationFrame(this.UpdateEntryPositions.bind(this));
 	}
 
 	static WrapIndex(id, minId, maxId)
@@ -350,6 +365,12 @@ export class RaffleOverlay
 			var name = RaffleState.instance.names[nameIndex];
 			var entry = new RaffleOverlayEntry(name);
 			entry.e_root.style.transform = `translate(${(-50 + nameIndex * 96)}%, 0%)`;
+
+			var colorR = Math.random() * 255.0;
+			var colorG = Math.random() * 255.0;
+			var colorB = Math.random() * 255.0;
+			entry.e_root.style.backgroundColor = `rgba(${colorR},${colorG},${colorB},0.2)`;
+
 			entry.e_root.draggable = false;
 			this.e_names_root.appendChild(entry.e_root);
 

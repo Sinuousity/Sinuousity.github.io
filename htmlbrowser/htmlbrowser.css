@@ -27,7 +27,7 @@ body
 
 	position: absolute;
 	left: 0;
-	right: 0;
+	right: 1rem;
 	top: 0;
 	bottom: 0;
 
@@ -39,8 +39,8 @@ body
 	opacity: 70%;
 	position: relative;
 	flex-grow: 1.0;
-	width: 12.5%;
-	height: 150px;
+	min-width: 12.5%;
+	min-height: 150px;
 	padding: 1rem;
 	background-color: #ffffff20;
 	border-radius: 0.5rem;

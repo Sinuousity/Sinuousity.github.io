@@ -86,6 +86,7 @@ export class HtmlBrowser
 			}
 			else this.FinishReadingFiles();
 		};
+		this.e_gridTitle.innerText = this.files[this.readFileIndex].name;
 		this.reader.readAsText(this.files[this.readFileIndex]);
 	}
 
@@ -99,6 +100,7 @@ export class HtmlBrowser
 	{
 		this.e_gridRoot = AddElement("div", "file-grid-root", "", document.body);
 		this.e_gridView = AddElement("div", "file-grid-view", "", this.e_gridRoot);
+		this.e_gridTitle = AddElement("div", "file-grid-title", "FILE GRID", document.body);
 	}
 
 	CreateFileTiles()

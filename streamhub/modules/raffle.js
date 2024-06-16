@@ -40,6 +40,7 @@ export class RaffleState
 
 	CheckMessageForKeyPhrase(m)
 	{
+		if (!RaffleState.instance.open) return;
 		if (m.message.startsWith(this.keyword)) this.AddName(m.username, false);
 	}
 
@@ -104,12 +105,14 @@ export class RaffleState
 	{
 		this.title = title;
 		this.TryStore();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	SetKeyword(keyword)
 	{
 		this.keyword = keyword;
 		this.TryStore();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	ToggleOpen()
@@ -123,6 +126,7 @@ export class RaffleState
 		if (this.open || this.running) return;
 		this.open = true;
 		this.TryStore();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	Close()
@@ -130,6 +134,7 @@ export class RaffleState
 		if (!this.open) return;
 		this.open = false;
 		this.TryStore();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	AddName(newName, force = false)
@@ -180,6 +185,7 @@ export class RaffleState
 		this.running = false;
 		window.clearInterval(this.runIntervalId);
 		this.TryStore();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 
 	ClearNames()
@@ -187,6 +193,7 @@ export class RaffleState
 		if (this.running) return;
 		this.names = [];
 		this.TryStore();
+		RaffleOverlay.instance.CreateNameElements();
 	}
 }
 

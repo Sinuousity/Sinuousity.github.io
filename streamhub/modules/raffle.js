@@ -298,10 +298,12 @@ export class RaffleOverlay
 		var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
 		if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.02;
+		var clampedVelocity = Math.sign(this.slideVelocity) * Math.min(deltaTime * Math.abs(this.slideVelocity), 0.99);
 
-		var cellCount = Math.min(6, nameCount);
+		var cellCount = 6;//Math.min(6, nameCount);
 		var halfCount = cellCount * 0.5;
-		this.slidePosition += deltaTime * this.slideVelocity;
+
+		this.slidePosition += clampedVelocity;
 		while (this.slidePosition < 0.0)
 		{
 			this.slidePosition += 1.0;
@@ -320,8 +322,8 @@ export class RaffleOverlay
 		var cellPad = 0.1 + 0.1 * (6 - cellCount);
 		var cellSize = this.e_names_slider.offsetHeight;
 		var cellRootWidth = this.e_names_root.offsetWidth;
-		var stretch = Math.pow(Math.abs(this.slideVelocity) * 0.01, 5) * 500.0;
-		var blur = Math.pow(Math.abs(this.slideVelocity) * 0.01, 2) * 100.0;
+		var stretch = Math.min(Math.pow(Math.abs(clampedVelocity) * 0.5, 5) * 200.0, 100);
+		var blur = Math.min(1.0, Math.pow(Math.abs(this.slideVelocity) * 0.01, 2)) * 100.0;
 		blur = Math.min(blur, 20);
 		cellPad += 0.1 * stretch;
 
@@ -341,20 +343,24 @@ export class RaffleOverlay
 
 			var scalePercentY = 100;
 			var scalePercentX = scalePercentY + stretch * 100.0;
-			var transitionDuration = Math.max(0.0, 0.1 - 0.5 * stretch);
+			var transitionDuration = Math.max(0.005, 0.1 - 0.5 * stretch);
 
-			this.e_entries[nameIndex].e_root.style.transform = `translate(-50%,0%) scale(${scalePercentX}%, ${scalePercentY}%)`;
+			var twist = `rotate3d(0,1,1,${(relativeIndex + this.slidePosition - 0.5) * 5}deg)`;
+			var lift = `${(1.0 - Math.pow(Math.abs(relativeIndex + this.slidePosition - 0.5), 2)) * -5}`;
+			this.e_entries[nameIndex].e_root.style.transform = `translate(-50%,${lift}%) scale(${scalePercentX}%, ${scalePercentY}%) ${twist}`;
 			this.e_entries[nameIndex].e_root.style.left = `${offsetPosition * cellSize + cellRootWidth * 0.5}px`;
 			this.e_entries[nameIndex].e_root.style.transitionDuration = transitionDuration + "s";
 			this.e_entries[nameIndex].e_root.style.outline = "solid transparent 3px";
 			this.e_entries[nameIndex].e_root.style.outlineOffset = "-16px";
 			this.e_entries[nameIndex].e_root.style.filter = `blur(${blur}px)`;
 
-			var userData = TwitchResources.GetCachedProfileData(nameActual)
-			if (userData) this.e_entries[nameIndex].e_image.src = userData.profile_image_url;
-			else this.e_entries[nameIndex].e_image.src = "";
-
-			this.e_entries[nameIndex].e_image.style.opacity = 0.75 - 0.1 * stretch;
+			if (Math.abs(this.slideVelocity) < 42.0)
+			{
+				var userData = TwitchResources.GetCachedProfileData(nameActual)
+				if (userData) this.e_entries[nameIndex].e_image.src = userData.profile_image_url;
+				else this.e_entries[nameIndex].e_image.src = "";
+			}
+			this.e_entries[nameIndex].e_image.style.opacity = (selected ? 0.95 : 0.2) - 0.1 * stretch;
 
 			var nameShow = 1.0 - 0.7 * Math.abs(relativeIndex);
 			this.e_entries[nameIndex].e_name.style.opacity = `${100 * nameShow}%`;
@@ -412,16 +418,16 @@ export class RaffleOverlay
 
 		this.e_entries = [];
 		this.e_names_slider.innerHTML = "";
-		var cellCount = Math.min(6, RaffleState.instance.names.length);
+		var cellCount = 6;//Math.min(6, RaffleState.instance.names.length);
 		for (var ii = 0; ii < cellCount; ii++)
 		{
 			var entry = new RaffleOverlayEntry("");
 			entry.e_root.style.transform = "translate(-50%, 0%)";
 
-			var colorR = Math.random() * 255.0;
-			var colorG = Math.random() * 255.0;
-			var colorB = Math.random() * 255.0;
-			entry.e_root.style.backgroundColor = `rgba(${colorR},${colorG},${colorB},0.2)`;
+			//var colorR = Math.random() * 255.0;
+			//var colorG = Math.random() * 255.0;
+			//var colorB = Math.random() * 255.0;
+			//entry.e_root.style.backgroundColor = `rgba(${colorR},${colorG},${colorB},0.2)`;
 
 			entry.e_root.draggable = false;
 			this.e_names_slider.appendChild(entry.e_root);

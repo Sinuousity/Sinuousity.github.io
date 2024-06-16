@@ -135,6 +135,10 @@
 	border-radius: 0.5rem;
 
 	opacity: 80%;
+
+	transition-property: opacity;
+	transition-duration: 0.169s;
+	transition-timing-function: ease-in-out;
 }
 
 

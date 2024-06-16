@@ -1,3 +1,18 @@
+const monthNames = [
+	"january",
+	"february",
+	"march",
+	"april",
+	"may",
+	"june",
+	"july",
+	"august",
+	"september",
+	"october",
+	"november",
+	"december"
+];
+
 export class HtmlBrowserTile
 {
 	constructor(fileIndex)
@@ -8,14 +23,49 @@ export class HtmlBrowserTile
 		this.e_tile = AddElement("div", "file-grid-tile", "", HtmlBrowser.instance.e_gridView);
 		this.e_tile.innerHTML = this.fileData;
 
+		var trimmedFileName = this.fileInfo.name.replaceAll('.html', '');
+		trimmedFileName = trimmedFileName.replaceAll(" ", "");
+		this.betterFileName = trimmedFileName;
+
 		this.e_btn_save = AddElement("a", "file-grid-tile-save", "file_download", this.e_tile);
-		this.e_btn_save.download = this.fileInfo.name.replace('.html', '') + '.html';
+		this.e_btn_save.addEventListener("click", e => { e.stopPropagation(); });
+		this.e_btn_save.download = this.betterFileName + '.html';
 		var dataBlob = new Blob([this.fileData], { type: 'text/html' });
 		this.dataBlobURL = window.URL.createObjectURL(dataBlob);
 		this.e_btn_save.href = this.dataBlobURL;
 
-		this.e_lbl_fileName = AddElement("div", "file-grid-tile-name", this.fileInfo.name, this.e_tile);
+		this.e_lbl_fileName = AddElement("div", "file-grid-tile-name", trimmedFileName, this.e_tile);
+		this.e_lbl_fileName.title = this.fileInfo.name;
 
+		var timestampMatch = this.fileData.match(HtmlBrowser.rgx_timestamp);
+		if (timestampMatch)
+		{
+			var timestampRaw = timestampMatch[1].trim();
+			var tsParts = timestampRaw.split(" ");
+
+			var monthStr = tsParts[0].toLowerCase();
+			var dayStr = tsParts[1];
+			dayStr = dayStr.replaceAll("st,", "");
+			dayStr = dayStr.replaceAll("rd,", "");
+			dayStr = dayStr.replaceAll("nd,", "");
+			dayStr = dayStr.replaceAll("th,", "");
+			if (dayStr.length < 2) dayStr = "0" + dayStr;
+			var yearStr = tsParts[2];
+
+			var timeStr = tsParts[3];
+			timeStr = timeStr.replaceAll(":", "");
+			var timeHr = Number(timeStr.substr(0, 2));
+			var timeMin = timeStr.substr(2, 2);
+			var timePost = timeStr.substr(4, 2);
+			if (timePost == "pm") timeHr += 12;
+
+			var monthNum = monthNames.indexOf(monthStr);
+			this.betterFileName = `${yearStr}-${monthNum}-${dayStr}_${timeHr}-${timeMin}_${trimmedFileName}`;
+			console.log("detected timestamp: " + this.betterFileName);
+
+			this.e_lbl_timestamp = AddElement("div", "file-grid-tile-timestamp", timestampRaw, this.e_tile);
+			this.e_lbl_timestamp.title = timestampRaw;
+		}
 	}
 
 	Remove()
@@ -40,6 +90,7 @@ export class HtmlBrowserTile
 export class HtmlBrowser
 {
 	static instance = new HtmlBrowser();
+	static rgx_timestamp = /\<span id\=\"(?:.+)\"\>(.+)\<\/span\>/;
 
 	constructor(files = [])
 	{
@@ -67,6 +118,7 @@ export class HtmlBrowser
 		this.fileDatum = [];
 		this.LoadNextFile();
 	}
+
 
 	LoadNextFile()
 	{

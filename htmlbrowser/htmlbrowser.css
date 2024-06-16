@@ -89,14 +89,17 @@ body
 	text-overflow: ellipsis;
 	color: #ff9e2eda;
 }
-
+.file-grid-tile-name:hover
+{
+	background-color: black;
+}
 
 .file-grid-tile-save
 {
 	opacity: 30%;
 	position: absolute;
-	right: 0.5rem;
-	top: 0.5rem;
+	right: 1rem;
+	bottom: 1rem;
 
 	text-decoration: none;
 	font-style: normal;
@@ -115,6 +118,26 @@ body
 	opacity: 100%;
 	transform: scale(160%);
 }
+
+
+.file-grid-tile-timestamp
+{
+	position: absolute;
+	left: 0.5rem;
+	bottom: 0.5rem;
+	padding: 0.1rem;
+	padding-left: 0.3rem;
+	padding-right: 0.3rem;
+	font-size: 0.666rem;
+	color: #ffffffa0;
+}
+.file-grid-tile-timestamp:hover
+{
+	background-color: black;
+}
+
+
+
 
 
 

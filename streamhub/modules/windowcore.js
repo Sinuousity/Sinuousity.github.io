@@ -319,8 +319,8 @@ export class WindowBase
 
 		var e_input = document.createElement("input");
 		e_input.type = "range";
-		e_input.min = minValue + "%";
-		e_input.max = maxValue + "%";
+		e_input.min = minValue;
+		e_input.max = maxValue;
 		e_input.value = initialValue;
 
 		const willDirtySettings = dirtiesSettings;

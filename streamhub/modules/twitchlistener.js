@@ -175,23 +175,9 @@ export class TwitchResources
 		for (var ii = 1; ii < usernames.length; ii++)
 		{
 			if (TwitchResources.HasCachedProfileData(usernames[ii])) continue;
-			console.log("twitch user req: " + usernames[ii]);
 			url += "&login=" + usernames[ii];
 		}
 		await TwitchResources.UserDataRequest(url);
-	}
-
-	static async GetProfileData(username)
-	{
-		if (TwitchResources.HasCachedProfileData(username)) return;
-		try
-		{
-			await TwitchResources.UserDataRequest(url_twitch_users + "?login=" + username);
-		}
-		catch (e)
-		{
-			console.error(e.toString());
-		}
 	}
 
 	static async UserDataRequest(url)

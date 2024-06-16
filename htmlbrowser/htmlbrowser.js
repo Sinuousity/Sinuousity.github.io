@@ -8,7 +8,7 @@ export class HtmlBrowserTile
 		this.e_tile = AddElement("div", "file-grid-tile", "", HtmlBrowser.instance.e_gridView);
 		this.e_tile.innerHTML = this.fileData;
 
-		this.e_btn_save = AddElement("a", "file-grid-tile-save", "archive", this.e_tile);
+		this.e_btn_save = AddElement("a", "file-grid-tile-save", "file_download", this.e_tile);
 		this.e_btn_save.download = this.fileInfo.name.replace('.html', '') + '.html';
 		var dataBlob = new Blob([this.fileData], { type: 'text/html' });
 		this.dataBlobURL = window.URL.createObjectURL(dataBlob);
@@ -17,13 +17,19 @@ export class HtmlBrowserTile
 
 	Remove()
 	{
-		ReleaseObjectURL();
+		this.ReleaseObjectURL();
 		this.e_tile.remove();
 	}
 
 	ReleaseObjectURL()
 	{
 		window.URL.revokeObjectURL(this.dataBlobURL);
+	}
+
+	UpdateSearchVisibility(search = "")
+	{
+		var matched = search == "" || this.e_tile.innerHTML.includes(search);
+		this.e_tile.style.display = matched ? "block" : "none";
 	}
 }
 
@@ -132,7 +138,31 @@ function CreateFileSelectionInput()
 		e => HtmlBrowser.instance.SetFiles(e_input_files.files)
 	);
 	e_control_files.appendChild(e_input_files);
+
+	var e_control_search = document.createElement("div");
+	var e_input_search = document.createElement("input");
+	e_input_search.type = "text";
+	e_input_search.id = "search-input";
+	e_input_search.name = "search-input";
+	e_input_search.addEventListener(
+		"change",
+		e =>
+		{
+			if (HtmlBrowser.instance.fileTiles.length > 0)
+			{
+				for (var tileIndex in HtmlBrowser.instance.fileTiles)
+				{
+					var tile = HtmlBrowser.instance.fileTiles[tileIndex];
+					tile.UpdateSearchVisibility(e_input_search.value.trim().toLowerCase());
+				}
+			}
+		}
+	);
+	e_control_search.appendChild(e_input_search);
+
+
 	document.body.appendChild(e_control_files);
+	document.body.appendChild(e_control_search);
 }
 
 function RemoveFileSelectionScreen()

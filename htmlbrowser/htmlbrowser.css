@@ -36,39 +36,55 @@ body
 
 .file-grid-tile
 {
+	cursor: pointer;
+
 	opacity: 70%;
+	user-select: none;
+	overflow: hidden;
 	position: relative;
-	flex-grow: 1.0;
-	min-width: 12.5%;
-	min-height: 150px;
+	width: 12.5%;
+	aspect-ratio: 1.0;
+	height: auto;
 	padding: 1rem;
 	background-color: #ffffff20;
 	border-radius: 0.5rem;
 	transform: scale(98%);
+	text-overflow: ellipsis;
 
 	transition-property: transform, opacity;
-	transition-duration: 0.1s;
 	transition-timing-function: ease-in-out;
+	transition-duration: 0.1s;
 }
 .file-grid-tile:hover
 {
 	opacity: 100%;
 	transform: scale(99%);
+	transition-duration: 0.03s;
 }
 
 .file-grid-tile-save
 {
+	opacity: 30%;
 	position: absolute;
 	right: 0.5rem;
-	bottom: 0.5rem;
+	top: 0.5rem;
+
+	text-decoration: none;
+	font-style: normal;
+	font-weight: normal;
 
 	font-family: 'Material Icons';
 	color: lightgreen;
-	transform: scale(100%);
+	transform: scale(120%);
+
+	transition-property: transform, opacity;
+	transition-timing-function: ease-in-out;
+	transition-duration: 0.1s;
 }
 .file-grid-tile-save:hover
 {
-	transform: scale(130%);
+	opacity: 100%;
+	transform: scale(160%);
 }
 
 
@@ -88,20 +104,28 @@ div[id="footer"]
 {
 	display: block;
 	position: absolute;
+	left: 0;
 	bottom: 0.1rem;
 	width: 100%;
+	height: 2.5rem;
+	background-color: #ffffff20;
+	border-radius: 0.5rem;
 }
 
 div[id="footer"] > span[id="timestamp"]
 {
-	font-size: 0.8rem;
+	position: absolute;
+	font-size: 0.666rem;
 	color: #ffffffa0;
+	bottom: 0.25rem;
+	right: 1.5rem;
 }
 
 div[id="footer"] > span[class="tag"]
 {
 	position: absolute;
-	right: 2rem;
+	right: 1.5rem;
+	bottom: 1rem;
 	font-size: 0.8rem;
 	font-weight: bold;
 	color: #eea654a0;

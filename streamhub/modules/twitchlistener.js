@@ -171,11 +171,11 @@ export class TwitchResources
 	{
 		if (usernames.length < 1) return;
 
-		console.log("twitch user data requested: " + usernames.join(", "));
 		var url = url_twitch_users + "?login=" + usernames[0];
 		for (var ii = 1; ii < usernames.length; ii++)
 		{
 			if (TwitchResources.HasCachedProfileData(usernames[ii])) continue;
+			console.log("twitch user req: " + usernames[ii]);
 			url += "&login=" + usernames[ii];
 		}
 		await TwitchResources.UserDataRequest(url);
@@ -183,7 +183,7 @@ export class TwitchResources
 
 	static async GetProfileData(username)
 	{
-		console.log("twitch user data requested: " + username);
+		if (TwitchResources.HasCachedProfileData(username)) return;
 		try
 		{
 			await TwitchResources.UserDataRequest(url_twitch_users + "?login=" + username);

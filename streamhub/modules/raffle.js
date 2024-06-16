@@ -5,6 +5,7 @@ import { OptionManager } from "./globalsettings.js";
 import { UserInput } from "./userinput.js";
 import { ChatCollector } from "./chatcollector.js";
 import { TwitchResources } from "./twitchlistener.js";
+import { EventSource } from "./eventsource.js";
 
 console.info("[ +Module ] Raffle");
 
@@ -13,10 +14,13 @@ const key_raffle_state_store = "raffle_state_store";
 export class RaffleState
 {
 	static instance = new RaffleState();
+	static onRaffleRunStart = new EventSource();
+	static onRaffleRunEnd = new EventSource();
 
 	constructor()
 	{
 		this.running = false;
+		this.showingWinner = false;
 		this.open = false;
 
 		this.title = "New Raffle";
@@ -27,9 +31,6 @@ export class RaffleState
 
 		this.runIntervalId = -1;
 		this.runTime = 0.0;
-		this.slidePhase = 0.0;
-		this.slideVelocity = 0.0;
-		this.nameIndexOffset = 0;
 
 		this.modified = false;
 		this.modifiedTimer = 0.0;
@@ -162,30 +163,36 @@ export class RaffleState
 	TryRun()
 	{
 		if (this.running) return;
+		console.warn("raffle run started");
+		RaffleState.onRaffleRunStart.Invoke();
 		this.running = true;
 		this.runTime = 0.0;
 
-		this.slideVelocity = (Math.random() > 0.5 ? -1.0 : 1.0) * 10.0;
-		this.runIntervalId = window.setInterval(() => { this.RunStep(); }, msFrameDuration);
+		RaffleOverlay.instance.slideVelocity = (Math.random() > 0.5 ? -1.0 : 1.0) * 50.0;
+		this.runIntervalId = window.setInterval(() => { this.RunStep(); }, RaffleState.msFrameDuration);
 	}
 
 	RunStep()
 	{
-		var deltaTime = msFrameDuration / 1000.0;
+		var deltaTime = RaffleState.msFrameDuration / 1000.0;
 
 		this.runTime += deltaTime;
-		this.slidePhase += this.slideVelocity * deltaTime;
+		this.slidePhase += RaffleOverlay.instance.slideVelocity * deltaTime;
 
-		if (Math.abs(this.slideVelocity) < 0.01) this.FinishRun();
+		if (Math.abs(RaffleOverlay.instance.slideVelocity) < 0.011) this.FinishRun();
 	}
 
 	FinishRun()
 	{
 		if (!this.running) return;
+		RaffleState.onRaffleRunEnd.Invoke();
+		console.warn("raffle concluded");
 		this.running = false;
 		window.clearInterval(this.runIntervalId);
 		this.TryStore();
-		RaffleOverlay.instance.CreateNameElements();
+		this.showingWinner = true;
+		//show winner for 10 seconds
+		window.setTimeout(() => { this.showingWinner = false; }, 10000);
 	}
 
 	ClearNames()
@@ -226,6 +233,7 @@ export class RaffleOverlay
 
 	constructor()
 	{
+
 		this.e_zone_root = document.createElement("div");
 		this.e_zone_root.className = "rafflezone";
 		this.e_zone_root.draggable = false;
@@ -298,9 +306,23 @@ export class RaffleOverlay
 		}
 
 		var midoffset = 0.5 - this.slidePosition;
-		var stick = 1.0 - Math.min(1.0, Math.abs(this.slideVelocity));
-		this.slideVelocity -= Math.min(deltaTime * (stick * 0.5 + 0.25), 1.0) * this.slideVelocity;
+		var stick = 1.0 - Math.min(1.0, Math.abs(this.slideVelocity) * 2.0);
+
+		// idle cruise
+		if (!RaffleState.instance.running && !RaffleState.instance.showingWinner) 
+		{
+			//no stickiness during cruise
+			stick = 0.0;
+			//add 'cruising' velocity
+			this.slideVelocity += (Math.sign(this.slideVelocity - 0.00001) * (RaffleState.instance.open ? 0.7 : 2.1) - this.slideVelocity) * deltaTime;
+		}
+
+		//drag
+		this.slideVelocity -= Math.min(deltaTime * (stick * 0.5 + 0.15), 1.0) * this.slideVelocity;
+
+		//entry midpoint stickiness
 		this.slideVelocity += midoffset * Math.min(1.0, deltaTime * 20.0 * stick);
+
 
 		var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
@@ -326,7 +348,7 @@ export class RaffleOverlay
 		this.slideIndex = RaffleOverlay.WrapIndex(this.slideIndex, 0, cellCount);
 		this.slideIndexReal = RaffleOverlay.WrapIndex(this.slideIndexReal, 0, nameCount);
 
-		var cellPad = 0.1 + 0.1 * (6 - cellCount);
+		var cellPad = 0.15;// + 0.15 * (6 - cellCount);
 		var cellSize = this.e_names_slider.offsetHeight;
 		var cellRootWidth = this.e_names_root.offsetWidth;
 		var stretch = Math.min(Math.pow(Math.abs(clampedVelocity) * 0.5, 5) * 200.0, 100);
@@ -352,8 +374,9 @@ export class RaffleOverlay
 			var scalePercentX = scalePercentY + stretch * 100.0;
 			var transitionDuration = Math.max(0.005, 0.1 - 0.5 * stretch);
 
-			var twist = `rotate3d(0,1,1,${(relativeIndex + this.slidePosition - 0.5) * 5}deg)`;
-			var lift = `${(1.0 - Math.pow(Math.abs(relativeIndex + this.slidePosition - 0.5), 2)) * -5}`;
+			var bend = 0;
+			var twist = `rotate3d(0,1,1,${(relativeIndex + this.slidePosition - 0.5) * bend}deg)`;
+			var lift = `${(1.0 - Math.pow(Math.abs(relativeIndex + this.slidePosition - 0.5), 2)) * -bend}`;
 			this.e_entries[nameIndex].e_root.style.transform = `translate(-50%,${lift}%) scale(${scalePercentX}%, ${scalePercentY}%) ${twist}`;
 			this.e_entries[nameIndex].e_root.style.left = `${offsetPosition * cellSize + cellRootWidth * 0.5}px`;
 			this.e_entries[nameIndex].e_root.style.transitionDuration = transitionDuration + "s";
@@ -379,6 +402,12 @@ export class RaffleOverlay
 
 		this.e_entries[this.slideIndex].e_root.style.outline = "solid orange 3px";
 		this.e_entries[this.slideIndex].e_root.style.outlineOffset = "4px";
+
+		if (RaffleState.instance.showingWinner)
+		{
+			this.e_entries[this.slideIndex].e_root.style.outline = "solid white 6px";
+			this.e_entries[this.slideIndex].e_root.style.outlineOffset = "8px";
+		}
 
 
 
@@ -541,8 +570,14 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_btn_run.style.color = "#ffffffaa";
 
 
-		//this.CreateForm();
+		this.sub_raffleRunStart = RaffleState.onRaffleRunStart.RequestSubscription(() => { this.e_btn_run.disabled = true; });
+		this.sub_raffleRunEnd = RaffleState.onRaffleRunEnd.RequestSubscription(() => { this.e_btn_run.disabled = false; });
+	}
 
+	onWindowClose()
+	{
+		RaffleState.onRaffleRunStart.RemoveSubscription(this.sub_raffleRunStart);
+		RaffleState.onRaffleRunEnd.RemoveSubscription(this.sub_raffleRunEnd);
 	}
 
 	AddControlButton(label, buttonText, action, dirtiesSettings = false)
@@ -552,96 +587,6 @@ export class RaffleSettingsWindow extends DraggableWindow
 		e_ctrl.style.lineHeight = "2rem";
 		e_ctrl.style.height = "2rem";
 		return e_btn;
-	}
-
-	CreateForm()
-	{
-		this.e_form = document.createElement("div");
-		this.e_form.id = "hubinfo-raffle-form";
-		this.e_form.className = "hubinfo-raffle-form flex-col";
-		this.e_content.appendChild(this.e_form);
-
-		this.e_info = document.createElement("div");
-		this.e_info.id = "hubinfo-raffle";
-		this.e_info.className = "hubinfo-raffle";
-		this.e_form.appendChild(this.e_info);
-
-		var e_row_a = this.CreateFormRow();
-		var cntrl_title = this.CreateInput(e_row_a, "text", "txt_raffle_title");
-		cntrl_title.placeholder = RaffleState.instance.title.length < 1 ? "Change Raffle Title" : RaffleState.instance.title;
-
-		var btn_set_title = this.CreateInput(e_row_a, "button", "btn_raffle_set_title");
-		btn_set_title.className = "btn-raffle btn-raffle-set-title";
-		btn_set_title.value = "Set Title";
-		btn_set_title.addEventListener("click", () =>
-		{
-			RaffleState.instance.SetTitle(cntrl_title.value);
-			//onChangeRaffleTitle(cntrl_title.value);
-			Notifications.instance.Add("Raffle Title Updated : " + cntrl_title.value, "#00ffff30");
-			cntrl_title.placeholder = cntrl_title.value;
-			cntrl_title.value = "";
-		});
-
-		var e_row_b = this.CreateFormRow();
-		var cntrl_keyword = this.CreateInput(e_row_b, "text", "txt_raffle_keyword");
-		cntrl_keyword.placeholder = RaffleState.instance.keyword.length < 1 ? "Change Raffle Keyword" : RaffleState.instance.keyword;
-
-		var btn_set_title = this.CreateInput(e_row_b, "button", "btn_raffle_set_keyword");
-		btn_set_title.className = "btn-raffle btn-raffle-set-keyword";
-		btn_set_title.value = "Set Keyword";
-		btn_set_title.addEventListener("click", () =>
-		{
-			RaffleState.instance.SetKeyword(cntrl_keyword.value);
-			Notifications.instance.Add("Raffle Keyword Updated : " + cntrl_keyword.value, "#00ffff30");
-			//onChangeRaffleKeyword(cntrl_keyword.value);
-			cntrl_keyword.placeholder = cntrl_keyword.value;
-			cntrl_keyword.value = "";
-		});
-
-		var e_row_c = this.CreateFormRow();
-		var txt_add_name = this.CreateInput(e_row_c, "text", "txt_raffle_add_name");
-		txt_add_name.placeholder = "Manually Add Name";
-
-		var btn_add_name = this.CreateInput(e_row_c, "button", "btn_raffle_add_name");
-		btn_add_name.className = "btn-raffle btn-raffle-add-name";
-		btn_add_name.value = "Add Name";
-		btn_add_name.addEventListener("click", () =>
-		{
-			RaffleState.instance.AddName(txt_add_name.value, true);
-			Notifications.instance.Add("Raffle Name Added : " + txt_add_name.value, "#00ff0030");
-			//onSubmitRaffleName(txt_add_name.value);
-			txt_add_name.value = "";
-		});
-
-		var e_row_d = this.CreateFormRow();
-
-		var btn_clear_entries = this.CreateInput(e_row_d, "button", "btn_raffle_clean");
-		btn_clear_entries.className = "btn-raffle";
-		btn_clear_entries.value = "Clear Entries";
-		btn_clear_entries.addEventListener("click", () =>
-		{
-			Notifications.instance.Add("Raffle Names Cleared", "#ffbb0030");
-			RaffleState.instance.ClearNames();
-			//onClearRaffle()
-		});
-
-		var btn_pick_winner = this.CreateInput(e_row_d, "button", "btn_raffle_run");
-		btn_pick_winner.className = "btn-raffle";
-		btn_pick_winner.value = "Pick Winner";
-		btn_pick_winner.addEventListener("click", () =>
-		{
-			RaffleState.instance.TryRun();
-			//onRunRaffle();
-		});
-
-		this.e_raffle_toggle = this.CreateInput(e_row_d, "button", "btn_raffle_toggle");
-		this.e_raffle_toggle.className = "btn-raffle";
-		this.UpdateToggleButtonText();
-		this.e_raffle_toggle.addEventListener("click", () =>
-		{
-			RaffleState.instance.ToggleOpen();
-			this.UpdateToggleButtonText();
-		});
 	}
 
 	UpdateToggleButtonText()

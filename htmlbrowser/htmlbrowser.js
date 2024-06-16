@@ -28,7 +28,7 @@ export class HtmlBrowserTile
 
 	UpdateSearchVisibility(search = "")
 	{
-		var matched = search == "" || this.e_tile.innerHTML.includes(search);
+		var matched = search == "" || this.e_tile.innerHTML.toLowerCase().includes(search);
 		this.e_tile.style.display = matched ? "block" : "none";
 	}
 }
@@ -44,6 +44,7 @@ export class HtmlBrowser
 		this.fileTiles = [];
 
 		this.CreateFileGrid();
+		this.CreateFocusPreview();
 
 		this.reader = new FileReader();
 		this.readFileIndex = 0;
@@ -107,9 +108,33 @@ export class HtmlBrowser
 		this.fileTiles = [];
 		for (var ii = 0; ii < this.files.length; ii++)
 		{
-			var tile = new HtmlBrowserTile(ii);
+			const fileIndex = ii;
+			var tile = new HtmlBrowserTile(fileIndex);
+			tile.e_tile.addEventListener(
+				"click",
+				e =>
+				{
+					this.e_focusPreview.style.display = "block";
+					this.e_focusPreviewContent.innerHTML = this.fileDatum[fileIndex];
+				}
+			);
 			this.fileTiles.push(tile);
 		}
+	}
+
+	CreateFocusPreview()
+	{
+		this.e_focusPreview = AddElement("div", "file-grid-preview", "", document.body);
+		this.e_focusPreviewContent = AddElement("div", "file-grid-preview-content", "", this.e_focusPreview);
+		this.e_focusPreview.style.display = "none";
+		this.e_focusPreview.addEventListener(
+			"click",
+			e =>
+			{
+				this.e_focusPreview.style.display = "none";
+				this.e_focusPreviewContent.innerHTML = "";
+			}
+		);
 	}
 }
 
@@ -127,7 +152,9 @@ function AddElement(kind, className = "", innerText = "", parent = null)
 function CreateFileSelectionInput()
 {
 	var e_control_files = document.createElement("div");
+	e_control_files.style.display = "inline-block";
 	var e_input_files = document.createElement("input");
+	e_input_files.style.width = "100%";
 	e_input_files.multiple = true;
 	e_input_files.type = "file";
 	e_input_files.accept = ".html";
@@ -140,7 +167,9 @@ function CreateFileSelectionInput()
 	e_control_files.appendChild(e_input_files);
 
 	var e_control_search = document.createElement("div");
+	e_control_search.style.display = "inline-block";
 	var e_input_search = document.createElement("input");
+	e_input_search.style.width = "100%";
 	e_input_search.type = "text";
 	e_input_search.id = "search-input";
 	e_input_search.name = "search-input";

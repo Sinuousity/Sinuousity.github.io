@@ -118,7 +118,6 @@
 	bottom: 0%;
 	aspect-ratio: 1.0;
 	background-color: #ffffff10;
-	background-blend-mode: soft-light;
 	border-radius: 0.5rem;
 
 	transition-property: outline, outline-offset;

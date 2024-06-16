@@ -1,4 +1,4 @@
-﻿import { GlobalSettings } from "./modules/globalsettings.js";
+﻿import { GlobalSettings, OptionManager } from "./modules/globalsettings.js";
 import { DebugWindow } from "./modules/debugwindow.js";
 import { WindowManager } from "./modules/windowmanager.js";
 import { TwitchListener } from "./modules/twitchlistener.js";
@@ -47,7 +47,7 @@ function FindBuiltInElements()
 
 function UpdateSiteTag()
 {
-	var username = GlobalSettings.instance.text_twitchUsername;
+	var username = OptionManager.GetOptionValue("twitch.bot.username");
 	var usernameEmpty = username == "";
 	e_site_tag.innerText = "streamhub " + hub_version + (usernameEmpty ? "" : (" | " + username));
 }

@@ -62,6 +62,19 @@ body
 	transition-duration: 0.03s;
 }
 
+.file-grid-tile-name
+{
+	position: absolute;
+	top: 0.15rem;
+	left: 0.15rem;
+	font-size: 0.7rem;
+	font-weight: normal;
+	text-wrap: nowrap;
+	text-overflow: ellipsis;
+	color: #ff9e2eda;
+}
+
+
 .file-grid-tile-save
 {
 	opacity: 30%;
@@ -132,8 +145,7 @@ body
 
 
 
-
-div[id="footer"]
+.file-grid-preview > * > div[id="footer"]
 {
 	display: block;
 	position: absolute;
@@ -145,7 +157,7 @@ div[id="footer"]
 	border-radius: 0.5rem;
 }
 
-div[id="footer"] > span[id="timestamp"]
+.file-grid-preview > * > div[id="footer"] > span[id="timestamp"]
 {
 	position: absolute;
 	font-size: 0.666rem;
@@ -154,7 +166,7 @@ div[id="footer"] > span[id="timestamp"]
 	right: 1.5rem;
 }
 
-div[id="footer"] > span[class="tag"]
+.file-grid-preview > * > div[id="footer"] > span[class="tag"]
 {
 	position: absolute;
 	right: 1.5rem;

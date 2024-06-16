@@ -13,6 +13,9 @@ export class HtmlBrowserTile
 		var dataBlob = new Blob([this.fileData], { type: 'text/html' });
 		this.dataBlobURL = window.URL.createObjectURL(dataBlob);
 		this.e_btn_save.href = this.dataBlobURL;
+
+		this.e_lbl_fileName = AddElement("div", "file-grid-tile-name", this.fileInfo.name, this.e_tile);
+
 	}
 
 	Remove()

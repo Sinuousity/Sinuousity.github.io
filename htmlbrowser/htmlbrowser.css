@@ -53,8 +53,34 @@ body
 .file-grid-tile:hover
 {
 	opacity: 100%;
+	transform: scale(99%);
+}
+
+.file-grid-tile-save
+{
+	position: absolute;
+	right: 0.5rem;
+	bottom: 0.5rem;
+
+	font-family: 'Material Icons';
+	color: lightgreen;
 	transform: scale(100%);
 }
+.file-grid-tile-save:hover
+{
+	transform: scale(130%);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

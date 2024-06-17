@@ -361,8 +361,16 @@ export class RaffleOverlay
 		this.e_names_slider.style.pointerEvents = "all";
 		this.e_names_slider.style.userSelect = "none";
 		this.e_names_slider.style.cursor = "grab";
-		this.e_names_slider.addEventListener("mousedown", () => { this.draggingEntries = true; this.e_names_slider.style.cursor = "grabbing"; });
-		window.addEventListener("mouseup", () => { this.draggingEntries = false; this.e_names_slider.style.cursor = "grab"; });
+		this.e_names_slider.addEventListener("mousedown", () =>
+		{
+			this.draggingEntries = true;
+			this.e_names_slider.style.cursor = "grabbing";
+		});
+		window.addEventListener("mouseup", () =>
+		{
+			this.draggingEntries = false;
+			this.e_names_slider.style.cursor = "grab";
+		});
 		this.e_names_root.appendChild(this.e_names_slider);
 
 		document.body.appendChild(this.e_zone_root);
@@ -404,10 +412,24 @@ export class RaffleOverlay
 
 	RefreshEntryImages()
 	{
+		if (Math.abs(this.slideVelocity) > 42.0) return;
 		for (var nameIndex = 0; nameIndex < this.e_entries.length; nameIndex++)
 		{
 			this.e_entries[nameIndex].RefreshImageProfile();
 		}
+	}
+
+	CheckDragInput()
+	{
+		var mouseDeltaX = (this.draggingEntries && !RaffleState.instance.showingWinner && !RaffleState.instance.running) ? (UserInput.instance.mousePositionX - this.lastMousePositionX) : 0.0;
+		this.lastMousePositionX = UserInput.instance.mousePositionX;
+		if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.01;
+
+		var canRun = !RaffleState.instance.open && !RaffleState.instance.showingWinner && !RaffleState.instance.running;
+
+		var canRunFromDrag = canRun && OptionManager.GetOptionValue("raffle.drag.run", true);
+		if (canRunFromDrag && Math.abs(this.slideVelocity) > 10.0 && canRun) RaffleState.instance.TryRun();
+
 	}
 
 	UpdateEntryPositions(timestamp)
@@ -433,7 +455,7 @@ export class RaffleOverlay
 			//no stickiness during cruise
 			stick = 0.0;
 			//add 'cruising' velocity
-			if (RaffleState.instance.open) this.slideVelocity += (Math.sign(this.slideVelocity - 0.00001) * 0.7 - this.slideVelocity) * deltaTime;
+			if (RaffleState.instance.open) this.slideVelocity += (Math.sign(this.slideVelocity - 0.00001) - this.slideVelocity) * deltaTime * 2.9;
 		}
 
 		//drag
@@ -442,23 +464,13 @@ export class RaffleOverlay
 		//entry midpoint stickiness
 		this.slideVelocity += midoffset * Math.min(1.0, deltaTime * 20.0 * stick);
 
-		if (Math.abs(this.slideVelocity) < 0.01) 
+		if (Math.abs(this.slideVelocity) < 0.05) 
 		{
 			this.slideVelocity = 0.0;
 		}
 
 
-		if (!RaffleState.instance.showingWinner && !RaffleState.instance.running)
-		{
-			var mouseDeltaX = this.draggingEntries ? (UserInput.instance.mousePositionX - this.lastMousePositionX) : 0.0;
-			this.lastMousePositionX = UserInput.instance.mousePositionX;
-			if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.01;
-
-			if (Math.abs(this.slideVelocity) > 10.0 && !RaffleState.instance.open && !RaffleState.instance.showingWinner)
-			{
-				RaffleState.instance.TryRun();
-			}
-		}
+		this.CheckDragInput();
 		var clampedVelocity = Math.sign(this.slideVelocity) * Math.min(deltaTime * Math.abs(this.slideVelocity), 0.99);
 
 		var cellCount = 6;//Math.min(6, nameCount);
@@ -490,7 +502,7 @@ export class RaffleOverlay
 		cellPad += 0.1 * stretch;
 
 		var bend = OptionManager.GetOptionValue("raffle.slide.bend");
-		var doImages = Math.abs(this.slideVelocity) < 42.0;
+		//var doImages = Math.abs(this.slideVelocity) < 42.0;
 
 		var scalePercentY = 100;
 		var scalePercentX = scalePercentY + stretch * 100.0;
@@ -615,6 +627,8 @@ export class RaffleOverlay
 		this.e_names_slider.innerHTML = "";
 		this.e_entries = [];
 
+		if (RaffleState.instance.names.length < 1) return;
+
 		var cellCount = 6;//Math.min(6, RaffleState.instance.names.length);
 		for (var ii = 0; ii < cellCount; ii++)
 		{
@@ -657,6 +671,18 @@ export class RaffleSettingsWindow extends DraggableWindow
 			x =>
 			{
 				OptionManager.SetOptionValue("raffle.visible", x.checked);
+				RaffleOverlay.instance.UpdateStyle();
+			},
+			true
+		);
+
+		this.option_drag_run = OptionManager.GetOption("raffle.drag.run");
+		this.e_control_drag_run = this.AddToggle(
+			this.option_drag_run.label,
+			this.option_drag_run.value,
+			x =>
+			{
+				OptionManager.SetOptionValue("raffle.drag.run", x.checked);
 				RaffleOverlay.instance.UpdateStyle();
 			},
 			true
@@ -813,3 +839,4 @@ OptionManager.AppendOption("raffle.title", "New Raffle", "Title");
 OptionManager.AppendOption("raffle.keyword", "joinraffle", "Join Key Phrase");
 OptionManager.AppendOption("raffle.slide.bend", 0.0, "Slide Bend");
 OptionManager.AppendOption("raffle.slide.pad", 0.0, "Entry Padding");
+OptionManager.AppendOption("raffle.drag.run", true, "Run By Dragging");

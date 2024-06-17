@@ -9,6 +9,7 @@ import { RaffleState } from "./modules/raffle.js";
 import { CreatureRoster } from "./modules/creatures.js";
 import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
+import { SaveIndicator } from "./modules/saveindicator.js";
 
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
@@ -18,6 +19,7 @@ const resetStoredState = false;
 var e_background_log = {};
 var e_menu_windows = {};
 var e_site_tag = {};
+var e_save_indicator = {};
 
 console.info("[ +Module ] Hub Core");
 OnBodyLoad();
@@ -43,6 +45,10 @@ function FindBuiltInElements()
 	e_menu_windows = document.getElementById("menu-windows");
 	e_site_tag = document.getElementById("site-tag");
 	e_site_tag.innerText = "streamhub " + hub_version;
+
+	e_save_indicator = addElement("i", "save-indicator", document.body, "save");
+	e_save_indicator.style.fontFamily = "'Material Icons'";
+	SaveIndicator.SetElement(e_save_indicator);
 }
 
 function UpdateSiteTag()

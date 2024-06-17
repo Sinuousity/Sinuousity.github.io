@@ -1,3 +1,4 @@
+import { SaveIndicator } from "./saveindicator.js";
 import { DraggableWindow } from "./windowcore.js";
 console.info("[ +Module ] Window Manager");
 
@@ -47,6 +48,7 @@ export class WindowManager
 	TryStoreState()
 	{
 		if (this.storingState) return;
+		SaveIndicator.AddShowTime(3);
 		this.storingState = true;
 		var windowStates = [];
 		if (this.windows.length > 0)

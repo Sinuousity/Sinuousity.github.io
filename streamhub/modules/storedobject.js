@@ -1,4 +1,5 @@
 import { RunningTimeout } from "./runningtimeout.js";
+import { SaveIndicator } from "./saveindicator.js";
 console.info("[ +Module ] Stored Objects");
 
 export class StoredObject
@@ -26,6 +27,7 @@ export class StoredObject
 		}
 		localStorage.setItem(this.storeKey, JSON.stringify(this.GetState()));
 
+		SaveIndicator.AddShowTime(3);
 		this.AfterStore();
 	}
 	AfterStore() { }

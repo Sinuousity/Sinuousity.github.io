@@ -4,6 +4,7 @@ import { WindowManager } from "./windowmanager.js";
 import "./storedobject.js";
 import { ViewerInventoryManager } from "./viewerinventory.js";
 import { Notifications } from "./notifications.js";
+import { SaveIndicator } from "./saveindicator.js";
 
 console.info("[ +Module ] Item Library");
 
@@ -111,7 +112,8 @@ export class ItemGiverWindow extends DraggableWindow
 					item,
 					1
 				);
-				Notifications.instance.Add(`Added ${itemName} to ${username}`);
+				SaveIndicator.AddShowTime(3);
+				//Notifications.instance.Add(`Added ${itemName} to ${username}`);
 			}
 		);
 		this.e_btn_give.style.filter = "opacity(20%)";

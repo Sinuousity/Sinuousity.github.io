@@ -27,6 +27,35 @@
 	}
 }
 
+@keyframes save-indicator
+{
+	0%
+	{
+		transform: translate(-50%, -40%) scale(85%);
+		color: #00ff005b;
+	}
+	25%
+	{
+		transform: translate(-50%, -60%) scale(88%);
+		color: #46ff4670;
+	}
+	50%
+	{
+		transform: translate(-50%, -60%) scale(90%);
+		color: #dfff4fff;
+	}
+	75%
+	{
+		transform: translate(-50%, -60%) scale(85%);
+		color: #46ff4670;
+	}
+	100%
+	{
+		transform: translate(-50%, -40%) scale(85%);
+		color: #00ff005b;
+	}
+}
+
 @keyframes huerotate
 {
 	0%
@@ -241,6 +270,41 @@ body
 	letter-spacing: 2px;
 	color: #ffffff18;
 }
+
+
+
+.save-indicator
+{
+	z-index: 9999999;
+	user-select: none;
+	pointer-events: none;
+
+	display: block;
+	opacity: 50%;
+
+	position: fixed;
+	top: 1rem;
+	left: 0.75rem;
+
+	width: 1.5rem;
+	height: 1.5rem;
+
+	text-align: center;
+	font-style: normal;
+	font-weight: normal;
+	line-height: 1.5rem;
+
+	transition-property: opacity;
+	transition-duration: 0.5s;
+
+	animation-name: save-indicator;
+	animation-duration: 0.35s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+
+
+
 
 
 

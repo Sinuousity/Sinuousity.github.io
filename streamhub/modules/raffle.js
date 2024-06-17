@@ -6,6 +6,7 @@ import { UserInput } from "./userinput.js";
 import { ChatCollector } from "./chatcollector.js";
 import { TwitchResources } from "./twitchlistener.js";
 import { EventSource } from "./eventsource.js";
+import { SaveIndicator } from "./saveindicator.js";
 
 console.info("[ +Module ] Raffle");
 
@@ -163,11 +164,12 @@ export class RaffleState
 	TryRun()
 	{
 		if (this.running) return;
-		RaffleState.onRaffleRunStart.Invoke();
+
+		this.Close();
 		this.running = true;
 		this.runTime = 0.0;
+		RaffleState.onRaffleRunStart.Invoke();
 
-		RaffleOverlay.instance.slideVelocity = (Math.random() > 0.5 ? -1.0 : 1.0) * 50.0;
 		this.runIntervalId = window.setInterval(() => { this.RunStep(); }, RaffleState.msFrameDuration);
 	}
 
@@ -188,6 +190,7 @@ export class RaffleState
 		this.running = false;
 		window.clearInterval(this.runIntervalId);
 		this.TryStore();
+
 		this.showingWinner = true;
 		//show winner for 10 seconds
 		window.setTimeout(() => { this.showingWinner = false; }, 10000);
@@ -231,6 +234,11 @@ export class RaffleOverlay
 
 	constructor()
 	{
+		window.addEventListener("keypress", e =>
+		{
+			var pressedToggleKey = e.key == 'r';
+		});
+
 		this.option_slide_curve = OptionManager.GetOption("raffle.slide.bend");
 
 		this.e_zone_root = document.createElement("div");
@@ -247,11 +255,15 @@ export class RaffleOverlay
 		this.e_zone_title.draggable = false;
 		this.e_zone_root.appendChild(this.e_zone_title);
 
+		this.e_zone_title_span = document.createElement("span");
+		this.e_zone_title_span.draggable = false;
+		this.e_zone_title.appendChild(this.e_zone_title_span);
+
 		this.e_zone_subtitle = document.createElement("div");
 		this.e_zone_subtitle.className = "rafflesubtitle";
 		this.e_zone_subtitle.draggable = false;
 		this.e_zone_subtitle.addEventListener("click", () => { RaffleState.instance.ToggleOpen(); });
-		this.e_zone_root.appendChild(this.e_zone_subtitle);
+		this.e_zone_title.appendChild(this.e_zone_subtitle);
 
 		this.e_names_root = document.createElement("div");
 		this.e_names_root.className = "rafflenameroot";
@@ -288,6 +300,22 @@ export class RaffleOverlay
 		requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
 
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
+
+
+		this.sub_raffleRunStart = RaffleState.onRaffleRunStart.RequestSubscription(() => { this.OnRaffleStarted(); });
+		this.sub_raffleRunEnd = RaffleState.onRaffleRunEnd.RequestSubscription(() => { this.OnRaffleConcluded(); });
+	}
+
+	OnRaffleStarted()
+	{
+		this.slideVelocity = (Math.random() > 0.5 ? -1.0 : 1.0) * 30.0 * (Math.random() * 0.3 + 0.7);
+		this.UpdateStyle();
+	}
+
+	OnRaffleConcluded()
+	{
+		this.slideVelocity = 0.0;
+		this.UpdateStyle();
 	}
 
 	UpdateEntryPositions(timestamp)
@@ -322,10 +350,18 @@ export class RaffleOverlay
 		//entry midpoint stickiness
 		this.slideVelocity += midoffset * Math.min(1.0, deltaTime * 20.0 * stick);
 
+		if (Math.abs(this.slideVelocity) < 0.01) 
+		{
+			this.slideVelocity = 0.0;
+		}
 
-		var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
-		this.lastMousePositionX = UserInput.instance.mousePositionX;
-		if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.01;
+
+		if (!RaffleState.instance.showingWinner && !RaffleState.instance.running)
+		{
+			var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
+			this.lastMousePositionX = UserInput.instance.mousePositionX;
+			if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.01;
+		}
 		var clampedVelocity = Math.sign(this.slideVelocity) * Math.min(deltaTime * Math.abs(this.slideVelocity), 0.99);
 
 		var cellCount = 6;//Math.min(6, nameCount);
@@ -347,7 +383,8 @@ export class RaffleOverlay
 		this.slideIndex = RaffleOverlay.WrapIndex(this.slideIndex, 0, cellCount);
 		this.slideIndexReal = RaffleOverlay.WrapIndex(this.slideIndexReal, 0, nameCount);
 
-		var cellPad = 0.15;// + 0.15 * (6 - cellCount);
+		var pad = OptionManager.GetOptionValue("raffle.slide.pad");
+		var cellPad = 0.025 * pad;
 		var cellSize = this.e_names_slider.offsetHeight;
 		var cellRootWidth = this.e_names_root.offsetWidth;
 		var stretch = Math.min(Math.pow(Math.abs(this.slideVelocity) * 0.02, 5) * 200.0, 2);
@@ -398,16 +435,27 @@ export class RaffleOverlay
 			this.e_entries[nameIndex].e_name.style.maxWidth = selected ? "200%" : "80%";
 			this.e_entries[nameIndex].e_name.style.overflow = selected ? "visible" : "hidden";
 			this.e_entries[nameIndex].e_name.style.transform = `translate(-50%, 0%) scale(${70 + 30 * nameShow}%)`;
+			this.e_entries[this.slideIndex].e_name.style.backgroundBlendMode = "normal";
+			this.e_entries[this.slideIndex].e_root.style.backgroundImage = "unset";
+			this.e_entries[this.slideIndex].e_root.style.animation = "unset";
 			//this.e_entries[nameIndex].e_root.children[0].innerHTML = `name ${nameIdActual + 1}`;
 		}
 
-		this.e_entries[this.slideIndex].e_root.style.outline = "solid orange 3px";
-		this.e_entries[this.slideIndex].e_root.style.outlineOffset = "4px";
-
 		if (RaffleState.instance.showingWinner)
 		{
+			this.e_entries[this.slideIndex].e_name.style.backgroundBlendMode = "multiply";
 			this.e_entries[this.slideIndex].e_root.style.outline = "solid white 6px";
+			this.e_entries[this.slideIndex].e_root.style.backgroundImage = "radial-gradient(90deg, red,purple,blue,green,yellow,red)";
+			this.e_entries[this.slideIndex].e_root.style.animation = "huerotate";
+			this.e_entries[this.slideIndex].e_root.style.animationTimingFunction = "linear";
+			this.e_entries[this.slideIndex].e_root.style.animationDuration = "1s";
+			this.e_entries[this.slideIndex].e_root.style.animationIterationCount = "infinite";
 			this.e_entries[this.slideIndex].e_root.style.outlineOffset = "8px";
+		}
+		else
+		{
+			this.e_entries[this.slideIndex].e_root.style.outline = "solid orange 3px";
+			this.e_entries[this.slideIndex].e_root.style.outlineOffset = "4px";
 		}
 
 
@@ -426,18 +474,18 @@ export class RaffleOverlay
 
 	UpdateStyle()
 	{
-		var showing = OptionManager.GetOptionValue("raffle.visible") && (RaffleState.instance.open || RaffleState.instance.names.length > 0);
+		var showing = OptionManager.GetOptionValue("raffle.visible") === true && (RaffleState.instance.open || RaffleState.instance.names.length > 0);
 		this.e_zone_root.style.opacity = showing ? "100%" : "0%";
-		this.e_zone_root.style.pointerEvents = showing ? "all" : "none";
+		this.e_zone_root.style.zIndex = showing ? "all" : "none";
 
-		this.e_zone_title.innerText = RaffleState.instance.title;
-		this.e_zone_subtitle.innerText = RaffleState.instance.open ? "OPEN" : "CLOSED";
-		this.e_zone_subtitle.style.color = RaffleState.instance.open ? "lightgreen" : "red";
+		this.e_zone_title_span.innerText = RaffleState.instance.title;
+		this.e_zone_subtitle.innerText = RaffleState.instance.running ? "RUNNING" : (RaffleState.instance.open ? "OPEN" : "CLOSED");
+		this.e_zone_subtitle.style.color = RaffleState.instance.running ? "yellow" : (RaffleState.instance.open ? "lightgreen" : "red");
 	}
 
 	Recreate()
 	{
-		window.setTimeout(() => { TwitchResources.GetProfileDataMultiple(RaffleState.instance.names); }, 300);
+		window.setTimeout(() => { TwitchResources.GetProfileDataMultiple(RaffleState.instance.names); }, 100);
 		this.UpdateStyle();
 		this.CreateNameElements();
 	}
@@ -493,7 +541,11 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_control_visible = this.AddToggle(
 			this.option_visible.label,
 			this.option_visible.value,
-			x => { OptionManager.SetOptionValue("raffle.visible", x.checked); },
+			x =>
+			{
+				OptionManager.SetOptionValue("raffle.visible", x.checked);
+				RaffleOverlay.instance.UpdateStyle();
+			},
 			true
 		);
 
@@ -503,6 +555,15 @@ export class RaffleSettingsWindow extends DraggableWindow
 			this.option_slide_curve.value,
 			-13, 13,
 			x => { OptionManager.SetOptionValue("raffle.slide.bend", Math.round(x.value)); },
+			true
+		);
+
+		this.option_slide_pad = OptionManager.GetOption("raffle.slide.pad");
+		this.e_control_slide_pad = this.AddSlider(
+			this.option_slide_pad.label,
+			this.option_slide_pad.value,
+			0, 20,
+			x => { OptionManager.SetOptionValue("raffle.slide.pad", Math.round(x.value)); },
 			true
 		);
 
@@ -548,7 +609,8 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_btn_addName = this.AddButton("", "Add", e =>
 		{
 			RaffleState.instance.AddName(this.txt_addName.value, true);
-			Notifications.instance.Add("Raffle Name Added : " + this.txt_addName.value, "#00ff0030");
+			//SaveIndicator.AddShowTime(3);
+			//Notifications.instance.Add("Raffle Name Added : " + this.txt_addName.value, "#00ff0030");
 			//onSubmitRaffleName(txt_add_name.value);
 			this.e_btn_addName.children[1].children[0].disabled = true;
 			this.txt_addName.value = "";
@@ -562,14 +624,16 @@ export class RaffleSettingsWindow extends DraggableWindow
 			RaffleState.instance.ToggleOpen();
 			this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc0050" : "#00ffcc50";
 			this.e_btn_toggleOpen.value = RaffleState.instance.open ? "Close" : "Open";
-			Notifications.instance.Add(RaffleState.instance.open ? "Raffle Open" : "Raffle Closed", "#ffff0030");
+			//SaveIndicator.AddShowTime(3);
+			//Notifications.instance.Add(RaffleState.instance.open ? "Raffle Open" : "Raffle Closed", "#ffff0030");
 		}, false);
 		this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc0050" : "#00ffcc50";
 
 		var e_btn_clearNames = this.AddControlButton("Clear All Names", "Clear", e =>
 		{
 			RaffleState.instance.ClearNames();
-			Notifications.instance.Add("Raffle Names Cleared", "#ffff0050");
+			//SaveIndicator.AddShowTime(3);
+			//Notifications.instance.Add("Raffle Names Cleared", "#ffff0050");
 		}, false);
 		e_btn_clearNames.style.backgroundColor = "#ff330050";
 		e_btn_clearNames.style.color = "#ffffffaa";
@@ -635,3 +699,4 @@ OptionManager.AppendOption("raffle.visible", true, "Show Overlay");
 OptionManager.AppendOption("raffle.title", "New Raffle", "Title");
 OptionManager.AppendOption("raffle.keyword", "joinraffle", "Join Key Phrase");
 OptionManager.AppendOption("raffle.slide.bend", 0.0, "Slide Bend");
+OptionManager.AppendOption("raffle.slide.pad", 0.0, "Entry Padding");

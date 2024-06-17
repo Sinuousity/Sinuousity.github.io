@@ -2,6 +2,7 @@ import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 import { Notifications } from "./notifications.js";
 import { EventSource } from "./eventsource.js";
+import { SaveIndicator } from "./saveindicator.js";
 
 console.info("[ +Module ] Global Settings");
 
@@ -162,6 +163,7 @@ export class GlobalSettings
 	MarkDirty()
 	{
 		this.modifiedTimer = 0.5;
+		SaveIndicator.AddShowTime(3);
 		if (this.modified) return;
 		this.modified = true;
 		this.delayedStoreIntervalId = window.setInterval(() => { this.step_DelayedStateStore(); }, 50);
@@ -189,7 +191,8 @@ export class GlobalSettings
 	StoreState()
 	{
 		localStorage.setItem(key_global_settings_store, JSON.stringify(this));
-		Notifications.instance.Add("Settings Saved", "#00ff0030");
+		SaveIndicator.AddShowTime(3);
+		//Notifications.instance.Add("Settings Saved", "#00ff0030");
 		OptionManager.Save();
 	}
 

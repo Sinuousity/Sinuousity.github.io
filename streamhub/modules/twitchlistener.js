@@ -220,7 +220,6 @@ export class TwitchResources
 		{
 			var reqIndex = ii;
 			var newCacheData = TwitchResources.GetCachedProfileData(reqs[reqIndex].username);
-			console.warn("emitting twitch profile data :" + reqs[reqIndex].username + "   ::   " + reqs[reqIndex].withData);
 			reqs[reqIndex].withData(newCacheData);
 		}
 	}

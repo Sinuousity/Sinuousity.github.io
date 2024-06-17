@@ -145,7 +145,7 @@
 
 	opacity: 0%;
 
-	transition-property: opacity;
+	transition-property: opacity, box-shadow;
 	transition-duration: 0.169s;
 	transition-timing-function: ease-in-out;
 }
@@ -160,29 +160,40 @@
 
 .raffle-entry-name
 {
+	overflow: hidden;
+
 	position: absolute;
 	left: 50%;
 	bottom: 2rem;
-	transform: translate(-50%, 0%);
-
 	max-width: 150%;
+
 	padding: 1rem;
 	padding-left: 2rem;
 	padding-right: 2rem;
 
-	text-align: center;
-	color: white;
-	font-size: 1.5rem;
-	line-height: 1.5rem;
-	text-wrap: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+	background-color: #00000099;
 	border-radius: 1rem;
-	background-color: rgba(0, 0, 0, 0.6);
+	transform: translate(-50%, 0%);
 
 	transition-property: opacity, transform;
 	transition-duration: 0.269s;
 	transition-timing-function: ease-in-out;
+}
+
+.raffle-entry-name > span
+{
+	overflow: hidden;
+
+	color: white;
+	text-align: center;
+	font-size: 1.5rem;
+	line-height: 1.5rem;
+	text-wrap: nowrap;
+	text-overflow: ellipsis;
+
+	background-image: linear-gradient(to right, red, yellow, green, blue, purple, red);
+	background-clip: text;
+	-webkit-text-fill-color: #ffffff30;
 }
 
 

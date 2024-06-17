@@ -210,11 +210,12 @@ export class RaffleOverlayEntry
 	constructor(cellIndex)
 	{
 		this.cellIndex = cellIndex;
+		this.indexOffsetChanged = false;
 
 		this.selected = false;
 		this.entryIndex = -1;
-		this.cellIndexOffset = 0;
-		this.relativeCellIndex = 0;
+		this.cellIndexOffset = 99999;
+		this.relativeCellIndex = 9999999;
 		this.offsetPosition = 0;
 
 		this.username = "";
@@ -226,9 +227,13 @@ export class RaffleOverlayEntry
 		this.e_root.draggable = false;
 
 		this.e_name = document.createElement("div");
-		this.e_name.innerText = "";
 		this.e_name.className = "raffle-entry-name";
 		this.e_name.draggable = false;
+
+		this.e_name_span = document.createElement("span");
+		this.e_name_span.innerText = "";
+		this.e_name_span.draggable = false;
+		this.e_name.appendChild(this.e_name_span);
 
 		this.e_image = document.createElement("img");
 		this.e_image.src = "";
@@ -241,7 +246,10 @@ export class RaffleOverlayEntry
 	UpdateIndices(slideIndex, slideIndexReal, slidePosition, nameCount, cellPad)
 	{
 		const halfCount = 3;
-		this.cellIndexOffset = this.cellIndex - slideIndex;
+
+		var newCellIndexOffset = this.cellIndex - slideIndex;
+		this.indexOffsetChanged = this.cellIndexOffset != newCellIndexOffset;
+		this.cellIndexOffset = newCellIndexOffset;
 
 		this.selected = this.cellIndexOffset == 0;
 		this.offsetPosition = this.cellIndexOffset + (slidePosition - 0.5);
@@ -255,7 +263,7 @@ export class RaffleOverlayEntry
 		this.entryIndex = newEntryIndex;
 
 		this.username = RaffleState.instance.names[this.entryIndex];
-		this.e_name.innerText = this.username;
+		this.e_name_span.innerText = this.username;
 
 		if (entryIndexChanged) this.RefreshImageProfile();
 	}
@@ -270,7 +278,7 @@ export class RaffleOverlayEntry
 		this.e_root.style.transitionDuration = transitionDuration + "s";
 		this.e_root.style.outline = "solid transparent 3px";
 		this.e_root.style.outlineOffset = "-16px";
-		this.e_root.style.filter = `blur(${blur}px)`;
+		this.e_root.style.boxShadow = (this.selected && RaffleState.instance.showingWinner) ? "goldenrod 0px 0px 32px 8px" : "none";
 	}
 
 	UpdateImageStyle(stretch)
@@ -281,13 +289,17 @@ export class RaffleOverlayEntry
 	UpdateNameStyle()
 	{
 		var nameShow = 1.0 - 0.7 * Math.abs(this.relativeCellIndex);
+		var isWinner = this.selected && RaffleState.instance.showingWinner;
+
 		this.e_name.style.opacity = `${100 * nameShow}%`;
 		this.e_name.style.maxWidth = this.selected ? "200%" : "80%";
-		this.e_name.style.overflow = this.selected ? "visible" : "hidden";
+		//this.e_name.style.overflow = this.selected ? "visible" : "hidden";
 		this.e_name.style.transform = `translate(-50%, 0%) scale(${70 + 30 * nameShow}%)`;
-		this.e_name.style.backgroundBlendMode = "normal";
+		//this.e_name.style.backgroundBlendMode = "normal";
 		this.e_root.style.backgroundImage = "unset";
 		this.e_root.style.animation = "unset";
+
+		this.e_name_span.style.webkitTextFillColor = isWinner ? "#ffffff30" : "#ffffffff";
 	}
 
 	RefreshImageProfile()
@@ -386,7 +398,8 @@ export class RaffleOverlay
 		this.slideIndex = 0;
 		this.slideIndexReal = 0;
 
-		this.animationStartTime = -1.0;
+		this.animationDeltaTime = 0.0;
+		this.animationTimeLast = 0.0;
 		this.animationTime = 0.0;
 		requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
 
@@ -399,7 +412,10 @@ export class RaffleOverlay
 
 	OnRaffleStarted()
 	{
-		this.slideVelocity = (Math.random() > 0.5 ? -1.0 : 1.0) * 30.0 * (Math.random() * 0.3 + 0.7);
+		if (Math.abs(this.slideVelocity) > 2.0)
+			this.slideVelocity = Math.sign(this.slideVelocity) * 30.0 * (Math.random() * 0.3 + 0.7);
+		else
+			this.slideVelocity = (Math.random() > 0.5 ? -1.0 : 1.0) * 30.0 * (Math.random() * 0.3 + 0.7);
 		this.showingWinner = false;
 		this.UpdateStyle();
 	}
@@ -428,16 +444,25 @@ export class RaffleOverlay
 		var canRun = !RaffleState.instance.open && !RaffleState.instance.showingWinner && !RaffleState.instance.running;
 
 		var canRunFromDrag = canRun && OptionManager.GetOptionValue("raffle.drag.run", true);
-		if (canRunFromDrag && Math.abs(this.slideVelocity) > 10.0 && canRun) RaffleState.instance.TryRun();
+		if (canRunFromDrag && Math.abs(this.slideVelocity) > 10.0 && Math.abs(mouseDeltaX) > 150.0 && canRun) RaffleState.instance.TryRun();
 
 	}
 
 	UpdateEntryPositions(timestamp)
 	{
-		if (this.animationStartTime <= 0) this.animationStartTime = timestamp;
-		var newTime = (timestamp - this.animationStartTime) / 1000.0;
-		var deltaTime = (newTime - this.animationTime);
-		this.animationTime = newTime;
+		var deltaTimeMs = timestamp - this.animationTimeLast;
+		this.animationTimeLast = timestamp;
+		this.animationDeltaTime += deltaTimeMs;
+
+		if (this.animationDeltaTime < 15)
+		{
+			requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
+			return;
+		}
+
+		var deltaTime = this.animationDeltaTime * 0.001;
+		this.animationTime += deltaTime;
+		this.animationDeltaTime = 0;
 
 		var nameCount = RaffleState.instance.names.length;
 		if (nameCount < 1)
@@ -459,12 +484,12 @@ export class RaffleOverlay
 		}
 
 		//drag
-		this.slideVelocity -= Math.min(deltaTime * (stick * 0.5 + (RaffleState.instance.showingWinner ? 0.5 : 0.15)), 1.0) * this.slideVelocity;
+		this.slideVelocity -= Math.min(deltaTime * (stick * 0.5 + (RaffleState.instance.showingWinner ? 0.3 : 0.15)), 1.0) * this.slideVelocity;
 
 		//entry midpoint stickiness
 		this.slideVelocity += midoffset * Math.min(1.0, deltaTime * 20.0 * stick);
 
-		if (Math.abs(this.slideVelocity) < 0.05) 
+		if (Math.abs(this.slideVelocity) < 0.03) 
 		{
 			this.slideVelocity = 0.0;
 		}
@@ -506,15 +531,18 @@ export class RaffleOverlay
 
 		var scalePercentY = 100;
 		var scalePercentX = scalePercentY + stretch * 100.0;
-		var transitionDuration = Math.max(0.0, 0.12 - 3.0 * stretch);
+		var transitionDuration = Math.max(0.0, 0.12 - 6.0 * stretch);
 
 		for (var nameIndex = 0; nameIndex < cellCount; nameIndex++)
 		{
 			var thisEntry = this.e_entries[nameIndex];
 			thisEntry.UpdateIndices(this.slideIndex, this.slideIndexReal, this.slidePosition, nameCount, cellPad);
 			thisEntry.UpdateTransform(this.slidePosition, cellSize, cellRootWidth, bend, scalePercentX, scalePercentY, transitionDuration);
-			thisEntry.UpdateImageStyle(stretch);
-			thisEntry.UpdateNameStyle();
+			if (thisEntry.indexOffsetChanged)
+			{
+				thisEntry.UpdateImageStyle(stretch);
+				thisEntry.UpdateNameStyle();
+			}
 			thisEntry.e_root.style.filter = `blur(${blur}px)`;
 			/*
 			var offsetIndex = nameIndex - this.slideIndex;
@@ -553,29 +581,33 @@ export class RaffleOverlay
 			*/
 		}
 
+
+		var highlightedEntry = this.e_entries[this.slideIndex];
 		if (RaffleState.instance.showingWinner)
 		{
-			this.e_entries[this.slideIndex].e_image.style.backgroundBlendMode = "multiply";
-			this.e_entries[this.slideIndex].e_root.style.outline = "solid white 6px";
-			this.e_entries[this.slideIndex].e_root.style.backgroundImage = "radial-gradient(90deg, red,purple,blue,green,yellow,red)";
-			this.e_entries[this.slideIndex].e_root.style.outlineOffset = "8px";
+			highlightedEntry.e_image.style.backgroundBlendMode = "multiply";
+			highlightedEntry.e_root.style.outline = "solid white 6px";
+			highlightedEntry.e_root.style.backgroundImage = "radial-gradient(red, purple, blue, green, yellow, red)";
+			highlightedEntry.e_root.style.outlineOffset = "8px";
 
-			this.e_entries[this.slideIndex].e_root.style.animation = "huerotate-outline";
-			this.e_entries[this.slideIndex].e_root.style.animationTimingFunction = "linear";
-			this.e_entries[this.slideIndex].e_root.style.animationDuration = "1s";
-			this.e_entries[this.slideIndex].e_root.style.animationIterationCount = "infinite";
+			highlightedEntry.e_root.style.animation = "huerotate-outline";
+			highlightedEntry.e_root.style.animationTimingFunction = "linear";
+			highlightedEntry.e_root.style.animationDuration = "2s";
+			highlightedEntry.e_root.style.animationIterationCount = "infinite";
 
-			this.e_entries[this.slideIndex].e_name.style.animation = "huerotate-outline";
-			this.e_entries[this.slideIndex].e_name.style.animationTimingFunction = "linear";
-			this.e_entries[this.slideIndex].e_name.style.animationDuration = "1.5s";
-			this.e_entries[this.slideIndex].e_name.style.animationIterationCount = "infinite";
+			highlightedEntry.e_name_span.style.animation = "huerotate-outline";
+			highlightedEntry.e_name_span.style.animationTimingFunction = "linear";
+			highlightedEntry.e_name_span.style.animationDuration = "1.5s";
+			highlightedEntry.e_name_span.style.animationIterationCount = "infinite";
 		}
 		else
 		{
-			this.e_entries[this.slideIndex].e_root.style.outline = "solid orange 3px";
-			this.e_entries[this.slideIndex].e_root.style.outlineOffset = "4px";
-			this.e_entries[this.slideIndex].e_root.style.animation = "";
-			this.e_entries[this.slideIndex].e_name.style.animation = "";
+			highlightedEntry.e_root.style.backgroundImage = "unset";
+			highlightedEntry.e_image.style.backgroundBlendMode = "normal";
+			highlightedEntry.e_root.style.outline = "solid orange 3px";
+			highlightedEntry.e_root.style.outlineOffset = "4px";
+			highlightedEntry.e_root.style.animation = "unset";
+			highlightedEntry.e_name_span.style.animation = "unset";
 		}
 
 
@@ -651,8 +683,8 @@ export class RaffleSettingsWindow extends DraggableWindow
 		super("Raffle", pos_x, pos_y);
 		super.window_kind = "Raffle";
 
-		this.e_window_root.style.minHeight = "300px";
-		this.e_window_root.style.minWidth = "300px";
+		this.e_window_root.style.minHeight = "380px";
+		this.e_window_root.style.minWidth = "320px";
 
 		this.CreateContentContainer();
 		this.SetIcon("confirmation_number");

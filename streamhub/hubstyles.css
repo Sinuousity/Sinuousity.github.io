@@ -83,31 +83,37 @@
 {
 	0%
 	{
+		filter: hue-rotate(0deg);
 		outline-color: red;
 		color: red;
 	}
 	20%
 	{
+		filter: hue-rotate(72deg);
 		outline-color: yellow;
 		color: yellow;
 	}
 	40%
 	{
+		filter: hue-rotate(144deg);
 		outline-color: green;
 		color: green;
 	}
 	60%
 	{
+		filter: hue-rotate(216deg);
 		outline-color: blue;
 		color: blue;
 	}
 	80%
 	{
+		filter: hue-rotate(288deg);
 		outline-color: purple;
 		color: purple;
 	}
 	100%
 	{
+		filter: hue-rotate(360deg);
 		outline-color: red;
 		color: red;
 	}

@@ -79,6 +79,40 @@
 	}
 }
 
+@keyframes huerotate-outline
+{
+	0%
+	{
+		outline-color: red;
+		color: red;
+	}
+	20%
+	{
+		outline-color: yellow;
+		color: yellow;
+	}
+	40%
+	{
+		outline-color: green;
+		color: green;
+	}
+	60%
+	{
+		outline-color: blue;
+		color: blue;
+	}
+	80%
+	{
+		outline-color: purple;
+		color: purple;
+	}
+	100%
+	{
+		outline-color: red;
+		color: red;
+	}
+}
+
 @keyframes glow-flicker
 {
 	0%

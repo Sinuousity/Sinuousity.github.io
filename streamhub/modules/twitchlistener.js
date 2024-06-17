@@ -157,27 +157,72 @@ export class TwitchResources
 	static profileDataCache = new Lookup();
 	static onCacheUpdated = new EventSource();
 
-	static HasCachedProfileData(username)
+	static profileDataQueue = [];
+
+	static Initialize()
 	{
-		return TwitchResources.profileDataCache.Contains(username);
+		window.setInterval(() => { TwitchResources.StepProfileDataQueue(); }, 100);
 	}
 
-	static GetCachedProfileData(username)
-	{
-		return TwitchResources.profileDataCache.Get(username);
-	}
+	static StepProfileDataQueue() { if (TwitchResources.profileDataQueue.length > 0) TwitchResources.GetProfileDataBatch(); }
 
-	static async GetProfileDataMultiple(usernames = [])
-	{
-		if (usernames.length < 1) return;
+	static HasCachedProfileData(username) { return TwitchResources.profileDataCache.Contains(username); }
+	static GetCachedProfileData(username) { return TwitchResources.profileDataCache.Get(username); }
 
-		var url = url_twitch_users + "?login=" + usernames[0];
-		for (var ii = 1; ii < usernames.length; ii++)
+	static HasDataRequest(username)
+	{
+		for (var ii = 0; ii < TwitchResources.profileDataQueue.length; ii++)
 		{
-			if (TwitchResources.HasCachedProfileData(usernames[ii])) continue;
-			url += "&login=" + usernames[ii];
+			if (TwitchResources.profileDataQueue[ii].username == username) return true;
 		}
+		return false;
+	}
+
+	static EnqueueProfileDataRequest(username, withData = x => { })
+	{
+		if (TwitchResources.HasDataRequest(username)) return;
+		TwitchResources.profileDataQueue.push({
+			username: username,
+			withData: withData
+		});
+	}
+
+	static GetOrRequestData(username, withData = x => { })
+	{
+		var cacheIndex = TwitchResources.profileDataCache.IndexOf(username);
+		if (cacheIndex > -1) // exists in cache
+		{
+			withData(TwitchResources.profileDataCache.Get(cacheIndex));
+			return;
+		}
+
+		// does not exist in cache
+		TwitchResources.EnqueueProfileDataRequest(username, withData);
+	}
+
+	static async GetProfileDataBatch()
+	{
+		var reqCount = Math.min(50, TwitchResources.profileDataQueue.length);
+		var reqs = TwitchResources.profileDataQueue.splice(0, reqCount);
+		if (reqs.length < 1) return;
+
+
+		var url = url_twitch_users + "?login=" + reqs[0].username;
+		if (reqs.length > 1)
+		{
+			for (var ii = 1; ii < reqs.length; ii++)
+				url += "&login=" + reqs[ii].username;
+		}
+
 		await TwitchResources.UserDataRequest(url);
+
+		for (var ii = 0; ii < reqs.length; ii++)
+		{
+			var reqIndex = ii;
+			var newCacheData = TwitchResources.GetCachedProfileData(reqs[reqIndex].username);
+			console.warn("emitting twitch profile data :" + reqs[reqIndex].username + "   ::   " + reqs[reqIndex].withData);
+			reqs[reqIndex].withData(newCacheData);
+		}
 	}
 
 	static async UserDataRequest(url)
@@ -211,6 +256,8 @@ export class TwitchResources
 	}
 }
 
+
+TwitchResources.Initialize();
 
 OptionManager.AppendOption("twitch.listen", false, "Listen To Twitch");
 OptionManager.AppendOption("twitch.channel", "", "Join Channel");

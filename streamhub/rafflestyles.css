@@ -47,6 +47,12 @@
 	overflow: visible;
 }
 
+.raffle-title-count
+{
+	font-size: 0.86rem;
+	color: #ffffff90;
+}
+
 .rafflesubtitle
 {
 	pointer-events: all;
@@ -79,6 +85,11 @@
 	transform: translate(-75%, -100%) rotate(-20deg) scale(120%);
 	transition-duration: 0.05s;
 }
+
+
+
+
+
 
 .rafflenameroot
 {

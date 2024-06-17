@@ -146,7 +146,7 @@ export class RaffleState
 		this.names.push(newName);
 		this.TryStore();
 		RaffleOverlay.instance.Recreate();
-		TwitchResources.GetProfileDataMultiple([newName]);
+		TwitchResources.GetOrRequestData([newName], x => { RaffleOverlay.instance.RefreshEntryImages(); });
 	}
 
 	RemoveName(oldName, force = false)
@@ -186,12 +186,12 @@ export class RaffleState
 	FinishRun()
 	{
 		if (!this.running) return;
-		RaffleState.onRaffleRunEnd.Invoke();
 		this.running = false;
 		window.clearInterval(this.runIntervalId);
 		this.TryStore();
 
 		this.showingWinner = true;
+		RaffleState.onRaffleRunEnd.Invoke();
 		//show winner for 10 seconds
 		window.setTimeout(() => { this.showingWinner = false; }, 10000);
 	}
@@ -207,15 +207,26 @@ export class RaffleState
 
 export class RaffleOverlayEntry
 {
-	constructor(username)
+	constructor(cellIndex)
 	{
-		this.username = username;
+		this.cellIndex = cellIndex;
+
+		this.selected = false;
+		this.entryIndex = -1;
+		this.cellIndexOffset = 0;
+		this.relativeCellIndex = 0;
+		this.offsetPosition = 0;
+
+		this.username = "";
+		this.profileImageUrl = "";
+		this.waitingOnImage = false;
+
 		this.e_root = document.createElement("div");
 		this.e_root.className = "raffle-entry-root";
 		this.e_root.draggable = false;
 
 		this.e_name = document.createElement("div");
-		this.e_name.innerText = username;
+		this.e_name.innerText = "";
 		this.e_name.className = "raffle-entry-name";
 		this.e_name.draggable = false;
 
@@ -225,6 +236,72 @@ export class RaffleOverlayEntry
 
 		this.e_root.appendChild(this.e_image);
 		this.e_root.appendChild(this.e_name);
+	}
+
+	UpdateIndices(slideIndex, slideIndexReal, slidePosition, nameCount, cellPad)
+	{
+		const halfCount = 3;
+		this.cellIndexOffset = this.cellIndex - slideIndex;
+
+		this.selected = this.cellIndexOffset == 0;
+		this.offsetPosition = this.cellIndexOffset + (slidePosition - 0.5);
+		this.offsetPosition = RaffleOverlay.WrapIndex(this.offsetPosition, -halfCount, halfCount);
+		this.offsetPosition *= 1.0 + cellPad;
+
+		this.relativeCellIndex = RaffleOverlay.WrapIndex(this.cellIndexOffset, -halfCount, halfCount);
+
+		var newEntryIndex = RaffleOverlay.WrapIndex(slideIndexReal + this.relativeCellIndex, 0, nameCount);
+		var entryIndexChanged = newEntryIndex != this.entryIndex;
+		this.entryIndex = newEntryIndex;
+
+		this.username = RaffleState.instance.names[this.entryIndex];
+		this.e_name.innerText = this.username;
+
+		if (entryIndexChanged) this.RefreshImageProfile();
+	}
+
+	UpdateTransform(slidePosition, cellSize, cellRootWidth, bend, scalePercentX, scalePercentY, transitionDuration)
+	{
+		var twist = `rotate3d(0,1,1,${(this.relativeCellIndex + slidePosition - 0.5) * bend}deg)`;
+		var lift = `${(1.0 - Math.pow(Math.abs(this.relativeCellIndex + slidePosition - 0.5), 2)) * -bend}`;
+
+		this.e_root.style.transform = `translate(-50%,${lift}%) scale(${scalePercentX}%, ${scalePercentY}%) ${twist}`;
+		this.e_root.style.left = `${this.offsetPosition * cellSize + cellRootWidth * 0.5}px`;
+		this.e_root.style.transitionDuration = transitionDuration + "s";
+		this.e_root.style.outline = "solid transparent 3px";
+		this.e_root.style.outlineOffset = "-16px";
+		this.e_root.style.filter = `blur(${blur}px)`;
+	}
+
+	UpdateImageStyle(stretch)
+	{
+		this.e_image.style.opacity = (this.selected ? 0.95 : 0.2) - 0.1 * stretch;
+	}
+
+	UpdateNameStyle()
+	{
+		var nameShow = 1.0 - 0.7 * Math.abs(this.relativeCellIndex);
+		this.e_name.style.opacity = `${100 * nameShow}%`;
+		this.e_name.style.maxWidth = this.selected ? "200%" : "80%";
+		this.e_name.style.overflow = this.selected ? "visible" : "hidden";
+		this.e_name.style.transform = `translate(-50%, 0%) scale(${70 + 30 * nameShow}%)`;
+		this.e_name.style.backgroundBlendMode = "normal";
+		this.e_root.style.backgroundImage = "unset";
+		this.e_root.style.animation = "unset";
+	}
+
+	RefreshImageProfile()
+	{
+		if (this.username === "") return;
+
+		var cacheIndex = TwitchResources.profileDataCache.IndexOf(this.username);
+		if (cacheIndex < 0) 
+		{
+			TwitchResources.GetOrRequestData(this.username, x => { RaffleOverlay.instance.RefreshEntryImages(); });
+			return;
+		}
+
+		this.e_image.src = TwitchResources.profileDataCache.values[cacheIndex].profile_image_url;
 	}
 }
 
@@ -264,6 +341,12 @@ export class RaffleOverlay
 		this.e_zone_subtitle.draggable = false;
 		this.e_zone_subtitle.addEventListener("click", () => { RaffleState.instance.ToggleOpen(); });
 		this.e_zone_title.appendChild(this.e_zone_subtitle);
+
+		this.e_zone_entry_count = document.createElement("div");
+		this.e_zone_entry_count.className = "raffle-title-count";
+		this.e_zone_entry_count.innerText = RaffleState.instance.names.length + " ENTERED";
+		this.e_zone_entry_count.draggable = false;
+		this.e_zone_title.appendChild(this.e_zone_entry_count);
 
 		this.e_names_root = document.createElement("div");
 		this.e_names_root.className = "rafflenameroot";
@@ -309,6 +392,7 @@ export class RaffleOverlay
 	OnRaffleStarted()
 	{
 		this.slideVelocity = (Math.random() > 0.5 ? -1.0 : 1.0) * 30.0 * (Math.random() * 0.3 + 0.7);
+		this.showingWinner = false;
 		this.UpdateStyle();
 	}
 
@@ -316,6 +400,14 @@ export class RaffleOverlay
 	{
 		this.slideVelocity = 0.0;
 		this.UpdateStyle();
+	}
+
+	RefreshEntryImages()
+	{
+		for (var nameIndex = 0; nameIndex < this.e_entries.length; nameIndex++)
+		{
+			this.e_entries[nameIndex].RefreshImageProfile();
+		}
 	}
 
 	UpdateEntryPositions(timestamp)
@@ -358,9 +450,14 @@ export class RaffleOverlay
 
 		if (!RaffleState.instance.showingWinner && !RaffleState.instance.running)
 		{
-			var mouseDeltaX = UserInput.instance.mousePositionX - this.lastMousePositionX;
+			var mouseDeltaX = this.draggingEntries ? (UserInput.instance.mousePositionX - this.lastMousePositionX) : 0.0;
 			this.lastMousePositionX = UserInput.instance.mousePositionX;
 			if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.01;
+
+			if (Math.abs(this.slideVelocity) > 10.0 && !RaffleState.instance.open && !RaffleState.instance.showingWinner)
+			{
+				RaffleState.instance.TryRun();
+			}
 		}
 		var clampedVelocity = Math.sign(this.slideVelocity) * Math.min(deltaTime * Math.abs(this.slideVelocity), 0.99);
 
@@ -401,6 +498,13 @@ export class RaffleOverlay
 
 		for (var nameIndex = 0; nameIndex < cellCount; nameIndex++)
 		{
+			var thisEntry = this.e_entries[nameIndex];
+			thisEntry.UpdateIndices(this.slideIndex, this.slideIndexReal, this.slidePosition, nameCount, cellPad);
+			thisEntry.UpdateTransform(this.slidePosition, cellSize, cellRootWidth, bend, scalePercentX, scalePercentY, transitionDuration);
+			thisEntry.UpdateImageStyle(stretch);
+			thisEntry.UpdateNameStyle();
+			thisEntry.e_root.style.filter = `blur(${blur}px)`;
+			/*
 			var offsetIndex = nameIndex - this.slideIndex;
 			var selected = offsetIndex == 0;
 			var offsetPosition = offsetIndex + (this.slidePosition - 0.5);
@@ -413,49 +517,53 @@ export class RaffleOverlay
 			this.e_entries[nameIndex].username = nameActual;
 			this.e_entries[nameIndex].e_name.innerText = nameActual;
 
-			var twist = `rotate3d(0,1,1,${(relativeIndex + this.slidePosition - 0.5) * bend}deg)`;
-			var lift = `${(1.0 - Math.pow(Math.abs(relativeIndex + this.slidePosition - 0.5), 2)) * -bend}`;
-			this.e_entries[nameIndex].e_root.style.transform = `translate(-50%,${lift}%) scale(${scalePercentX}%, ${scalePercentY}%) ${twist}`;
-			this.e_entries[nameIndex].e_root.style.left = `${offsetPosition * cellSize + cellRootWidth * 0.5}px`;
-			this.e_entries[nameIndex].e_root.style.transitionDuration = transitionDuration + "s";
-			this.e_entries[nameIndex].e_root.style.outline = "solid transparent 3px";
-			this.e_entries[nameIndex].e_root.style.outlineOffset = "-16px";
-			this.e_entries[nameIndex].e_root.style.filter = `blur(${blur}px)`;
+			var twist = `rotate3d(0,1,1,${(thisEntry.relativeCellIndex + this.slidePosition - 0.5) * bend}deg)`;
+			var lift = `${(1.0 - Math.pow(Math.abs(thisEntry.relativeCellIndex + this.slidePosition - 0.5), 2)) * -bend}`;
+			thisEntry.e_root.style.transform = `translate(-50%,${lift}%) scale(${scalePercentX}%, ${scalePercentY}%) ${twist}`;
+			thisEntry.e_root.style.left = `${thisEntry.offsetPosition * cellSize + cellRootWidth * 0.5}px`;
+			thisEntry.e_root.style.transitionDuration = transitionDuration + "s";
+			thisEntry.e_root.style.outline = "solid transparent 3px";
+			thisEntry.e_root.style.outlineOffset = "-16px";
+			thisEntry.e_root.style.filter = `blur(${blur}px)`;
 
-			if (doImages)
-			{
-				var userData = TwitchResources.GetCachedProfileData(nameActual)
-				if (userData) this.e_entries[nameIndex].e_image.src = userData.profile_image_url;
-				else this.e_entries[nameIndex].e_image.src = "";
-			}
-			this.e_entries[nameIndex].e_image.style.opacity = (selected ? 0.95 : 0.2) - 0.1 * stretch;
+			if (doImages) thisEntry.SetImageProfile(nameActual);
+			thisEntry.e_image.style.opacity = (thisEntry.selected ? 0.95 : 0.2) - 0.1 * stretch;
 
-			var nameShow = 1.0 - 0.7 * Math.abs(relativeIndex);
-			this.e_entries[nameIndex].e_name.style.opacity = `${100 * nameShow}%`;
-			this.e_entries[nameIndex].e_name.style.maxWidth = selected ? "200%" : "80%";
-			this.e_entries[nameIndex].e_name.style.overflow = selected ? "visible" : "hidden";
-			this.e_entries[nameIndex].e_name.style.transform = `translate(-50%, 0%) scale(${70 + 30 * nameShow}%)`;
-			this.e_entries[this.slideIndex].e_name.style.backgroundBlendMode = "normal";
-			this.e_entries[this.slideIndex].e_root.style.backgroundImage = "unset";
-			this.e_entries[this.slideIndex].e_root.style.animation = "unset";
-			//this.e_entries[nameIndex].e_root.children[0].innerHTML = `name ${nameIdActual + 1}`;
+			var nameShow = 1.0 - 0.7 * Math.abs(thisEntry.relativeCellIndex);
+			thisEntry.e_name.style.opacity = `${100 * nameShow}%`;
+			thisEntry.e_name.style.maxWidth = thisEntry.selected ? "200%" : "80%";
+			thisEntry.e_name.style.overflow = thisEntry.selected ? "visible" : "hidden";
+			thisEntry.e_name.style.transform = `translate(-50%, 0%) scale(${70 + 30 * nameShow}%)`;
+			thisEntry.e_name.style.backgroundBlendMode = "normal";
+			thisEntry.e_root.style.backgroundImage = "unset";
+			thisEntry.e_root.style.animation = "unset";
+			//thisEntry.e_root.children[0].innerHTML = `name ${nameIdActual + 1}`;
+			*/
 		}
 
 		if (RaffleState.instance.showingWinner)
 		{
-			this.e_entries[this.slideIndex].e_name.style.backgroundBlendMode = "multiply";
+			this.e_entries[this.slideIndex].e_image.style.backgroundBlendMode = "multiply";
 			this.e_entries[this.slideIndex].e_root.style.outline = "solid white 6px";
 			this.e_entries[this.slideIndex].e_root.style.backgroundImage = "radial-gradient(90deg, red,purple,blue,green,yellow,red)";
-			this.e_entries[this.slideIndex].e_root.style.animation = "huerotate";
+			this.e_entries[this.slideIndex].e_root.style.outlineOffset = "8px";
+
+			this.e_entries[this.slideIndex].e_root.style.animation = "huerotate-outline";
 			this.e_entries[this.slideIndex].e_root.style.animationTimingFunction = "linear";
 			this.e_entries[this.slideIndex].e_root.style.animationDuration = "1s";
 			this.e_entries[this.slideIndex].e_root.style.animationIterationCount = "infinite";
-			this.e_entries[this.slideIndex].e_root.style.outlineOffset = "8px";
+
+			this.e_entries[this.slideIndex].e_name.style.animation = "huerotate-outline";
+			this.e_entries[this.slideIndex].e_name.style.animationTimingFunction = "linear";
+			this.e_entries[this.slideIndex].e_name.style.animationDuration = "1.5s";
+			this.e_entries[this.slideIndex].e_name.style.animationIterationCount = "infinite";
 		}
 		else
 		{
 			this.e_entries[this.slideIndex].e_root.style.outline = "solid orange 3px";
 			this.e_entries[this.slideIndex].e_root.style.outlineOffset = "4px";
+			this.e_entries[this.slideIndex].e_root.style.animation = "";
+			this.e_entries[this.slideIndex].e_name.style.animation = "";
 		}
 
 
@@ -474,18 +582,22 @@ export class RaffleOverlay
 
 	UpdateStyle()
 	{
-		var showing = OptionManager.GetOptionValue("raffle.visible") === true && (RaffleState.instance.open || RaffleState.instance.names.length > 0);
+		var overlayAllowed = OptionManager.GetOptionValue("raffle.visible") === true;
+		var showing = RaffleState.instance.open || RaffleState.instance.names.length > 0;
+		this.e_zone_root.style.display = overlayAllowed ? "block" : "none";
 		this.e_zone_root.style.opacity = showing ? "100%" : "0%";
 		this.e_zone_root.style.zIndex = showing ? "all" : "none";
 
 		this.e_zone_title_span.innerText = RaffleState.instance.title;
 		this.e_zone_subtitle.innerText = RaffleState.instance.running ? "RUNNING" : (RaffleState.instance.open ? "OPEN" : "CLOSED");
+		this.e_zone_subtitle.style.textShadow = RaffleState.instance.running ? "#ffff00c0 0px 0px 11px" : "unset";
 		this.e_zone_subtitle.style.color = RaffleState.instance.running ? "yellow" : (RaffleState.instance.open ? "lightgreen" : "red");
+
+		this.e_zone_entry_count.innerText = RaffleState.instance.names.length + " ENTERED";
 	}
 
 	Recreate()
 	{
-		window.setTimeout(() => { TwitchResources.GetProfileDataMultiple(RaffleState.instance.names); }, 100);
 		this.UpdateStyle();
 		this.CreateNameElements();
 	}
@@ -506,7 +618,8 @@ export class RaffleOverlay
 		var cellCount = 6;//Math.min(6, RaffleState.instance.names.length);
 		for (var ii = 0; ii < cellCount; ii++)
 		{
-			var entry = new RaffleOverlayEntry("");
+			const id = ii;
+			var entry = new RaffleOverlayEntry(id);
 			entry.e_root.style.transform = "translate(-50%, 0%)";
 
 			entry.e_root.draggable = false;

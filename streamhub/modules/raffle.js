@@ -724,7 +724,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 		super("Raffle", pos_x, pos_y);
 		super.window_kind = "Raffle";
 
-		this.e_window_root.style.minHeight = "390px";
+		this.e_window_root.style.minHeight = "420px";
 		this.e_window_root.style.minWidth = "320px";
 
 		this.CreateContentContainer();

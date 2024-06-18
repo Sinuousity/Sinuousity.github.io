@@ -126,6 +126,7 @@ export class RaffleState
 	Open()
 	{
 		if (this.open || this.running) return;
+		if (this.showingWinner) this.showingWinner = false;
 		this.open = true;
 		this.TryStore();
 		RaffleOverlay.instance.UpdateStyle();
@@ -163,6 +164,7 @@ export class RaffleState
 	static msFrameDuration = 20;
 	TryRun()
 	{
+		if (this.showingWinner) return;
 		if (this.running) return;
 
 		this.Close();
@@ -198,6 +200,7 @@ export class RaffleState
 
 	ClearNames()
 	{
+		if (this.showingWinner) return;
 		if (this.running) return;
 		this.names = [];
 		this.TryStore();
@@ -443,12 +446,16 @@ export class RaffleOverlay
 
 	CheckDragInput()
 	{
-		var mouseDeltaX = (this.draggingEntries && !RaffleState.instance.showingWinner && !RaffleState.instance.running) ? (UserInput.instance.mousePositionX - this.lastMousePositionX) : 0.0;
+		var mouseDeltaX = (this.draggingEntries && !RaffleState.instance.running) ? (UserInput.instance.mousePositionX - this.lastMousePositionX) : 0.0;
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
 		if (this.draggingEntries) this.slideVelocity += mouseDeltaX * 0.01;
 
-		var canRun = !RaffleState.instance.open && !RaffleState.instance.showingWinner && !RaffleState.instance.running;
+		if (RaffleState.instance.showingWinner)
+		{
+			if (Math.abs(this.slideVelocity) > 1.0) RaffleState.instance.showingWinner = false;
+		}
 
+		var canRun = !RaffleState.instance.open && !RaffleState.instance.running;
 		var canRunFromDrag = canRun && OptionManager.GetOptionValue("raffle.drag.run", true);
 		if (canRunFromDrag && Math.abs(this.slideVelocity) > 10.0 && Math.abs(mouseDeltaX) > 150.0 && canRun) RaffleState.instance.TryRun();
 

@@ -133,15 +133,15 @@ export class CreatureCatchingOverlay extends WindowBase
 		this.drag_start_pos_x = pos_x;
 		this.drag_start_pos_y = pos_y;
 
-		this.e_window_top_bar.remove();
-		this.e_window_root.className = "creature-catch-overlay";
+		//this.e_window_top_bar.remove();
+		//this.e_window_root.className = "creature-catch-overlay";
 		this.e_window_root.style.minHeight = "240px";
 		this.e_window_root.style.maxHeight = "240px";
 		this.e_window_root.style.minWidth = "240px";
 		this.e_window_root.style.maxWidth = "240px";
 
 		this.e_window_root.setAttribute("draggable", "false");
-		this.e_window_root.addEventListener("mousedown", () => { this.StartDrag(); });
+		this.e_window_root.addEventListener("mousedown", e => { this.StartDrag(); e.stopPropagation(); });
 	}
 
 	StartDrag()

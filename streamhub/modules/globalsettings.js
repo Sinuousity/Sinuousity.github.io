@@ -304,8 +304,8 @@ export class GlobalSettingsWindow extends DraggableWindow
 		const opt = OptionManager.GetOption(optionName);
 		var e_txt = this.AddTextField(
 			opt.label,
-			opt.value ? opt.value : "",
-			(e) => { OptionManager.SetOptionValue(optionName, e.checked); }
+			(typeof opt.value == 'string') ? opt.value : "",
+			(e) => { OptionManager.SetOptionValue(optionName, e.value); }
 		);
 		e_txt.style.height = "2rem";
 		e_txt.style.lineHeight = "2rem";

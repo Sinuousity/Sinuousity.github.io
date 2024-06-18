@@ -586,8 +586,8 @@ export class DraggableWindow extends WindowBase
 		this.position_x = Math.max(0, this.position_x);
 		this.position_y = Math.max(0, this.position_y);
 
-		this.position_x = Math.min(document.documentElement.clientWidth - this.e_window_root.offsetWidth, this.position_x);
-		this.position_y = Math.min(document.documentElement.clientHeight - this.e_window_root.offsetHeight, this.position_y);
+		this.position_x = Math.min(document.body.offsetWidth - this.e_window_root.offsetWidth, this.position_x);
+		this.position_y = Math.min(document.body.offsetHeight - this.e_window_root.offsetHeight, this.position_y);
 
 		var xdeltasign = Math.sign(dragDeltaX);
 		var screenx = Math.abs(dragDeltaX) / 100.0;

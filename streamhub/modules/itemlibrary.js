@@ -112,7 +112,7 @@ export class ItemGiverWindow extends DraggableWindow
 					item,
 					1
 				);
-				SaveIndicator.AddShowTime(3);
+				SaveIndicator.AddShowTime();
 				//Notifications.instance.Add(`Added ${itemName} to ${username}`);
 			}
 		);

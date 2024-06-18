@@ -44,7 +44,8 @@ function FindBuiltInElements()
 	e_background_log = document.getElementById("background-log");
 	e_menu_windows = document.getElementById("menu-windows");
 	e_site_tag = document.getElementById("site-tag");
-	e_site_tag.innerText = "streamhub " + hub_version;
+	e_site_tag.innerText = "sHub " + hub_version;
+	document.title = "sHub";
 
 	e_save_indicator = addElement("i", "save-indicator", document.body, "save");
 	e_save_indicator.style.fontFamily = "'Material Icons'";
@@ -55,7 +56,9 @@ function UpdateSiteTag()
 {
 	var username = OptionManager.GetOptionValue("twitch.bot.username");
 	var usernameEmpty = username == "";
-	e_site_tag.innerText = "streamhub " + hub_version + (usernameEmpty ? "" : (" | " + username));
+	e_site_tag.innerText = (usernameEmpty ? "" : (username + "  |  ")) + "sHub " + hub_version;
+
+	document.title = "sHub " + (usernameEmpty ? "" : (" | " + username));
 }
 
 function RestoreLocalStorageContent()

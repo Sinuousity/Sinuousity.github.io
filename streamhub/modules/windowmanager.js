@@ -48,7 +48,7 @@ export class WindowManager
 	TryStoreState()
 	{
 		if (this.storingState) return;
-		SaveIndicator.AddShowTime(3);
+		SaveIndicator.AddShowTime();
 		this.storingState = true;
 		var windowStates = [];
 		if (this.windows.length > 0)
@@ -117,8 +117,8 @@ export class WindowManager
 		var existing_window = this.GetExistingWindow(window_kind);
 		if (existing_window) 
 		{
-			existing_window.position_x = document.documentElement.clientWidth / 2.0 - existing_window.e_window_root.offsetWidth / 2.0;
-			existing_window.position_y = document.documentElement.clientHeight / 2.0 - existing_window.e_window_root.offsetHeight / 2.0;
+			existing_window.position_x = document.body.offsetWidth / 2.0 - existing_window.e_window_root.offsetWidth / 2.0;
+			existing_window.position_y = document.body.offsetHeight / 2.0 - existing_window.e_window_root.offsetHeight / 2.0;
 			existing_window.ApplyPosition();
 			this.BringToFront(existing_window);
 			return existing_window;

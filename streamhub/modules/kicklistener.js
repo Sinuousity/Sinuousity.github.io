@@ -35,7 +35,12 @@ export class KickState extends RemoteDataConnection
 		this.RefreshChannel();
 	}
 
-	static GetTargetChannelName() { return OptionManager.GetOptionValue("kick.channel"); }
+	static GetTargetChannelName()
+	{
+		var channelValue = OptionManager.GetOptionValue("kick.channel");
+		if (channelValue) return channelValue;
+		return "";
+	}
 	static IsString(thing) { return typeof thing === 'string'; }
 
 	RefreshChannel()

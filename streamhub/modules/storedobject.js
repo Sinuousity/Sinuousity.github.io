@@ -27,7 +27,7 @@ export class StoredObject
 		}
 		localStorage.setItem(this.storeKey, JSON.stringify(this.GetState()));
 
-		SaveIndicator.AddShowTime(3);
+		SaveIndicator.AddShowTime();
 		this.AfterStore();
 	}
 	AfterStore() { }

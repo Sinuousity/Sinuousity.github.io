@@ -456,6 +456,9 @@ export class RaffleOverlay
 
 	UpdateEntryPositions(timestamp)
 	{
+		var overlayAllowed = OptionManager.GetOptionValue("raffle.visible") === true;
+		this.e_zone_root.style.display = overlayAllowed ? "block" : "none";
+
 		var deltaTimeMs = timestamp - this.animationTimeLast;
 		this.animationTimeLast = timestamp;
 		this.animationDeltaTime += deltaTimeMs;
@@ -636,9 +639,9 @@ export class RaffleOverlay
 	{
 		var autohidden = OptionManager.GetOptionValue("raffle.autohide") === true;
 		var overlayAllowed = OptionManager.GetOptionValue("raffle.visible") === true;
+		this.e_zone_root.style.display = overlayAllowed ? "block" : "none";
 
 		var showing = (!autohidden) || (RaffleState.instance.open || RaffleState.instance.names.length > 0);
-		this.e_zone_root.style.display = overlayAllowed ? "block" : "none";
 		this.e_zone_root.style.opacity = showing ? "100%" : "0%";
 		this.e_zone_root.style.zIndex = showing ? "all" : "none";
 

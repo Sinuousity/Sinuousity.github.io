@@ -332,6 +332,7 @@ body
 	text-align: center;
 	font-style: normal;
 	font-weight: normal;
+	font-size: 1.5rem;
 	line-height: 1.5rem;
 
 	transition-property: opacity;
@@ -413,7 +414,8 @@ body
 
 .twitchinfobox
 {
-	text-shadow: #00000042 -2px 2px 2px;
+	text-shadow: #00000042 -2px 2px 1px;
+	overflow: visible;
 
 	z-index: 5000;
 	opacity: 60%;
@@ -543,7 +545,6 @@ body
 
 	flex-grow: 1;
 	flex-shrink: 1;
-	width: 100%;
 	height: 0;
 	text-align: center;
 
@@ -556,6 +557,7 @@ body
 	font-weight: bold;
 	font-variant: small-caps;
 	letter-spacing: 0.05rem;
+	text-shadow: #00000005 -2px 2px 0px;
 
 	color: #ffffff86;
 	background-color: #0000002f;
@@ -568,6 +570,7 @@ body
 }
 .menu-windows-button:hover
 {
+	text-shadow: #00000042 -2px 2px 1px;
 	color: #ffbe73;
 	background-color: #0000007e;
 	transform: scale(100%, 100%);

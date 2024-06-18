@@ -163,7 +163,7 @@ export class GlobalSettings
 	MarkDirty()
 	{
 		this.modifiedTimer = 0.5;
-		SaveIndicator.AddShowTime(3);
+		SaveIndicator.AddShowTime();
 		if (this.modified) return;
 		this.modified = true;
 		this.delayedStoreIntervalId = window.setInterval(() => { this.step_DelayedStateStore(); }, 50);
@@ -191,7 +191,7 @@ export class GlobalSettings
 	StoreState()
 	{
 		localStorage.setItem(key_global_settings_store, JSON.stringify(this));
-		SaveIndicator.AddShowTime(3);
+		SaveIndicator.AddShowTime();
 		//Notifications.instance.Add("Settings Saved", "#00ff0030");
 		OptionManager.Save();
 	}
@@ -304,7 +304,7 @@ export class GlobalSettingsWindow extends DraggableWindow
 		const opt = OptionManager.GetOption(optionName);
 		var e_txt = this.AddTextField(
 			opt.label,
-			opt.value,
+			opt.value ? opt.value : "",
 			(e) => { OptionManager.SetOptionValue(optionName, e.checked); }
 		);
 		e_txt.style.height = "2rem";

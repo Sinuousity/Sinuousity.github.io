@@ -16,7 +16,7 @@ export class SaveIndicator
 		SaveIndicator.element.style.opacity = "0.0";
 	}
 
-	static AddShowTime(showTime)
+	static AddShowTime(showTime = 2.0)
 	{
 		SaveIndicator.showTime = showTime;
 		SaveIndicator.element.style.opacity = 0.6;

@@ -564,14 +564,16 @@ body
 
 	transform: scale(98%, 98%);
 
-	transition-property: transform;
-	transition-duration: 0.2s;
-	transition-timing-function: ease-in-out;
+	transition-property: opacity, transform, background-color, color, text-shadow !important;
+	transition-delay: 0s !important;
+	transition-duration: 0.15s !important;
+	transition-timing-function: ease-in-out !important;
 }
 .menu-windows-button:hover
 {
-	text-shadow: #00000042 -2px 2px 1px;
-	color: #ffbe73;
-	background-color: #0000007e;
-	transform: scale(100%, 100%);
+	transition-duration: 0.03s !important;
+	text-shadow: #00000042 -2px 2px 1px !important;
+	color: #ffbe73 !important;
+	background-color: #0000007e !important;
+	transform: scale(100%, 100%) !important;
 }

@@ -43,7 +43,27 @@ export class RaffleState
 	CheckMessageForKeyPhrase(m)
 	{
 		if (!RaffleState.instance.open) return;
-		if (m.message.startsWith(this.keyword)) this.AddName(m.username, false);
+
+		var keywordRequired = this.keyword != "";
+		if (!keywordRequired)
+		{
+			this.AddName(m.username, false);
+			return;
+		}
+
+		var opt_keyword = OptionManager.GetOption("raffle.keyword");
+		var opt_keyword_first = OptionManager.GetOption("raffle.keyword.first");
+		var keyPhraseLower = opt_keyword.value.toLowerCase();
+		if (opt_keyword_first.value === true)
+		{
+			var validPhrase = m.message.toLowerCase().startsWith(keyPhraseLower);
+			if (validPhrase) this.AddName(m.username, false);
+		}
+		else
+		{
+			var validPhrase = m.message.toLowerCase().includes(keyPhraseLower);
+			if (validPhrase) this.AddName(m.username, false);
+		}
 	}
 
 	MarkDirty()
@@ -652,7 +672,7 @@ export class RaffleOverlay
 		this.e_zone_root.style.opacity = showing ? "100%" : "0%";
 		this.e_zone_root.style.zIndex = showing ? "all" : "none";
 
-		this.e_zone_title_span.innerText = RaffleState.instance.title;
+		this.e_zone_title_span.innerText = RaffleState.instance.title === "" ? "Raffle" : RaffleState.instance.title;
 
 		this.e_zone_subtitle.innerText = RaffleState.instance.running ? "RUNNING" : (RaffleState.instance.open ? "OPEN" : "CLOSED");
 		this.e_zone_subtitle.style.textShadow = RaffleState.instance.running ? "#ffff00c0 0px 0px 11px" : "unset";
@@ -704,7 +724,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 		super("Raffle", pos_x, pos_y);
 		super.window_kind = "Raffle";
 
-		this.e_window_root.style.minHeight = "380px";
+		this.e_window_root.style.minHeight = "390px";
 		this.e_window_root.style.minWidth = "320px";
 
 		this.CreateContentContainer();
@@ -728,6 +748,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 			},
 			true
 		);
+		this.e_control_visible.title = "Show the raffle overlay at all?";
 
 		this.option_autohide = OptionManager.GetOption("raffle.autohide");
 		this.e_control_autohide = this.AddToggle(
@@ -740,6 +761,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 			},
 			true
 		);
+		this.e_control_autohide.title = "Automatically hide the overlay when it is closed and there are no entries.";
 
 		this.option_drag_run = OptionManager.GetOption("raffle.drag.run");
 		this.e_control_drag_run = this.AddToggle(
@@ -752,6 +774,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 			},
 			true
 		);
+		this.e_control_drag_run.title = "Whether the raffle be started by dragging quickly.";
 
 		this.option_slide_curve = OptionManager.GetOption("raffle.slide.bend");
 		this.e_control_slide_curve = this.AddSlider(
@@ -761,6 +784,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 			x => { OptionManager.SetOptionValue("raffle.slide.bend", Math.round(x.value)); },
 			true
 		);
+		this.e_control_slide_curve.title = "How curved is the entry slide, and which direction?";
 
 		this.option_slide_pad = OptionManager.GetOption("raffle.slide.pad");
 		this.e_control_slide_pad = this.AddSlider(
@@ -770,6 +794,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 			x => { OptionManager.SetOptionValue("raffle.slide.pad", Math.round(x.value)); },
 			true
 		);
+		this.e_control_slide_pad.title = "Extra spacing between entries in the slide.";
 
 		this.e_control_title = this.AddTextField(
 			"Raffle Title",
@@ -782,8 +807,10 @@ export class RaffleSettingsWindow extends DraggableWindow
 			},
 			true
 		);
+		this.e_control_title.children[1].children[0].placeholder = "Just 'Raffle'";
 		this.e_control_title.style.lineHeight = "2rem";
 		this.e_control_title.style.height = "2rem";
+		this.e_control_title.title = "The title of the raffle, shown atop the overlay.";
 
 		this.e_control_keyword = this.AddTextField(
 			"Join Key Phrase",
@@ -796,8 +823,22 @@ export class RaffleSettingsWindow extends DraggableWindow
 			},
 			true
 		);
+		this.e_control_keyword.children[1].children[0].placeholder = "No Phrase Required";
+		this.e_control_keyword.title = "The key phrase viewers must type to join.";
 		this.e_control_keyword.style.lineHeight = "2rem";
 		this.e_control_keyword.style.height = "2rem";
+
+		this.option_keyword_first = OptionManager.GetOption("raffle.keyword.first");
+		this.e_control_keyword_first = this.AddToggle(
+			this.option_keyword_first.label,
+			this.option_keyword_first.value,
+			x =>
+			{
+				OptionManager.SetOptionValue("raffle.keyword.first", x.checked);
+			},
+			true
+		);
+		this.e_control_keyword_first.title = "Require that the key phrase be the first thing in a message to join?";
 
 		this.e_control_addName = this.AddTextField(
 			"Manual Add",
@@ -901,6 +942,7 @@ WindowManager.instance.windowTypes.push({ key: "Raffle", icon: "confirmation_num
 
 OptionManager.AppendOption("raffle.visible", true, "Enable Overlay");
 OptionManager.AppendOption("raffle.autohide", true, "AutoHide Overlay");
+OptionManager.AppendOption("raffle.keyword.first", true, "Phrase At Start");
 OptionManager.AppendOption("raffle.title", "New Raffle", "Title");
 OptionManager.AppendOption("raffle.keyword", "joinraffle", "Join Key Phrase");
 OptionManager.AppendOption("raffle.slide.bend", 0.0, "Slide Bend");

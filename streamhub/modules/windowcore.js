@@ -37,11 +37,22 @@ export class WindowBase
 
 		document.body.appendChild(this.e_window_root);
 		WindowManager.instance.windows.push(this);
-		if (!WindowManager.instance.restoringState) WindowManager.instance.TryStoreState();
+		if (!WindowManager.instance.restoringState) WindowManager.instance.SetStateDirty();
+
+
+		this.resizeObserver = new ResizeObserver(
+			() =>
+			{
+				this.onWindowResize();
+				WindowManager.instance.SetStateDirty();
+			}
+		);
+		this.resizeObserver.observe(this.e_window_root);
 
 		this.Show();
 	}
 
+	onWindowResize() { };
 	onWindowShow() { };
 	onWindowClose() { };
 

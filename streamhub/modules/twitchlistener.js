@@ -24,6 +24,7 @@ const url_twitch_users = url_twitch_helix + "/users";
 const rgx_twitch_access_token = /\#access\_token\=([\w]+)/;
 const rgx_twitch_privmsg = /\:(.+)\!\1\@\1\.tmi\.twitch\.tv PRIVMSG \#([^\s]+) \:(.+)/;
 const rgx_twitch_usercolor = /color\=(\#\w{6})\;/;
+const rgx_twitch_displayName = /display\-name\=(\w+)\;/;
 
 export class TwitchListener
 {
@@ -96,14 +97,12 @@ export class TwitchListener
 				if (OptionManager.GetOptionValue("twitch.listen", false))
 				{
 					var color_check = event.data.match(rgx_twitch_usercolor);
-					if (color_check)
-					{
-						ChatCollector.Append(privmsg_check[1], privmsg_check[3], "twitch", color_check[1]);
-					}
-					else
-					{
-						ChatCollector.Append(privmsg_check[1], privmsg_check[3], "twitch", "white");
-					}
+					var displayName_check = event.data.match(rgx_twitch_displayName);
+
+					var nameColor = color_check ? color_check[1] : "white";
+					var displayName = displayName_check ? displayName_check[1] : privmsg_check[1];
+
+					ChatCollector.Append(displayName, privmsg_check[3], "twitch", nameColor);
 				}
 				return;
 			}

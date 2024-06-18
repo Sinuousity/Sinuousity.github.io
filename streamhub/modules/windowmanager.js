@@ -128,9 +128,13 @@ export class WindowManager
 
 	GetNewWindowAnywhere(window_kind)
 	{
-		var xPosition = Math.random() * document.documentElement.clientWidth * 0.5;
-		var yPosition = Math.random() * document.documentElement.clientHeight * 0.5;
-		return this.GetNewWindow(window_kind, xPosition, yPosition);
+		var w = this.GetNewWindow(window_kind, 0, 0);
+		var xPosition = Math.random() * (document.body.offsetWidth - w.e_window_root.offsetWidth);
+		var yPosition = Math.random() * (document.body.offsetHeight - w.e_window_root.offsetHeight);
+		w.position_x = xPosition;
+		w.position_y = yPosition;
+		w.ApplyPosition();
+		return w;
 	}
 
 	GetNewWindow(window_kind, xPosition, yPosition)

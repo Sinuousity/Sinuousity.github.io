@@ -6,7 +6,7 @@ console.info("[ +Module ] Window Core");
 
 export class WindowBase
 {
-	constructor(title, pos_x, pos_y)
+	constructor(title, pos_x = 0.0, pos_y = 0.0)
 	{
 		this.orderOffset = -WindowManager.instance.windows.length - 2;
 
@@ -19,8 +19,11 @@ export class WindowBase
 		this.e_window_icon = {};
 		this.e_title = {};
 
-		this.position_x = pos_x ? pos_x : 300;
-		this.position_y = pos_y ? pos_y : 300;
+		this.position_x = 0.0;
+		this.position_y = 0.0;
+		if (pos_x) this.position_x = pos_x;
+		if (pos_y) this.position_y = pos_y;
+
 		this.width = 300;
 		this.height = 600;
 
@@ -103,6 +106,7 @@ export class WindowBase
 		this.e_window_root.style.transform = "scale(100%)";
 		this.e_window_root.style.userSelect = "none";
 		this.e_window_root.style.pointerEvents = "all";
+		this.ApplyPosition();
 		this.onWindowShow();
 		WindowManager.instance.BringToFront(this);
 	}

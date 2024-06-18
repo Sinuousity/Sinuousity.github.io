@@ -304,12 +304,14 @@ export class RaffleOverlayEntry
 
 	RefreshImageProfile()
 	{
-		if (this.username === "") return;
+		if (this.username == "") return;
 
-		var cacheIndex = TwitchResources.profileDataCache.IndexOf(this.username);
+		const lowerUsername = this.username.toLowerCase();
+
+		var cacheIndex = TwitchResources.profileDataCache.IndexOf(lowerUsername);
 		if (cacheIndex < 0) 
 		{
-			TwitchResources.GetOrRequestData(this.username, x => { RaffleOverlay.instance.RefreshEntryImages(); });
+			TwitchResources.GetOrRequestData(lowerUsername, x => { RaffleOverlay.instance.RefreshEntryImages(); });
 			return;
 		}
 
@@ -320,6 +322,7 @@ export class RaffleOverlayEntry
 export class RaffleOverlay
 {
 	static instance = new RaffleOverlay();
+	static canRefreshImages = true;
 
 	constructor()
 	{
@@ -401,17 +404,18 @@ export class RaffleOverlay
 		this.animationDeltaTime = 0.0;
 		this.animationTimeLast = 0.0;
 		this.animationTime = 0.0;
-		requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
 
 		this.lastMousePositionX = UserInput.instance.mousePositionX;
 
-
 		this.sub_raffleRunStart = RaffleState.onRaffleRunStart.RequestSubscription(() => { this.OnRaffleStarted(); });
 		this.sub_raffleRunEnd = RaffleState.onRaffleRunEnd.RequestSubscription(() => { this.OnRaffleConcluded(); });
+
+		requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
 	}
 
 	OnRaffleStarted()
 	{
+		this.slideIndex = Math.round(Math.random() * RaffleState.instance.names.length);
 		if (Math.abs(this.slideVelocity) > 2.0)
 			this.slideVelocity = Math.sign(this.slideVelocity) * 30.0 * (Math.random() * 0.3 + 0.7);
 		else
@@ -428,11 +432,13 @@ export class RaffleOverlay
 
 	RefreshEntryImages()
 	{
+		if (!RaffleOverlay.canRefreshImages) return;
 		if (Math.abs(this.slideVelocity) > 42.0) return;
 		for (var nameIndex = 0; nameIndex < this.e_entries.length; nameIndex++)
 		{
 			this.e_entries[nameIndex].RefreshImageProfile();
 		}
+		RaffleOverlay.canRefreshImages = false;
 	}
 
 	CheckDragInput()
@@ -611,6 +617,8 @@ export class RaffleOverlay
 		}
 
 
+		RaffleOverlay.canRefreshImages = true;
+
 
 		requestAnimationFrame(x => { this.UpdateEntryPositions(x); });
 	}
@@ -626,16 +634,19 @@ export class RaffleOverlay
 
 	UpdateStyle()
 	{
+		var autohidden = OptionManager.GetOptionValue("raffle.autohide") === true;
 		var overlayAllowed = OptionManager.GetOptionValue("raffle.visible") === true;
-		var showing = RaffleState.instance.open || RaffleState.instance.names.length > 0;
+
+		var showing = (!autohidden) || (RaffleState.instance.open || RaffleState.instance.names.length > 0);
 		this.e_zone_root.style.display = overlayAllowed ? "block" : "none";
 		this.e_zone_root.style.opacity = showing ? "100%" : "0%";
 		this.e_zone_root.style.zIndex = showing ? "all" : "none";
 
 		this.e_zone_title_span.innerText = RaffleState.instance.title;
+
 		this.e_zone_subtitle.innerText = RaffleState.instance.running ? "RUNNING" : (RaffleState.instance.open ? "OPEN" : "CLOSED");
 		this.e_zone_subtitle.style.textShadow = RaffleState.instance.running ? "#ffff00c0 0px 0px 11px" : "unset";
-		this.e_zone_subtitle.style.color = RaffleState.instance.running ? "yellow" : (RaffleState.instance.open ? "lightgreen" : "red");
+		this.e_zone_subtitle.style.color = RaffleState.instance.running ? "goldenrod" : (RaffleState.instance.open ? "lightgreen" : "red");
 
 		this.e_zone_entry_count.innerText = RaffleState.instance.names.length + " ENTERED";
 	}
@@ -703,6 +714,18 @@ export class RaffleSettingsWindow extends DraggableWindow
 			x =>
 			{
 				OptionManager.SetOptionValue("raffle.visible", x.checked);
+				RaffleOverlay.instance.UpdateStyle();
+			},
+			true
+		);
+
+		this.option_autohide = OptionManager.GetOption("raffle.autohide");
+		this.e_control_autohide = this.AddToggle(
+			this.option_autohide.label,
+			this.option_autohide.value,
+			x =>
+			{
+				OptionManager.SetOptionValue("raffle.autohide", x.checked);
 				RaffleOverlay.instance.UpdateStyle();
 			},
 			true
@@ -866,7 +889,8 @@ export class RaffleSettingsWindow extends DraggableWindow
 WindowManager.instance.windowTypes.push({ key: "Raffle", icon: "confirmation_number", model: (x, y) => { return new RaffleSettingsWindow(x, y); } });
 
 
-OptionManager.AppendOption("raffle.visible", true, "Show Overlay");
+OptionManager.AppendOption("raffle.visible", true, "Enable Overlay");
+OptionManager.AppendOption("raffle.autohide", true, "AutoHide Overlay");
 OptionManager.AppendOption("raffle.title", "New Raffle", "Title");
 OptionManager.AppendOption("raffle.keyword", "joinraffle", "Join Key Phrase");
 OptionManager.AppendOption("raffle.slide.bend", 0.0, "Slide Bend");

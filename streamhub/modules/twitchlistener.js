@@ -171,6 +171,7 @@ export class TwitchResources
 
 	static HasDataRequest(username)
 	{
+		if (!username) return;
 		for (var ii = 0; ii < TwitchResources.profileDataQueue.length; ii++)
 		{
 			if (TwitchResources.profileDataQueue[ii].username == username) return true;
@@ -180,6 +181,7 @@ export class TwitchResources
 
 	static EnqueueProfileDataRequest(username, withData = x => { })
 	{
+		if (!username) return;
 		if (TwitchResources.HasDataRequest(username)) return;
 		TwitchResources.profileDataQueue.push({
 			username: username,
@@ -189,6 +191,7 @@ export class TwitchResources
 
 	static GetOrRequestData(username, withData = x => { })
 	{
+		if (!username) return;
 		var cacheIndex = TwitchResources.profileDataCache.IndexOf(username);
 		if (cacheIndex > -1) // exists in cache
 		{

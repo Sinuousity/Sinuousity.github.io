@@ -430,10 +430,10 @@ body
 
 	font-size: 0.8rem;
 	font-weight: bold;
-	color: #ca65e4;
+	color: #e4b165;
 	letter-spacing: 0.125rem;
 
-	background-color: #83388d6e;
+	background-color: #8d61386e;
 	border: 3px solid #6e3d6713;
 	border-radius: 0.5rem;
 
@@ -447,9 +447,9 @@ body
 	width: 12rem;
 	height: 20rem;
 	opacity: 100%;
-	background-color: #83388d;
-	border: 3px solid #6e3d67;
-	color: #eda4ff;
+	background-color: #8d6538;
+	border: 3px solid #00000079;
+	color: #ffdfa4;
 
 	transition-timing-function: var(--bounce);
 	transition-duration: 0.25s;
@@ -557,8 +557,8 @@ body
 	font-variant: small-caps;
 	letter-spacing: 0.05rem;
 
-	color: #505050;
-	background-color: #181818;
+	color: #ffffff86;
+	background-color: #0000002f;
 
 	transform: scale(98%, 98%);
 
@@ -569,6 +569,6 @@ body
 .menu-windows-button:hover
 {
 	color: #ffbe73;
-	background-color: #272727;
+	background-color: #0000007e;
 	transform: scale(100%, 100%);
 }

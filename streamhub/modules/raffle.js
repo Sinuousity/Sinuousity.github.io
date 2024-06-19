@@ -54,9 +54,10 @@ export class RaffleState
 		var opt_keyword = OptionManager.GetOption("raffle.keyword");
 		var opt_keyword_first = OptionManager.GetOption("raffle.keyword.first");
 		var opt_keyword_casesens = OptionManager.GetOption("raffle.keyword.case.sensitive");
+		var doCaseSensitive = opt_keyword_casesens.value === true;
 
-		var actualKeyPhase = (opt_keyword_casesens.value === true) ? opt_keyword.value : opt_keyword.value.toLowerCase();
-		var actualMessage = (opt_keyword_casesens.value === true) ? m.message : m.message.toLowerCase();
+		var actualKeyPhase = doCaseSensitive ? opt_keyword.value : opt_keyword.value.toLowerCase();
+		var actualMessage = doCaseSensitive ? m.message : m.message.toLowerCase();
 
 		var keyPhraseMatch = false;
 		if (opt_keyword_first.value === true) keyPhraseMatch = actualMessage.startsWith(actualKeyPhase);
@@ -267,7 +268,7 @@ export class RaffleOverlayEntry
 
 	UpdateIndices(slideIndex, slideIndexReal, slidePosition, nameCount, cellPad)
 	{
-		const halfCount = 3;
+		const halfCount = 4;
 
 		var newCellIndexOffset = this.cellIndex - slideIndex;
 		this.indexOffsetChanged = this.cellIndexOffset != newCellIndexOffset;
@@ -533,7 +534,7 @@ export class RaffleOverlay
 		this.CheckDragInput();
 		var clampedVelocity = Math.sign(this.slideVelocity) * Math.min(deltaTime * Math.abs(this.slideVelocity), 0.99);
 
-		var cellCount = 6;//Math.min(6, nameCount);
+		var cellCount = 8;
 		var halfCount = cellCount * 0.5;
 
 		this.slidePosition += clampedVelocity;
@@ -701,7 +702,7 @@ export class RaffleOverlay
 
 		if (RaffleState.instance.names.length < 1) return;
 
-		var cellCount = 6;//Math.min(6, RaffleState.instance.names.length);
+		var cellCount = 8;
 		for (var ii = 0; ii < cellCount; ii++)
 		{
 			const id = ii;

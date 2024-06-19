@@ -53,17 +53,16 @@ export class RaffleState
 
 		var opt_keyword = OptionManager.GetOption("raffle.keyword");
 		var opt_keyword_first = OptionManager.GetOption("raffle.keyword.first");
-		var keyPhraseLower = opt_keyword.value.toLowerCase();
-		if (opt_keyword_first.value === true)
-		{
-			var validPhrase = m.message.toLowerCase().startsWith(keyPhraseLower);
-			if (validPhrase) this.AddName(m.username, false);
-		}
-		else
-		{
-			var validPhrase = m.message.toLowerCase().includes(keyPhraseLower);
-			if (validPhrase) this.AddName(m.username, false);
-		}
+		var opt_keyword_casesens = OptionManager.GetOption("raffle.keyword.case.sensitive");
+
+		var actualKeyPhase = (opt_keyword_casesens.value === true) ? opt_keyword.value : opt_keyword.value.toLowerCase();
+		var actualMessage = (opt_keyword_casesens.value === true) ? m.message : m.message.toLowerCase();
+
+		var keyPhraseMatch = false;
+		if (opt_keyword_first.value === true) keyPhraseMatch = actualMessage.startsWith(actualKeyPhase);
+		else keyPhraseMatch = actualMessage.includes(actualKeyPhase);
+
+		if (keyPhraseMatch) this.AddName(m.username, false);
 	}
 
 	MarkDirty()
@@ -724,7 +723,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 		super("Raffle", pos_x, pos_y);
 		super.window_kind = "Raffle";
 
-		this.e_window_root.style.minHeight = "420px";
+		this.e_window_root.style.minHeight = "600px";
 		this.e_window_root.style.minWidth = "320px";
 
 		this.CreateContentContainer();
@@ -737,6 +736,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 
 		this.CreateControlsColumn();
 
+		this.AddSectionTitle("Appearance");
 		this.option_visible = OptionManager.GetOption("raffle.visible");
 		this.e_control_visible = this.AddToggle(
 			this.option_visible.label,
@@ -812,8 +812,10 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_control_title.style.height = "2rem";
 		this.e_control_title.title = "The title of the raffle, shown atop the overlay.";
 
+
+		this.AddSectionTitle("Key Phrase");
 		this.e_control_keyword = this.AddTextField(
-			"Join Key Phrase",
+			"Key Phrase",
 			OptionManager.GetOptionValue("raffle.keyword", "joinraffle"),
 			e =>
 			{
@@ -840,6 +842,23 @@ export class RaffleSettingsWindow extends DraggableWindow
 		);
 		this.e_control_keyword_first.title = "Require that the key phrase be the first thing in a message to join?";
 
+		this.e_control_keyword_case_sensitive = OptionManager.GetOption("raffle.keyword.case.sensitive");
+		this.e_control_keyword_case_sensitive = this.AddToggle(
+			this.e_control_keyword_case_sensitive.label,
+			this.e_control_keyword_case_sensitive.value,
+			x =>
+			{
+				OptionManager.SetOptionValue("raffle.keyword.case.sensitive", x.checked);
+			},
+			true
+		);
+		this.e_control_keyword_case_sensitive.title = "Is the key phrase case sensitive?";
+
+
+
+
+
+		this.AddSectionTitle("Manual Add");
 		this.e_control_addName = this.AddTextField(
 			"Manual Add",
 			"",
@@ -864,6 +883,9 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_btn_addName.style.lineHeight = "2rem";
 		this.e_btn_addName.style.height = "2rem";
 
+
+
+		this.AddSectionTitle("Controls");
 		this.e_btn_toggleOpen = this.AddControlButton("Join From Chat", RaffleState.instance.open ? "Close" : "Open", e =>
 		{
 			RaffleState.instance.ToggleOpen();
@@ -942,7 +964,8 @@ WindowManager.instance.windowTypes.push({ key: "Raffle", icon: "confirmation_num
 
 OptionManager.AppendOption("raffle.visible", true, "Enable Overlay");
 OptionManager.AppendOption("raffle.autohide", true, "AutoHide Overlay");
-OptionManager.AppendOption("raffle.keyword.first", true, "Phrase At Start");
+OptionManager.AppendOption("raffle.keyword.first", true, "Start With Phrase");
+OptionManager.AppendOption("raffle.keyword.case.sensitive", true, "Case Sensitive");
 OptionManager.AppendOption("raffle.title", "New Raffle", "Title");
 OptionManager.AppendOption("raffle.keyword", "joinraffle", "Join Key Phrase");
 OptionManager.AppendOption("raffle.slide.bend", 0.0, "Slide Bend");

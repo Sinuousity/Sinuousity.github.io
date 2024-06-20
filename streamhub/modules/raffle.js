@@ -242,6 +242,7 @@ export class RaffleOverlayEntry
 		this.offsetPosition = 0;
 
 		this.username = "";
+		this.platform = "";
 		this.profileImageUrl = "";
 		this.waitingOnImage = false;
 
@@ -286,17 +287,29 @@ export class RaffleOverlayEntry
 		this.entryIndex = newEntryIndex;
 
 		this.username = RaffleState.instance.names[this.entryIndex];
+		this.platform = RaffleState.instance.names[this.entryIndex];
 		this.e_name_span.innerText = this.username;
 
 		if (entryIndexChanged) this.RefreshImageProfile();
 	}
 
-	UpdateTransform(slidePosition, cellSize, cellRootWidth, bend, scalePercentX, scalePercentY, transitionDuration)
+	UpdateTransform(slidePosition, cellSize, cellRootWidth, scalePercentX, scalePercentY, transitionDuration)
 	{
-		var twist = `rotate3d(0,1,1,${(this.relativeCellIndex + slidePosition - 0.5) * bend}deg)`;
-		var lift = `${(1.0 - Math.pow(Math.abs(this.relativeCellIndex + slidePosition - 0.5), 2)) * -bend}`;
+		var posdelta = this.relativeCellIndex + slidePosition - 0.5;
+		var bothSides = Math.pow(Math.abs(posdelta) * 0.7, 2);
+		var bothSidesSigned = bothSides * Math.sign(posdelta);
 
-		this.e_root.style.transform = `translate(-50%,${lift}%) scale(${scalePercentX}%, ${scalePercentY}%) ${twist}`;
+		var lift = `${(1.0 - bothSides) * -RaffleOverlay.instance.bend}`;
+		var scaleMult = 1.0 + posdelta * RaffleOverlay.instance.zoom * 0.05;
+
+		var styleTransform = `translate(-50%, ${lift}%)`;
+		styleTransform += ` perspective(60rem)`;
+		styleTransform += ` scale(${scalePercentX * scaleMult}%, ${scalePercentY * scaleMult}%)`;
+		styleTransform += ` rotate3d(0,0,1,${posdelta * RaffleOverlay.instance.bend + bothSidesSigned * RaffleOverlay.instance.turn}deg)`;
+		styleTransform += ` rotate3d(0,1,0,${bothSidesSigned * RaffleOverlay.instance.flipX * 15}deg)`;
+		styleTransform += ` rotate3d(1,0,0,${bothSidesSigned * RaffleOverlay.instance.flipY * 15 * 0.3333}deg)`;
+
+		this.e_root.style.transform = styleTransform;
 		this.e_root.style.left = `${this.offsetPosition * cellSize + cellRootWidth * 0.5}px`;
 		this.e_root.style.transitionDuration = transitionDuration + "s";
 		this.e_root.style.outline = "solid transparent 3px";
@@ -562,18 +575,22 @@ export class RaffleOverlay
 		blur = Math.min(blur, 20);
 		cellPad += 0.1 * stretch;
 
-		var bend = OptionManager.GetOptionValue("raffle.slide.bend");
+		this.bend = OptionManager.GetOptionValue("raffle.slide.bend");
+		this.zoom = OptionManager.GetOptionValue("raffle.slide.zoom");
+		this.turn = OptionManager.GetOptionValue("raffle.slide.turn");
+		this.flipX = OptionManager.GetOptionValue("raffle.slide.flipx");
+		this.flipY = OptionManager.GetOptionValue("raffle.slide.flipy");
 		//var doImages = Math.abs(this.slideVelocity) < 42.0;
 
 		var scalePercentY = 100;
 		var scalePercentX = scalePercentY + stretch * 100.0;
 		var transitionDuration = Math.max(0.0, 0.12 - 6.0 * stretch);
 
-		for (var nameIndex = 0; nameIndex < cellCount; nameIndex++)
+		for (var cellIndex = 0; cellIndex < cellCount; cellIndex++)
 		{
-			var thisEntry = this.e_entries[nameIndex];
+			var thisEntry = this.e_entries[cellIndex];
 			thisEntry.UpdateIndices(this.slideIndex, this.slideIndexReal, this.slidePosition, nameCount, cellPad);
-			thisEntry.UpdateTransform(this.slidePosition, cellSize, cellRootWidth, bend, scalePercentX, scalePercentY, transitionDuration);
+			thisEntry.UpdateTransform(this.slidePosition, cellSize, cellRootWidth, scalePercentX, scalePercentY, transitionDuration);
 			if (thisEntry.indexOffsetChanged)
 			{
 				thisEntry.UpdateImageStyle(stretch);
@@ -724,7 +741,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 		super("Raffle", pos_x, pos_y);
 		super.window_kind = "Raffle";
 
-		this.e_window_root.style.minHeight = "600px";
+		this.e_window_root.style.minHeight = "800px";
 		this.e_window_root.style.minWidth = "320px";
 
 		this.CreateContentContainer();
@@ -737,7 +754,10 @@ export class RaffleSettingsWindow extends DraggableWindow
 
 		this.CreateControlsColumn();
 
-		this.AddSectionTitle("Appearance");
+		this.AddSectionTitle("General");
+
+		this.e_control_visible = this.AddOptionToggle("raffle.visible", "Show the raffle overlay at all?");
+		/*
 		this.option_visible = OptionManager.GetOption("raffle.visible");
 		this.e_control_visible = this.AddToggle(
 			this.option_visible.label,
@@ -750,52 +770,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 			true
 		);
 		this.e_control_visible.title = "Show the raffle overlay at all?";
-
-		this.option_autohide = OptionManager.GetOption("raffle.autohide");
-		this.e_control_autohide = this.AddToggle(
-			this.option_autohide.label,
-			this.option_autohide.value,
-			x =>
-			{
-				OptionManager.SetOptionValue("raffle.autohide", x.checked);
-				RaffleOverlay.instance.UpdateStyle();
-			},
-			true
-		);
-		this.e_control_autohide.title = "Automatically hide the overlay when it is closed and there are no entries.";
-
-		this.option_drag_run = OptionManager.GetOption("raffle.drag.run");
-		this.e_control_drag_run = this.AddToggle(
-			this.option_drag_run.label,
-			this.option_drag_run.value,
-			x =>
-			{
-				OptionManager.SetOptionValue("raffle.drag.run", x.checked);
-				RaffleOverlay.instance.UpdateStyle();
-			},
-			true
-		);
-		this.e_control_drag_run.title = "Whether the raffle be started by dragging quickly.";
-
-		this.option_slide_curve = OptionManager.GetOption("raffle.slide.bend");
-		this.e_control_slide_curve = this.AddSlider(
-			this.option_slide_curve.label,
-			this.option_slide_curve.value,
-			-13, 13,
-			x => { OptionManager.SetOptionValue("raffle.slide.bend", Math.round(x.value)); },
-			true
-		);
-		this.e_control_slide_curve.title = "How curved is the entry slide, and which direction?";
-
-		this.option_slide_pad = OptionManager.GetOption("raffle.slide.pad");
-		this.e_control_slide_pad = this.AddSlider(
-			this.option_slide_pad.label,
-			this.option_slide_pad.value,
-			0, 20,
-			x => { OptionManager.SetOptionValue("raffle.slide.pad", Math.round(x.value)); },
-			true
-		);
-		this.e_control_slide_pad.title = "Extra spacing between entries in the slide.";
+		*/
 
 		this.e_control_title = this.AddTextField(
 			"Raffle Title",
@@ -814,7 +789,6 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_control_title.title = "The title of the raffle, shown atop the overlay.";
 
 
-		this.AddSectionTitle("Key Phrase");
 		this.e_control_keyword = this.AddTextField(
 			"Key Phrase",
 			OptionManager.GetOptionValue("raffle.keyword", "joinraffle"),
@@ -831,30 +805,23 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_control_keyword.style.lineHeight = "2rem";
 		this.e_control_keyword.style.height = "2rem";
 
-		this.option_keyword_first = OptionManager.GetOption("raffle.keyword.first");
-		this.e_control_keyword_first = this.AddToggle(
-			this.option_keyword_first.label,
-			this.option_keyword_first.value,
-			x =>
-			{
-				OptionManager.SetOptionValue("raffle.keyword.first", x.checked);
-			},
-			true
-		);
-		this.e_control_keyword_first.title = "Require that the key phrase be the first thing in a message to join?";
+		this.AddSectionTitle("Appearance");
 
-		this.e_control_keyword_case_sensitive = OptionManager.GetOption("raffle.keyword.case.sensitive");
-		this.e_control_keyword_case_sensitive = this.AddToggle(
-			this.e_control_keyword_case_sensitive.label,
-			this.e_control_keyword_case_sensitive.value,
-			x =>
-			{
-				OptionManager.SetOptionValue("raffle.keyword.case.sensitive", x.checked);
-			},
-			true
-		);
-		this.e_control_keyword_case_sensitive.title = "Is the key phrase case sensitive?";
+		this.e_control_autohide = this.AddOptionToggle("raffle.autohide", "Hides the overlay when it is closed and there are no entries.");
 
+		this.e_control_drag_run = this.AddOptionToggle("raffle.drag.run", "Whether the raffle can be started by dragging quickly.");
+
+		this.e_control_slide_curve = this.AddOptionSlider("raffle.slide.bend", -13, 13, "How curved is the entry slide, and which direction?", true);
+		this.e_control_slide_curve = this.AddOptionSlider("raffle.slide.zoom", -10.0, 10.0, "How zoomy is the entry slide, and which direction?", true);
+		this.e_control_slide_pad = this.AddOptionSlider("raffle.slide.pad", 0, 20, "Extra spacing between entries in the slide.", true);
+		this.e_control_slide_turn = this.AddOptionSlider("raffle.slide.turn", -12, 12, "How much entries turn facing you as they slide.", true);
+		this.e_control_slide_flipX = this.AddOptionSlider("raffle.slide.flipx", -12, 12, "How much entries turn horizontally as they slide.", true);
+		this.e_control_slide_flipY = this.AddOptionSlider("raffle.slide.flipy", -12, 12, "How much entries turn vertically as they slide.", true);
+
+
+		this.AddSectionTitle("Key Phrase Options");
+		this.e_control_keyword_first = this.AddOptionToggle("raffle.keyword.first", "Require that the key phrase be the first thing in a message to join?");
+		this.e_control_keyword_case_sensitive = this.AddOptionToggle("raffle.keyword.case.sensitive", "Is the key phrase case sensitive?");
 
 
 
@@ -863,7 +830,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_control_addName = this.AddTextField(
 			"Manual Add",
 			"",
-			e => { this.e_btn_addName.children[1].children[0].disabled = e.value == ""; },
+			e => { this.e_btn_addName.children[1].children[0].disabled = e.value == "" || RaffleState.instance.running; },
 			false
 		);
 		this.txt_addName = this.e_control_addName.children[1].children[0];
@@ -874,9 +841,6 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_btn_addName = this.AddButton("", "Add", e =>
 		{
 			RaffleState.instance.AddName(this.txt_addName.value, true);
-			//SaveIndicator.AddShowTime(3);
-			//Notifications.instance.Add("Raffle Name Added : " + this.txt_addName.value, "#00ff0030");
-			//onSubmitRaffleName(txt_add_name.value);
 			this.e_btn_addName.children[1].children[0].disabled = true;
 			this.txt_addName.value = "";
 		}, false);
@@ -892,32 +856,63 @@ export class RaffleSettingsWindow extends DraggableWindow
 			RaffleState.instance.ToggleOpen();
 			this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc0050" : "#00ffcc50";
 			this.e_btn_toggleOpen.value = RaffleState.instance.open ? "Close" : "Open";
-			//SaveIndicator.AddShowTime(3);
-			//Notifications.instance.Add(RaffleState.instance.open ? "Raffle Open" : "Raffle Closed", "#ffff0030");
 		}, false);
 		this.e_btn_toggleOpen.style.backgroundColor = RaffleState.instance.open ? "#ffcc0050" : "#00ffcc50";
 
-		var e_btn_clearNames = this.AddControlButton("Clear All Names", "Clear", e =>
+		this.e_btn_clearNames = this.AddControlButton("Clear All Names", "Clear", e =>
 		{
 			RaffleState.instance.ClearNames();
-			//SaveIndicator.AddShowTime(3);
-			//Notifications.instance.Add("Raffle Names Cleared", "#ffff0050");
 		}, false);
-		e_btn_clearNames.style.backgroundColor = "#ff330050";
-		e_btn_clearNames.style.color = "#ffffffaa";
+		this.e_btn_clearNames.style.backgroundColor = "#ff330050";
+		this.e_btn_clearNames.style.color = "#ffffffaa";
 
 		this.e_btn_run = this.AddControlButton("Run Raffle", "Run", e =>
 		{
 			RaffleState.instance.TryRun();
-			this.e_btn_run.disabled = RaffleState.instance.running;
 		}, false);
-		this.e_btn_run.disabled = RaffleState.instance.running;
+
 		this.e_btn_run.style.backgroundColor = "#00ff0050";
 		this.e_btn_run.style.color = "#ffffffaa";
 
 
-		this.sub_raffleRunStart = RaffleState.onRaffleRunStart.RequestSubscription(() => { this.e_btn_run.disabled = true; });
-		this.sub_raffleRunEnd = RaffleState.onRaffleRunEnd.RequestSubscription(() => { this.e_btn_run.disabled = false; });
+		this.sub_raffleRunStart = RaffleState.onRaffleRunStart.RequestSubscription(() => { this.DisableLiveControls(); });
+		this.sub_raffleRunEnd = RaffleState.onRaffleRunEnd.RequestSubscription(() => { this.EnableLiveControls(); });
+		this.EnableLiveControls();
+	}
+
+
+
+	AddOptionSlider(option_key, min, max, tooltip = "", roundValue = false)
+	{
+		var opt = OptionManager.GetOption(option_key);
+		var control = this.AddSlider(
+			opt.label,
+			opt.value,
+			min, max,
+			x =>
+			{
+				OptionManager.SetOptionValue(option_key, roundValue ? Math.round(x.value) : x.value);
+			},
+			true
+		);
+		control.title = tooltip;
+	}
+
+	AddOptionToggle(option_key, tooltip = "")
+	{
+		var opt = OptionManager.GetOption(option_key);
+		var control = this.AddToggle(
+			opt.label,
+			opt.value,
+			x =>
+			{
+				OptionManager.SetOptionValue(option_key, x.checked);
+				RaffleOverlay.instance.UpdateStyle();
+			},
+			true
+		);
+		control.title = tooltip;
+		return control;
 	}
 
 	onWindowClose()
@@ -925,6 +920,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 		RaffleState.onRaffleRunStart.RemoveSubscription(this.sub_raffleRunStart);
 		RaffleState.onRaffleRunEnd.RemoveSubscription(this.sub_raffleRunEnd);
 	}
+
 
 	AddControlButton(label, buttonText, action, dirtiesSettings = false)
 	{
@@ -958,6 +954,22 @@ export class RaffleSettingsWindow extends DraggableWindow
 		e_row.appendChild(e_control);
 		return e_control;
 	}
+
+	EnableLiveControls()
+	{
+		this.e_btn_run.disabled = false;
+		this.e_btn_addName.disabled = this.txt_addName.value == "";
+		this.e_btn_toggleOpen.disabled = false;
+		this.e_btn_clearNames.disabled = false;
+	}
+
+	DisableLiveControls()
+	{
+		this.e_btn_run.disabled = true;
+		this.e_btn_addName.disabled = true;
+		this.e_btn_toggleOpen.disabled = true;
+		this.e_btn_clearNames.disabled = true;
+	}
 }
 
 WindowManager.instance.windowTypes.push({ key: "Raffle", icon: "confirmation_number", model: (x, y) => { return new RaffleSettingsWindow(x, y); } });
@@ -965,10 +977,14 @@ WindowManager.instance.windowTypes.push({ key: "Raffle", icon: "confirmation_num
 
 OptionManager.AppendOption("raffle.visible", true, "Enable Overlay");
 OptionManager.AppendOption("raffle.autohide", true, "AutoHide Overlay");
-OptionManager.AppendOption("raffle.keyword.first", true, "Start With Phrase");
+OptionManager.AppendOption("raffle.keyword.first", true, "Must Be First");
 OptionManager.AppendOption("raffle.keyword.case.sensitive", true, "Case Sensitive");
 OptionManager.AppendOption("raffle.title", "New Raffle", "Title");
 OptionManager.AppendOption("raffle.keyword", "joinraffle", "Join Key Phrase");
 OptionManager.AppendOption("raffle.slide.bend", 0.0, "Slide Bend");
+OptionManager.AppendOption("raffle.slide.zoom", 0.0, "Slide Zoom");
+OptionManager.AppendOption("raffle.slide.turn", 0.0, "Slide Turn");
+OptionManager.AppendOption("raffle.slide.flipx", 0.0, "Slide Flip X");
+OptionManager.AppendOption("raffle.slide.flipy", 0.0, "Slide Flip Y");
 OptionManager.AppendOption("raffle.slide.pad", 0.0, "Entry Padding");
 OptionManager.AppendOption("raffle.drag.run", true, "Run By Dragging");

@@ -88,7 +88,7 @@ export class OptionManager
 		var optionIndex = this.GetOptionIndex(name);
 		if (optionIndex < 0) 
 		{
-			AppendOption(name, newValue, name);
+			this.AppendOption(name, newValue, name);
 		}
 		else
 		{

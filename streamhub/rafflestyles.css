@@ -101,6 +101,7 @@
 	top: 50%;
 	width: min(1280px, 200%);
 	height: calc(40% + 100px);
+
 	transform: translate(-50%, -50%);
 
 	overflow: hidden;

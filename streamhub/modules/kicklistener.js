@@ -2,10 +2,61 @@ import { Lookup } from "./lookup.js";
 import { RemoteDataConnection } from "./remotedata.js";
 import { ChatCollector } from "./chatcollector.js";
 import { GlobalSettings, OptionManager } from "./globalsettings.js";
+import { EventSource } from "./eventsource.js";
 
 console.info("[ +Module ] Kick Listener");
 
 const rgx_kick_message_emote = /\[emote\:(\d+)\:(\w+)\]/g;
+
+
+
+const url_kick_v2_channels = "https://kick.com/api/v2/channels/";
+export class KickChannelDataCache
+{
+	static cachedData = new Lookup();
+	static onNewData = new EventSource();
+	static requestedChannels = [];
+
+	static IndexOfCachedData(channel) { return cachedData.IndexOf(channel); }
+	static HasDataCached(channel) { return cachedData.Contains(channel); }
+	static HasDataRequested(channel) { return KickChannelDataCache.requestedChannels.includes(channel); }
+
+	static async RequestData(channel, useCache = true, skipCacheCheck = false)
+	{
+		if (!skipCacheCheck && KickChannelDataCache.HasDataCached(channel)) return;
+		if (KickChannelDataCache.HasDataRequested(channel)) return;
+
+		KickChannelDataCache.requestedChannels.push(channel);
+
+		var path = url_kick_v2_channels + channel;
+		var resp = await fetch(path, { cache: (useCache ? "default" : "no-store") });
+		if (!resp.ok)
+		{
+			console.warn("fetch() error for : " + path);
+			return null;
+		}
+		var obj = await resp.json();
+		KickChannelDataCache.cachedData.Add(channel, obj);
+
+		var reqId = KickChannelDataCache.requestedChannels.indexOf(channel);
+		KickChannelDataCache.requestedChannels.splice(reqId, 1);
+		KickChannelDataCache.onNewData.Invoke();
+	}
+
+	static GetOrRequestProfileData(channel)
+	{
+		var cacheIndex = KickChannelDataCache.IndexOfCachedData(channel);
+		if (cacheIndex < 0) 
+		{
+			KickChannelDataCache.RequestData(channel, true, true);
+			return {};
+		}
+		return KickChannelDataCache.cachedData[cacheIndex];
+	}
+}
+
+
+
 
 export class KickState extends RemoteDataConnection
 {
@@ -61,8 +112,6 @@ export class KickState extends RemoteDataConnection
 
 	async GetKickDataAsync()
 	{
-		const url_kick_v2_channels = "https://kick.com/api/v2/channels/";
-
 		if (OptionManager.GetOptionValue("kick.listen"))
 		{
 			if (!this.gotChannelData)

@@ -165,6 +165,8 @@ export class TwitchResources
 
 	static StepProfileDataQueue() { if (TwitchResources.profileDataQueue.length > 0) TwitchResources.GetProfileDataBatch(); }
 
+	static IndexOfCachedData(username) { return TwitchResources.profileDataCache.IndexOf(username); }
+
 	static HasCachedProfileData(username) { return TwitchResources.profileDataCache.Contains(username); }
 	static GetCachedProfileData(username) { return TwitchResources.profileDataCache.Get(username); }
 

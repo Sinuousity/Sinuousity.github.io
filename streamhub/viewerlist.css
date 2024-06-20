@@ -1,0 +1,76 @@
+﻿.viewer-list-root
+{
+	position: absolute;
+	overflow-x: hidden;
+	overflow-y: auto;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+
+	letter-spacing: 0.03rem;
+}
+
+.viewer-list-item
+{
+	cursor: pointer;
+	padding-left: 0.69rem;
+	padding-top: 0.1rem;
+	padding-bottom: 0.1rem;
+	transition-property: padding-left;
+	transition-duration: 0.2s;
+	transition-timing-function: ease-in-out;
+}
+.viewer-list-item:hover
+{
+	padding-left: 1rem;
+	background-color: #ffffff10;
+}
+
+.viewer-list-counter
+{
+	position: absolute;
+	top: 0;
+	right: 1.3rem;
+	width: 5rem;
+	height: 1.2rem;
+	line-height: 1.2rem;
+	font-size: 0.7rem;
+	text-align: center;
+	text-wrap: nowrap;
+	overflow: visible;
+	background-color: #000000c2;
+	border-radius: 0.3rem;
+}
+
+
+
+
+
+.viewer-details-root
+{
+	position: absolute;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding: 0.5rem;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	background-color: #000000c2;
+	opacity: 0.0;
+	letter-spacing: 0.1rem;
+	pointer-events: none;
+}
+
+.viewer-details-root div
+{
+	text-align: center;
+}
+
+.viewer-details-root img
+{
+	border-radius: 0.5rem;
+	outline: solid #ffffff30 3px;
+	outline-offset: 3px;
+}

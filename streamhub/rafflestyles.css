@@ -51,8 +51,49 @@
 
 .raffle-title-count
 {
+	overflow: hidden;
+
+	pointer-events: fill;
 	font-size: 0.86rem;
+	height: 0.9rem;
+	line-height: 0.9rem;
 	color: #ffffff90;
+
+	border-bottom: solid transparent 1px;
+
+	transition-property: height, border-bottom;
+	transition-duration: 0.1s;
+	transition-timing-function: ease-in-out;
+}
+.raffle-title-count:hover
+{
+	height: 2.9rem;
+	border-bottom: solid white 1px;
+}
+
+.raffle-title-clear
+{
+	cursor: pointer;
+
+	margin-top: 0.25rem;
+	height: 1.5rem;
+	line-height: 1.5rem;
+
+	background-color: #ff00004f;
+	color: #ff000088;
+
+	border-radius: 1rem;
+	transform: scale(90%);
+
+	transition-property: transform, color, background-color;
+	transition-duration: 0.1s;
+	transition-timing-function: ease-in-out;
+}
+.raffle-title-clear:hover
+{
+	transform: scale(100%);
+	background-color: #ff000088;
+	color: #ff0000;
 }
 
 .rafflesubtitle
@@ -62,7 +103,7 @@
 	cursor: pointer;
 	position: absolute;
 	left: 0%;
-	top: 20%;
+	top: 1rem;
 	transform-origin: 50% 100%;
 	transform: translate(-80%, -100%) rotate(-20deg);
 
@@ -133,6 +174,8 @@
 	background-color: #ffffff10;
 	border-radius: 0.5rem;
 
+	object-fit: contain;
+
 	transition-property: outline, outline-offset;
 	transition-duration: 0.169s;
 	transition-timing-function: ease-in-out;
@@ -145,6 +188,8 @@
 	left: 0;
 	right: 0;
 	border-radius: 0.5rem;
+	max-width: 100%;
+	max-height: 100%;
 
 	opacity: 0%;
 

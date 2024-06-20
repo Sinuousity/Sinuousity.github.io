@@ -62,6 +62,19 @@
 	cursor: grab;
 }
 
+.window-button > .window-icon
+{
+	opacity: 0.0;
+	transition-property: opacity;
+	transition-duration: 0.2s;
+	transition-timing-function: ease-in-out;
+}
+
+.window-button:hover > .window-icon
+{
+	opacity: 0.5;
+}
+
 .window-icon
 {
 	z-index: 59;
@@ -319,7 +332,7 @@
 	z-index: 0;
 	cursor: default;
 	inset: 0rem;
-	padding-top: 2.15rem;
+	margin-top: 2.1rem;
 	text-align: left;
 
 	color: #ffffff80;
@@ -390,13 +403,14 @@
 	cursor: default;
 	z-index: 0;
 
+	overflow-x: hidden;
+	overflow-y: auto;
+
 	position: absolute;
 	bottom: 0rem;
 	left: 0rem;
 	right: 0rem;
 	height: auto;
-	min-height: calc(100% - 2.2rem);
-	padding-top: 2.1rem;
 
 	text-align: left;
 	color: #ffffff80;
@@ -404,6 +418,7 @@
 
 .window-content-chat
 {
+	user-select: text;
 	overflow: visible;
 	text-overflow: ellipsis;
 	padding: 0.25rem;
@@ -411,6 +426,7 @@
 	padding-right: 0.75rem;
 	background-color: #00000000;
 	word-wrap: break-word;
+	font-size: 0.94rem;
 
 	transition-property: color, background-color, transform;
 	transition-duration: 0.5s;
@@ -431,23 +447,28 @@
 }
 .window-content-chat span
 {
-	cursor: pointer;
 	display: inline-block;
 	padding-right: 0.5rem;
 	color: white;
 }
+
 .window-content-chat i
 {
-	position: absolute;
-	top: -0.2rem;
+	position: relative;
 	cursor: default;
-	display: block;
+	display: inline-block;
 	text-align: center;
 	color: white;
-	font-size: 0.65rem;
+	font-size: 0.6rem;
 	font-style: normal;
 	text-overflow: clip;
 	text-wrap: nowrap;
+	padding-right: 0.5rem;
+	opacity: 0.5;
+}
+.window-content-chat:hover i
+{
+	opacity: 1.0;
 }
 
 .window-section-title
@@ -469,7 +490,7 @@
 .window-control-column
 {
 	position: absolute;
-	top: 2.1rem;
+	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;

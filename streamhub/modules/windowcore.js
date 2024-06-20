@@ -29,7 +29,7 @@ export class WindowBase
 
 		this.CreateWindow();
 		this.CreateTopBar();
-		this.e_window_btn_close = this.CreateTopBarButton("red", () => { this.Close(); }, "Close");
+		this.e_window_btn_close = this.CreateTopBarButton("red", () => { this.Close(); }, "Close", "close");
 
 		this.SetTitle(title);
 
@@ -217,7 +217,7 @@ export class WindowBase
 		this.e_window_top_bar.appendChild(this.e_window_icon);
 	}
 
-	CreateTopBarButton(color, onClickAction, title = "")
+	CreateTopBarButton(color, onClickAction, title = "", iconName = "")
 	{
 		var e_btn = document.createElement("div");
 		e_btn.className = "window-button";
@@ -226,6 +226,26 @@ export class WindowBase
 		e_btn.addEventListener("click", onClickAction);
 		e_btn.setAttribute("draggable", "false");
 		this.e_window_button_group.appendChild(e_btn);
+
+		if (typeof iconName != 'string' || iconName == '') return;
+
+		var e_icon = document.createElement("i");
+		e_icon.id = "window-icon";
+		e_icon.className = "window-icon";
+		e_icon.style.fontFamily = "'Material Icons'";
+		e_icon.style.color = "black";
+		e_icon.style.position = "absolute";
+		e_icon.style.top = "13%";
+		e_icon.style.bottom = "unset";
+		e_icon.style.left = "50%";
+		e_icon.style.width = "0px";
+		e_icon.style.height = "0px";
+		e_icon.style.lineHeight = "1.3rem";
+		e_icon.style.fontSize = "1.3rem";
+		e_icon.style.transform = "translate(-50%,-50%)";
+		e_icon.innerText = iconName;
+		e_icon.setAttribute("draggable", "false");
+		e_btn.appendChild(e_icon);
 	}
 
 	CreateContentContainer(addObscurer = false)

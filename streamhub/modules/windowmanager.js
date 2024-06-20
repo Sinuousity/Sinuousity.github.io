@@ -55,7 +55,16 @@ export class WindowManager
 		{
 			for (var wi = 0; wi < this.windows.length; wi++)
 			{
-				if (this.windows[wi].window_kind == "null") continue;
+				if (typeof this.windows[wi].window_kind != 'string')
+				{
+					console.warn("window_kind not 'string' >> " + this.window_kind + "  :: " + this.window_name);
+					continue;
+				}
+				if (this.windows[wi].window_kind == "null")
+				{
+					console.warn("window_kind is 'null' >> " + this.window_kind + "  :: " + this.window_name);
+					continue;
+				}
 				if (!this.windows[wi].GetStateData) 
 				{
 					console.warn("could not get window state data >> " + this.window_kind + "  :: " + this.window_name);

@@ -11,14 +11,15 @@ const rgx_kick_message_emote = /\[emote\:(\d+)\:(\w+)\]/g;
 
 
 const url_kick_v2_channels = "https://kick.com/api/v2/channels/";
+const url_kick_v1_users = "https://kick.com/api/v1/users/";
 export class KickChannelDataCache
 {
 	static cachedData = new Lookup();
 	static onNewData = new EventSource();
 	static requestedChannels = [];
 
-	static IndexOfCachedData(channel) { return cachedData.IndexOf(channel); }
-	static HasDataCached(channel) { return cachedData.Contains(channel); }
+	static IndexOfCachedData(channel) { return KickChannelDataCache.cachedData.IndexOf(channel); }
+	static HasDataCached(channel) { return KickChannelDataCache.cachedData.Contains(channel); }
 	static HasDataRequested(channel) { return KickChannelDataCache.requestedChannels.includes(channel); }
 
 	static async RequestData(channel, useCache = true, skipCacheCheck = false)
@@ -28,15 +29,15 @@ export class KickChannelDataCache
 
 		KickChannelDataCache.requestedChannels.push(channel);
 
-		var path = url_kick_v2_channels + channel;
+		var path = url_kick_v1_users + channel;
 		var resp = await fetch(path, { cache: (useCache ? "default" : "no-store") });
 		if (!resp.ok)
 		{
-			console.warn("fetch() error for : " + path);
+			console.warn("fetch() error for : " + channel);
 			return null;
 		}
 		var obj = await resp.json();
-		KickChannelDataCache.cachedData.Add(channel, obj);
+		KickChannelDataCache.cachedData.Set(channel, obj);
 
 		var reqId = KickChannelDataCache.requestedChannels.indexOf(channel);
 		KickChannelDataCache.requestedChannels.splice(reqId, 1);
@@ -165,7 +166,7 @@ export class KickState extends RemoteDataConnection
 		{
 			var m = allMessages[ii];
 			if (KickState.messageCache.Contains(m.id)) continue;
-			KickState.messageCache.Add(m.id, m);
+			KickState.messageCache.Set(m.id, m);
 			this.EmitMessage(m.sender.username, this.CleanChatMessage(m.content), m.sender.identity.color);
 			newMessagesReceived = true;
 		}

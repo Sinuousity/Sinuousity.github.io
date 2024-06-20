@@ -4,6 +4,7 @@ import { WindowManager } from "./modules/windowmanager.js";
 import { TwitchListener } from "./modules/twitchlistener.js";
 import { KickState } from "./modules/kicklistener.js";
 import { RaffleState } from "./modules/raffle.js";
+import { MultiPlatformUserExplorer } from "./modules/multiplatformuser.js";
 import { ViewerInventoryManager } from "./modules/viewerinventory.js";
 import { ItemLibrary } from "./modules/itemlibrary.js";
 import { CreatureRoster } from "./modules/creatures.js";
@@ -16,7 +17,6 @@ export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExist
 
 const hub_version = "v0.2.0";
 const resetStoredState = false;
-var e_background_log = {};
 var e_menu_windows = {};
 var e_site_tag = {};
 var e_save_indicator = {};
@@ -41,7 +41,6 @@ function OnBodyLoad()
 
 function FindBuiltInElements()
 {
-	e_background_log = document.getElementById("background-log");
 	e_menu_windows = document.getElementById("menu-windows");
 	e_site_tag = document.getElementById("site-tag");
 	e_site_tag.innerText = "sHub " + hub_version;
@@ -114,7 +113,7 @@ function SetWindowMenuOptions()
 	}
 }
 
-function addElement(kind = "div", className = null, parent = null, innerText = null, extra = x => { })
+export function addElement(kind = "div", className = null, parent = null, innerText = null, extra = x => { })
 {
 	var e = document.createElement(kind);
 	if (className) e.className = className;

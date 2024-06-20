@@ -1,6 +1,7 @@
 import { WindowManager } from "./windowmanager.js";
 import { EventSource } from "./eventsource.js";
 import { ChatWindow } from "./windows.js";
+import { MultiPlatformUserCache } from "./multiplatformuser.js";
 
 console.info("[ +Module ] Chat Collector");
 
@@ -23,6 +24,7 @@ export class ChatCollector
 
 	static Append(username, message, source = "unknown", color = "white")
 	{
+		MultiPlatformUserCache.GetUser(username, source);
 		var m = new MultiChatMessage(username, message, source, color);
 		ChatCollector.messages.push(m);
 		ChatCollector.onMessageReceived.Invoke(m);
@@ -70,9 +72,10 @@ export class MultiChatWindow extends ChatWindow
 		}
 
 		var e_msg = document.createElement("div");
+		e_msg.draggable = false;
 		e_msg.className = "window-content-chat";
-		e_msg.innerHTML += "<i style='color:" + sourceColor + "'>" + m.source + "</i>";
-		e_msg.innerHTML += "<span style='color:" + m.color + "'>" + m.username + "</span>";
+		e_msg.innerHTML += "<i draggable=false style='color:" + sourceColor + "'>" + m.source + "</i>";
+		e_msg.innerHTML += "<span draggable=false style='color:" + m.color + "'>" + m.username + "</span>";
 		e_msg.innerHTML += m.message;
 		this.e_chat_root.appendChild(e_msg);
 

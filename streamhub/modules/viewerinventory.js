@@ -438,4 +438,11 @@ export class ViewerInventoryWindow extends DraggableWindow
 	onWindowClose() { };
 }
 
-WindowManager.instance.windowTypes.push({ key: "Viewer Inventories", icon: "inbox", model: (x, y) => { return new ViewerInventoryWindow(x, y); } });
+WindowManager.instance.windowTypes.push(
+	{
+		key: "Viewer Inventories",
+		icon: "inbox",
+		model: (x, y) => { return new ViewerInventoryWindow(x, y); },
+		wip: true
+	}
+);

@@ -348,5 +348,5 @@ export class ItemLibraryWindow extends DraggableWindow
 	}
 }
 
-WindowManager.instance.windowTypes.push({ key: ItemLibraryWindow.window_kind, icon: "toys", model: (x, y) => { return new ItemLibraryWindow(x, y); } });
-WindowManager.instance.windowTypes.push({ key: ItemGiverWindow.window_kind, icon: "card_giftcard", model: (x, y) => { return new ItemGiverWindow(x, y); } });
+WindowManager.instance.windowTypes.push({ key: ItemLibraryWindow.window_kind, icon: "toys", model: (x, y) => { return new ItemLibraryWindow(x, y); }, wip: true });
+WindowManager.instance.windowTypes.push({ key: ItemGiverWindow.window_kind, icon: "card_giftcard", model: (x, y) => { return new ItemGiverWindow(x, y); }, wip: true });

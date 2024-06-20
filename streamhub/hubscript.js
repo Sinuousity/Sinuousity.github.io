@@ -3,9 +3,9 @@ import { DebugWindow } from "./modules/debugwindow.js";
 import { WindowManager } from "./modules/windowmanager.js";
 import { TwitchListener } from "./modules/twitchlistener.js";
 import { KickState } from "./modules/kicklistener.js";
+import { RaffleState } from "./modules/raffle.js";
 import { ViewerInventoryManager } from "./modules/viewerinventory.js";
 import { ItemLibrary } from "./modules/itemlibrary.js";
-import { RaffleState } from "./modules/raffle.js";
 import { CreatureRoster } from "./modules/creatures.js";
 import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
@@ -100,8 +100,14 @@ function SetWindowMenuOptions()
 		const wt = WindowManager.instance.windowTypes[wti];
 		if (wt.key.startsWith("hidden:")) continue;
 
-		var e_btn_open = addElement("div", "menu-windows-button", e_btn_open, "", x => { x.addEventListener("click", () => { RequestWindow(wt.key); }); });
-		addElement("div", null, e_btn_open, wt.key);
+		var e_btn_open = addElement("div", "menu-windows-button", null, "", x => { if (!wt.comingSoon) x.addEventListener("click", () => { RequestWindow(wt.key); }); });
+		var e_lbl = addElement("div", "menu-windows-button-label", e_btn_open, wt.key);
+		if (wt.comingSoon) 
+		{
+			var e_comingSoon = addElement("div", "menu-windows-button-band-coming-soon", e_btn_open, "COMING SOON");
+			e_btn_open.className = "menu-windows-button menu-windows-button-disabled";
+		}
+		if (wt.wip) var e_wip = addElement("div", "menu-windows-button-band-wip", e_btn_open, "WIP");
 		if (wt.icon) addElement("i", "menu-windows-button-icon", e_btn_open, wt.icon, x => { x.setAttribute("draggable", "false"); });
 
 		e_menu_windows.appendChild(e_btn_open);

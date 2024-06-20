@@ -280,4 +280,11 @@ export class CreatureRosterWindow extends DraggableWindow
 	}
 }
 
-WindowManager.instance.windowTypes.push({ key: CreatureRosterWindow.window_kind, icon: "bug_report", model: (x, y) => { return new CreatureRosterWindow(x, y); } });
+WindowManager.instance.windowTypes.push(
+	{
+		key: CreatureRosterWindow.window_kind,
+		icon: "bug_report",
+		model: (x, y) => { return new CreatureRosterWindow(x, y); },
+		comingSoon: true
+	}
+);

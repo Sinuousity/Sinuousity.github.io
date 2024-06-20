@@ -526,7 +526,41 @@ body
 	transform: translate(0%, -50%) scale(80%);
 }
 
-.menu-windows-button > div
+
+.menu-windows-button-band-wip
+{
+	position: absolute;
+	top: 50%;
+	right: 0;
+	width: 100%;
+
+	transform: translate(40%, -80%) rotateZ(30deg);
+	background-color: #00ccff5d;
+	color: white !important;
+	box-shadow: #0000002c 0px 0px 5px 1px;
+
+	text-align: center;
+	font-size: 0.6rem;
+}
+
+.menu-windows-button-band-coming-soon
+{
+	position: absolute;
+	opacity: 10%;
+	top: 50%;
+	right: 0;
+	width: 100%;
+
+	transform: translate(20%, -50%) rotateZ(20deg);
+	background-color: #ffa600a8;
+	color: white !important;
+	box-shadow: #0000002c 0px 0px 5px 1px;
+
+	text-align: center;
+	font-size: 0.6rem;
+}
+
+.menu-windows-button-label
 {
 	position: absolute;
 	top: 50%;
@@ -536,12 +570,26 @@ body
 
 	text-align: left;
 }
+
+.menu-windows-button-disabled > .menu-windows-button-label
+{
+	filter: blur(0.8px) !important;
+}
+
+.menu-windows-button-disabled
+{
+	cursor: default !important;
+	pointer-events: none !important;
+}
+
 .menu-windows-button
 {
 	user-select: none;
 	pointer-events: all;
 	cursor: pointer;
 	position: relative;
+
+	overflow: hidden;
 
 	flex-grow: 1;
 	flex-shrink: 1;

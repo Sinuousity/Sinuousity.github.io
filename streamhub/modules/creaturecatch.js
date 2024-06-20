@@ -207,5 +207,18 @@ export class CreatureCatchingOverlay extends WindowBase
 	}
 }
 
-WindowManager.instance.windowTypes.push({ key: CreatureCatchingWindow.window_kind, icon: "android", model: (x, y) => { return new CreatureCatchingWindow(x, y); } });
-WindowManager.instance.windowTypes.push({ key: CreatureCatchingOverlay.window_kind, model: (x, y) => { return new CreatureCatchingOverlay(x, y); } });
+WindowManager.instance.windowTypes.push(
+	{
+		key: CreatureCatchingWindow.window_kind,
+		icon: "android",
+		model: (x, y) => { return new CreatureCatchingWindow(x, y); },
+		comingSoon: true
+	}
+);
+
+WindowManager.instance.windowTypes.push(
+	{
+		key: CreatureCatchingOverlay.window_kind,
+		model: (x, y) => { return new CreatureCatchingOverlay(x, y); }
+	}
+);

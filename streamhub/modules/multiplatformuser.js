@@ -336,8 +336,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: MultiPlatformUserExplorer.window_kind,
 		icon: "assignment_ind",
-		model: (x, y) => { return new MultiPlatformUserExplorer(x, y); },
-		wip: true
+		model: (x, y) => { return new MultiPlatformUserExplorer(x, y); }
 	}
 );
 

@@ -306,9 +306,28 @@ body
 	transition-timing-function: ease-in-out;
 }
 
+.site-fader
+{
+	z-index: 500000;
+	user-select: none;
+	pointer-events: none;
+	position: fixed;
+	top: 0;
+	right: 0;
+	left: 0;
+	bottom: 0;
+	background-color: black;
+	opacity: 100%;
+
+	transition-property: opacity;
+	transition-delay: 0s;
+	transition-duration: 0.5s;
+	transition-timing-function: ease-in-out;
+}
+
 .site-tag
 {
-	z-index: -150000;
+	z-index: 150000;
 	user-select: none;
 	pointer-events: none;
 	position: fixed;

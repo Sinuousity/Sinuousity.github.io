@@ -231,7 +231,9 @@ export class BackgroundScene
 		if (BackgroundScene.created) return;
 		BackgroundScene.created = true;
 
+		var e_fader = document.getElementById("site-fader");
 		BackgroundScene.e_root = addElement("div", null, document.body);
+		document.body.appendChild(e_fader);
 		BackgroundScene.e_root.style.zIndex = "-1000";
 		BackgroundScene.e_root.style.position = "fixed";
 		BackgroundScene.e_root.style.inset = "0";

@@ -42,6 +42,10 @@ function OnBodyLoad()
 
 function FindBuiltInElements()
 {
+	var e_fader = document.getElementById("site-fader");
+	document.body.appendChild(e_fader);
+	window.setTimeout(() => { e_fader.style.opacity = "0%"; }, 250);
+
 	e_menu_windows = document.getElementById("menu-windows");
 	e_site_tag = document.getElementById("site-tag");
 	e_site_tag.innerText = "sHub " + hub_version;

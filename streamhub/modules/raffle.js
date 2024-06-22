@@ -448,6 +448,8 @@ export class RaffleOverlay
 		this.e_names_root.appendChild(this.e_names_slider);
 
 		document.body.appendChild(this.e_zone_root);
+		var e_fader = document.getElementById("site-fader");
+		document.body.appendChild(e_fader);
 
 		this.e_entries = [];
 		this.draggingEntries = false;

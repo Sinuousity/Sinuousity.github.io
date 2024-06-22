@@ -261,6 +261,55 @@ export class RaffleOverlayEntry
 		this.e_name.className = "raffle-entry-name";
 		this.e_name.draggable = false;
 
+		this.e_btn_remove = document.createElement("div");
+		this.e_btn_remove.title = "Remove Entry";
+		this.e_btn_remove.style.cursor = "pointer";
+		this.e_btn_remove.style.position = "absolute";
+		this.e_btn_remove.style.left = "50%";
+		this.e_btn_remove.style.bottom = "0%";
+		this.e_btn_remove.style.transform = "translate(-50%,0%)";
+		//this.e_btn_remove.style.fontFamily = "'Material Icons'";
+		this.e_btn_remove.style.width = "6rem";
+		this.e_btn_remove.style.letterSpacing = "0.15rem";
+		this.e_btn_remove.style.height = "1rem";
+		this.e_btn_remove.style.lineHeight = "1rem";
+		this.e_btn_remove.style.fontSize = "0.8rem";
+		this.e_btn_remove.style.textAlign = "center";
+		this.e_btn_remove.style.borderRadius = "0.5rem 0.5rem 0rem 0rem";
+		this.e_btn_remove.style.backgroundColor = "#ffffff20";
+		this.e_btn_remove.style.color = "#ffffff40";
+		this.e_btn_remove.style.transitionProperty = "opacity, height, line-height";
+		this.e_btn_remove.style.transitionDuration = "0.1s";
+		this.e_btn_remove.innerText = "REMOVE";
+		this.e_btn_remove.draggable = false;
+		this.e_btn_remove.addEventListener("click",
+			() =>
+			{
+				RaffleState.instance.names.splice(this.entryIndex0, 1);
+				RaffleState.instance.MarkDirty();
+			}
+		);
+		this.e_btn_remove.addEventListener(
+			"mouseenter",
+			() =>
+			{
+				this.e_btn_remove.style.color = "#ffffffff";
+				this.e_btn_remove.style.backgroundColor = "#ff0000ff";
+				this.e_btn_remove.style.height = "1.5rem";
+				this.e_btn_remove.style.lineHeight = "1.5rem";
+			}
+		);
+		this.e_btn_remove.addEventListener(
+			"mouseleave",
+			() =>
+			{
+				this.e_btn_remove.style.color = "#ffffff40";
+				this.e_btn_remove.style.backgroundColor = "#ffffff20";
+				this.e_btn_remove.style.height = "1rem";
+				this.e_btn_remove.style.lineHeight = "1rem";
+			}
+		);
+
 		this.e_name_span = document.createElement("span");
 		this.e_name_span.innerText = "";
 		this.e_name_span.draggable = false;
@@ -272,6 +321,7 @@ export class RaffleOverlayEntry
 
 		this.e_root.appendChild(this.e_image);
 		this.e_root.appendChild(this.e_name);
+		this.e_root.appendChild(this.e_btn_remove);
 
 		this.ClearProfileImage();
 	}
@@ -336,6 +386,8 @@ export class RaffleOverlayEntry
 	{
 		var nameShow = 1.0 - 0.7 * Math.abs(this.relativeCellIndex);
 		var isWinner = this.selected && RaffleState.instance.showingWinner;
+
+		this.e_btn_remove.style.opacity = `${100 * nameShow * nameShow}%`;
 
 		this.e_name.style.opacity = `${100 * nameShow}%`;
 		this.e_name.style.maxWidth = this.selected ? "200%" : "80%";

@@ -177,14 +177,19 @@ export class RaffleState
 		RaffleOverlay.instance.Recreate();
 	}
 
+	RemoveEntry(entryIndex)
+	{
+		this.names.splice(entryIndex, 1);
+		this.TryStore();
+		RaffleOverlay.instance.Recreate();
+	}
+
 	RemoveName(oldName, force = false)
 	{
 		if (!force && this.running) return;
 		var entryIndex = this.IndexOfEntry(oldName);
 		if (entryIndex < 0) return;
-		this.names.splice(entryIndex, 1);
-		this.TryStore();
-		RaffleOverlay.instance.Recreate();
+		this.RemoveEntry(entryIndex);
 	}
 
 	static msFrameDuration = 20;
@@ -282,13 +287,7 @@ export class RaffleOverlayEntry
 		this.e_btn_remove.style.transitionDuration = "0.1s";
 		this.e_btn_remove.innerText = "REMOVE";
 		this.e_btn_remove.draggable = false;
-		this.e_btn_remove.addEventListener("click",
-			() =>
-			{
-				RaffleState.instance.names.splice(this.entryIndex0, 1);
-				RaffleState.instance.MarkDirty();
-			}
-		);
+		this.e_btn_remove.addEventListener("click", () => { RaffleState.instance.RemoveEntry(this.entryIndex); });
 		this.e_btn_remove.addEventListener(
 			"mouseenter",
 			() =>

@@ -22,7 +22,7 @@
 	overflow: hidden;
 
 	position: absolute;
-	top: 2.6rem;
+	top: 0;
 	right: 0.5rem;
 	left: 0.5rem;
 	bottom: 0.5rem;
@@ -52,7 +52,7 @@
 }
 
 
-.viewer-list
+.inventory-list-item
 {
 	z-index: 1;
 	cursor: default;
@@ -66,14 +66,14 @@
 	overflow-y: auto;
 }
 
-.viewer-list-button
+.inventory-list-item-button
 {
 	height: 2.4rem;
 	line-height: 2.4rem;
 	padding-left: 1rem;
 	transition-property: font-size, opacity, background-color, padding-left;
 }
-.viewer-list-button:hover
+.inventory-list-item-button:hover
 {
 	padding-left: 1.5rem;
 	font-size: 1.1rem;
@@ -83,7 +83,7 @@
 {
 	z-index: 5;
 	position: absolute;
-	top: 2.1rem;
+	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
@@ -169,7 +169,7 @@
 	font-size: 0.7rem;
 }
 
-.viewer-list-button span
+.inventory-list-item-button span
 {
 	all: unset;
 	position: relative;

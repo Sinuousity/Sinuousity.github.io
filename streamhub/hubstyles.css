@@ -15,6 +15,18 @@
 }
 
 
+@keyframes backgroundscene-pattern-scroll
+{
+	from
+	{
+		background-position-x: 0%;
+	}
+	to
+	{
+		background-position-x: 100%;
+	}
+}
+
 @keyframes scrollpattern
 {
 	from
@@ -418,7 +430,7 @@ body
 	overflow: visible;
 
 	z-index: 5000;
-	opacity: 60%;
+	opacity: 30%;
 	pointer-events: all;
 	user-select: none;
 

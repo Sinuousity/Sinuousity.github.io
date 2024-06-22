@@ -1,6 +1,7 @@
 ﻿import { GlobalSettings, OptionManager } from "./modules/globalsettings.js";
 import { DebugWindow } from "./modules/debugwindow.js";
 import { WindowManager } from "./modules/windowmanager.js";
+import { BackgroundSceneSettingsWindow } from "./modules/backgroundscene.js";
 import { TwitchListener } from "./modules/twitchlistener.js";
 import { KickState } from "./modules/kicklistener.js";
 import { RaffleState } from "./modules/raffle.js";
@@ -108,6 +109,8 @@ function SetWindowMenuOptions()
 		}
 		if (wt.wip) var e_wip = addElement("div", "menu-windows-button-band-wip", e_btn_open, "WIP");
 		if (wt.icon) addElement("i", "menu-windows-button-icon", e_btn_open, wt.icon, x => { x.setAttribute("draggable", "false"); });
+
+		if (wt.desc) e_btn_open.title = wt.desc;
 
 		e_menu_windows.appendChild(e_btn_open);
 	}

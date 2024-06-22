@@ -219,7 +219,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_viewer_list_container.appendChild(e_section_title);
 
 		this.e_viewer_list = document.createElement("div");
-		this.e_viewer_list.className = "viewer-list";
+		this.e_viewer_list.className = "inventory-list-item";
 		this.e_viewer_list_container.appendChild(this.e_viewer_list);
 		this.RefreshViewerList();
 	}
@@ -265,7 +265,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_viewer_list_container.appendChild(this.e_field_tradeValue);
 
 		this.e_btn_add = document.createElement("div");
-		this.e_btn_add.className = "viewer-list-button"
+		this.e_btn_add.className = "inventory-list-item-button"
 		this.e_btn_add.innerText = "ADD";
 		this.e_btn_add.style.fontSize = "0.8rem";
 		this.e_btn_add.style.lineHeight = "1.5rem";
@@ -311,7 +311,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 			var totalItemValue = ViewerInventory.GetTotalTradeValue(i);
 
 			var e_user = document.createElement("div");
-			e_user.className = "window-content-button viewer-list-button";
+			e_user.className = "window-content-button inventory-list-item-button";
 			e_user.style.paddingBottom = "0.5rem";
 			var styleColor = "white";
 			switch (i.viewerSource)

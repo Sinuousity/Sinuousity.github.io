@@ -336,6 +336,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: MultiPlatformUserExplorer.window_kind,
 		icon: "assignment_ind",
+		desc: "Browse all the cached viewer data from this session including names, IDs, and profile images. This data is not saved.",
 		model: (x, y) => { return new MultiPlatformUserExplorer(x, y); }
 	}
 );

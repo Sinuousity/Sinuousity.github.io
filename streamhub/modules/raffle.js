@@ -979,7 +979,14 @@ export class RaffleSettingsWindow extends DraggableWindow
 	}
 }
 
-WindowManager.instance.windowTypes.push({ key: "Raffle", icon: "confirmation_number", model: (x, y) => { return new RaffleSettingsWindow(x, y); } });
+WindowManager.instance.windowTypes.push(
+	{
+		key: "Raffle",
+		icon: "confirmation_number",
+		desc: "Spin a wheel! Kinda! Viewers can join! You can add any name! It twists!",
+		model: (x, y) => { return new RaffleSettingsWindow(x, y); }
+	}
+);
 
 
 OptionManager.AppendOption("raffle.visible", true, "Enable Overlay");

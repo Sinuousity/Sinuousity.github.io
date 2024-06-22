@@ -83,4 +83,11 @@ export class MultiChatWindow extends ChatWindow
 	}
 }
 
-WindowManager.instance.windowTypes.push({ key: "MultiChat", icon: "people", model: (x, y) => { return new MultiChatWindow(x, y); } });
+WindowManager.instance.windowTypes.push(
+	{
+		key: "MultiChat",
+		icon: "people",
+		desc: "Combines messages from all sources. You should check here to make sure messages are coming in!",
+		model: (x, y) => { return new MultiChatWindow(x, y); }
+	}
+);

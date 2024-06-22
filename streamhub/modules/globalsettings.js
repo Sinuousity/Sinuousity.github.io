@@ -331,6 +331,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: GlobalSettings.window_kind,
 		icon: "settings",
+		desc: "General settings for the Hub",
 		model: (x, y) => { return new GlobalSettingsWindow(x, y); }
 	}
 );

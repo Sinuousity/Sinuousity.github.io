@@ -296,12 +296,16 @@ export class BackgroundScene
 
 				if (layerInfo.data.opacity) e_layer.style.opacity = layerInfo.data.opacity + "%";
 
-				e_layer.style.animation = "backgroundscene-pattern-scroll";
-				e_layer.style.animationDuration = "10s";
-				if (layerInfo.data.speedX) e_layer.style.animationDuration = (10.0 / (Math.abs(layerInfo.data.speedX) + 0.01)) + "s";
-				e_layer.style.animationIterationCount = "infinite";
-				e_layer.style.animationTimingFunction = "linear";
-				e_layer.style.animationDirection = layerInfo.data.speedX >= 0.0 ? "normal" : "reverse";
+				if (layerInfo.data.speedX && Math.abs(layerInfo.data.speedX) > 0.01)
+				{
+
+					e_layer.style.animation = "backgroundscene-pattern-scroll";
+					e_layer.style.animationDuration = "10s";
+					if (layerInfo.data.speedX) e_layer.style.animationDuration = (10.0 / (Math.abs(layerInfo.data.speedX) + 0.01)) + "s";
+					e_layer.style.animationIterationCount = "infinite";
+					e_layer.style.animationTimingFunction = "linear";
+					e_layer.style.animationDirection = layerInfo.data.speedX >= 0.0 ? "normal" : "reverse";
+				}
 
 				if (layerInfo.data.blur && layerInfo.data.blur > 0) e_layer.style.filter = "blur(" + layerInfo.data.blur + "px)";
 				break;

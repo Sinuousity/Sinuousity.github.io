@@ -12,6 +12,7 @@ import { CreatureRoster } from "./modules/creatures.js";
 import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
 import { SaveIndicator } from "./modules/saveindicator.js";
+import "./modules/globaltooltip.js";
 
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
@@ -39,6 +40,20 @@ function OnBodyLoad()
 	//AddCssReloadButton();
 	UpdateSiteTag();
 }
+
+var ts_time_prev = -1;
+var global_time_seconds = 0.0;
+function anim_time_loop(timestamp)
+{
+	if (ts_time_prev == -1) ts_time_prev = timestamp;
+	if (ts_time_prev == timestamp) return;
+	var dtMs = timestamp - ts_time_prev;
+	var dtSeconds = dtMs * 0.001;
+	ts_time_prev = timestamp;
+	global_time_seconds += dtSeconds;
+	requestAnimationFrame(t => { anim_time_loop(t); })
+}
+requestAnimationFrame(t => { anim_time_loop(t); });
 
 function FindBuiltInElements()
 {

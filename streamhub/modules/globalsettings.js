@@ -198,14 +198,6 @@ export class GlobalSettings
 
 	ApplyState()
 	{
-		var e_cornerGlow = document.getElementById("effect-corner-glow");
-		if (!e_cornerGlow) return;
-		e_cornerGlow.style.display = OptionManager.GetOptionValue("fx.glow.visible") ? "block" : "none";
-		var glowPosX = OptionManager.GetOptionValue("fx.glow.position.x");
-		var glowPosY = OptionManager.GetOptionValue("fx.glow.position.y");
-		e_cornerGlow.style.transformOrigin = `${glowPosX}% ${glowPosY}%`;
-		e_cornerGlow.style.background = this.GetCornerGlowGradient(glowPosX, glowPosY, OptionManager.GetOptionValue("fx.glow.color"));
-
 		for (var ii = 0; ii < GlobalSettings.changeListeners.length; ii++)
 		{
 			var cl = GlobalSettings.changeListeners[ii];
@@ -228,7 +220,7 @@ export class GlobalSettingsWindow extends DraggableWindow
 		super("Settings", position_x, position_y);
 		super.window_kind = GlobalSettings.window_kind;
 
-		this.e_window_root.style.minHeight = "620px";
+		this.e_window_root.style.maxHeight = "440px";
 		this.e_window_root.style.minWidth = "320px";
 		this.e_window_root.style.maxWidth = "640px";
 
@@ -239,20 +231,10 @@ export class GlobalSettingsWindow extends DraggableWindow
 		this.CreateControlsColumn();
 
 		this.AddChatSection();
-		this.AddCornerGlowControls();
 		this.AddAuthSection();
 		this.AddStoreResetControls();
 
 		GlobalSettings.instance.ApplyState();
-	}
-
-	AddCornerGlowControls()
-	{
-		this.AddSectionTitle("Corner Glow");
-		this.AddToggle("Visible", OptionManager.GetOptionValue("fx.glow.visible"), (e) => { OptionManager.SetOptionValue("fx.glow.visible", e.checked); });
-		this.AddSlider("Position X", OptionManager.GetOptionValue("fx.glow.position.x"), 0, 100, (e) => { OptionManager.SetOptionValue("fx.glow.position.x", e.value); });
-		this.AddSlider("Position Y", OptionManager.GetOptionValue("fx.glow.position.y"), 0, 100, (e) => { OptionManager.SetOptionValue("fx.glow.position.y", e.value); });
-		this.AddColorPicker("Color", OptionManager.GetOptionValue("fx.glow.color"), (e) => { OptionManager.SetOptionValue("fx.glow.color", e.value); });
 	}
 
 	AddStoreResetControls()

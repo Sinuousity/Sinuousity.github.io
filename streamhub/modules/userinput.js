@@ -53,11 +53,11 @@ export class UserInput
 		this.mousePositionNormalizedX = this.mousePositionX / document.documentElement.clientWidth;
 		this.mousePositionNormalizedY = this.mousePositionY / document.documentElement.clientHeight;
 
+		/*
 		var glowposx = this.mousePositionNormalizedX * 100;
 		var glowposy = this.mousePositionNormalizedY * 100;
 		document.body.style.background = `radial-gradient(circle at ${glowposx}% ${glowposy}%, #1d1d1d 0px, #1b1b1b 700px)`;
 
-		/*
 		var tiltX = (this.mousePositionNormalizedX - 0.5) * 30;
 		var tiltY = (this.mousePositionNormalizedY - 0.5) * 30;
 		document.body.style.transform = `rotate3d(0,1,0,${tiltX}deg) rotate3d(1,0,0,${tiltY}deg)`;

@@ -1,6 +1,7 @@
 import { GlobalSettings } from "./globalsettings.js";
 import { WindowManager } from "./windowmanager.js";
 import { UserInput } from "./userinput.js";
+import { GlobalTooltip } from "./globaltooltip.js";
 
 console.info("[ +Module ] Window Core");
 
@@ -129,6 +130,8 @@ export class WindowBase
 		this.e_window_root.style.userSelect = "none";
 		this.e_window_root.style.pointerEvents = "none";
 
+		GlobalTooltip.ReleaseAllReceivers(this.e_window_root);
+
 		this.onWindowClose();
 
 		var myWindowIndex = WindowManager.instance.windows.indexOf(this);
@@ -222,7 +225,7 @@ export class WindowBase
 		var e_btn = document.createElement("div");
 		e_btn.className = "window-button";
 		e_btn.style.backgroundColor = color;
-		if (title) e_btn.title = title;
+		if (title) GlobalTooltip.RegisterReceiver(e_btn, title, title);
 		e_btn.addEventListener("click", onClickAction);
 		e_btn.setAttribute("draggable", "false");
 		this.e_window_button_group.appendChild(e_btn);

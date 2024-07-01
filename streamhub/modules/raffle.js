@@ -5,6 +5,7 @@ import { UserInput } from "./userinput.js";
 import { ChatCollector } from "./chatcollector.js";
 import { EventSource } from "./eventsource.js";
 import { MultiPlatformUser, MultiPlatformUserCache } from "./multiplatformuser.js";
+import { GlobalTooltip } from "./globaltooltip.js";
 
 console.info("[ +Module ] Raffle");
 
@@ -817,7 +818,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 		super("Raffle", pos_x, pos_y);
 		super.window_kind = "Raffle";
 
-		this.e_window_root.style.minHeight = "800px";
+		this.e_window_root.style.maxHeight = "730px";
 		this.e_window_root.style.minWidth = "320px";
 
 		this.CreateContentContainer();
@@ -849,7 +850,8 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_control_title.children[1].children[0].placeholder = "Just 'Raffle'";
 		this.e_control_title.style.lineHeight = "2rem";
 		this.e_control_title.style.height = "2rem";
-		this.e_control_title.title = "The title of the raffle, shown atop the overlay.";
+		const title_desc = "The title of the raffle, shown atop the overlay.";
+		GlobalTooltip.RegisterReceiver(this.e_control_title, title_desc, title_desc);
 
 
 		this.e_control_keyword = this.AddTextField(
@@ -864,7 +866,8 @@ export class RaffleSettingsWindow extends DraggableWindow
 			true
 		);
 		this.e_control_keyword.children[1].children[0].placeholder = "No Phrase Required";
-		this.e_control_keyword.title = "The key phrase viewers must type to join.";
+		const keyword_desc = "The key phrase viewers must type to join.";
+		GlobalTooltip.RegisterReceiver(this.e_control_keyword, keyword_desc, keyword_desc);
 		this.e_control_keyword.style.lineHeight = "2rem";
 		this.e_control_keyword.style.height = "2rem";
 
@@ -908,6 +911,8 @@ export class RaffleSettingsWindow extends DraggableWindow
 		this.e_btn_addName.style.lineHeight = "2rem";
 		this.e_btn_addName.style.height = "2rem";
 
+		const addname_desc = "Add a name manually! Enter any username and it will be added. The user doesn't have to exist, but it helps if they do.";
+		GlobalTooltip.RegisterReceiver(this.e_control_addName, addname_desc, addname_desc);
 
 
 		this.AddSectionTitle("Controls");
@@ -955,7 +960,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 			},
 			true
 		);
-		control.title = tooltip;
+		GlobalTooltip.RegisterReceiver(control, tooltip, tooltip);
 	}
 
 	AddOptionToggle(option_key, tooltip = "")
@@ -971,7 +976,7 @@ export class RaffleSettingsWindow extends DraggableWindow
 			},
 			true
 		);
-		control.title = tooltip;
+		GlobalTooltip.RegisterReceiver(control, tooltip, tooltip);
 		return control;
 	}
 

@@ -1,6 +1,7 @@
 import { addElement } from "../hubscript.js";
 import { EventSource } from "./eventsource.js";
 import { OptionManager } from "./globalsettings.js";
+import { GlobalTooltip } from "./globaltooltip.js";
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 
@@ -119,7 +120,7 @@ export class BackgroundScene
 		{
 			if (!addIfOutside) return;
 			activeId = BackgroundScene.loadedProfiles.length;
-			const l = BackgroundSceneProfile.GetDefault();
+			var l = BackgroundSceneProfile.GetDefault();
 			l.name = "Profile " + activeId;
 			BackgroundScene.loadedProfiles.push(l);
 		}
@@ -410,6 +411,9 @@ class LayerListItem
 		this.e_root.addEventListener("mouseleave", x => { this.e_root.style.backgroundColor = "transparent"; });
 		this.e_root.addEventListener("click", x => { this.ToggleExpandOptions(); });
 
+		var layerDesc = (layer.name != "") ? (layer.type + "  (" + layer.name + ")") : (layer.type + " (unnamed)");
+		GlobalTooltip.RegisterReceiver(this.e_root, layerDesc, layerDesc);
+
 		this.e_row = addElement("div", null, this.e_root);
 		this.e_row.style.display = "flex";
 		this.e_row.style.alignItems = "center";
@@ -445,7 +449,6 @@ class LayerListItem
 		this.e_lbl.style.overflow = "hidden";
 		this.e_lbl.style.textOverflow = "ellipsis";
 		this.e_lbl.style.textWrap = "nowrap";
-		this.e_lbl.title = layer.type;
 		this.e_root.addEventListener("mouseenter", x => { this.e_lbl.style.paddingLeft = "0.5rem"; });
 		this.e_root.addEventListener("mouseleave", x => { this.e_lbl.style.paddingLeft = "0.25rem"; });
 
@@ -685,7 +688,7 @@ class LayerListItem
 	AddLayerListItemButton(e_parent, title, color = "gray", icon = "")
 	{
 		var e = addElement("div", null, e_parent);
-		e.title = title;
+
 		e.style.borderRadius = "0.2rem";
 		e.style.backgroundColor = color;
 		e.style.width = "1rem";
@@ -695,6 +698,8 @@ class LayerListItem
 		e.style.transform = "scale(90%)";
 		e.addEventListener("mouseenter", x => { e.style.transform = "scale(100%)"; });
 		e.addEventListener("mouseleave", x => { e.style.transform = "scale(90%)"; });
+
+		GlobalTooltip.RegisterReceiver(e, title, title);
 
 		if (icon != "")
 		{
@@ -750,22 +755,46 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.e_listButtons.style.alignItems = "center";
 		this.e_listButtons.style.justifyContent = "center";
 
-		this.e_btn_solid = this.AddLayerButton("Solid Fill", "format_color_fill", { color: "gray" });
-		this.e_btn_gradient = this.AddLayerButton("Gradient Fill", "gradient", { gradient: "linear-gradient(0deg, white, transparent)" });
-		this.e_btn_image = this.AddLayerButton("Image", "insert_photo", { src: "./../streamhub/images/nobody.png" });
+		this.e_btn_solid = this.AddLayerButton(
+			"Solid Fill",
+			"format_color_fill",
+			() => { return { color: "gray" } },
+			"Add a solid fill layer. One color"
+		);
+		this.e_btn_gradient = this.AddLayerButton(
+			"Gradient Fill",
+			"gradient",
+			() => { return { gradient: "linear-gradient(0deg, white, transparent)" } },
+			"Add a gradient layer. Any valid CSS gradient."
+		);
+		this.e_btn_image = this.AddLayerButton(
+			"Image",
+			"insert_photo",
+			() => { return { src: "./../streamhub/images/nobody.png" } },
+			"Add a centered image pattern, enter a URL to use an image from the web"
+		);
 		this.e_btn_pattern = this.AddLayerButton(
 			"Pattern",
 			"apps",
+			() =>
 			{
-				src: "url(./../streamhub/images/nobody.png)",
-				scaleX: 10,
-				scaleY: 10,
-				speedX: 0.0,
-				speedY: 0.0,
-				opacity: 1.0
-			}
+				return {
+					src: "url(./../streamhub/images/nobody.png)",
+					scaleX: 10,
+					scaleY: 10,
+					speedX: 0.0,
+					speedY: 0.0,
+					opacity: 1.0
+				}
+			},
+			"Add a repeating image pattern, use 'url( [YOUR URL] )' to use an image from the web"
 		);
-		this.e_btn_filter = this.AddLayerButton("Filter Layer", "filter_b_and_w", { filter: "hue-rotate(35deg)" });
+		this.e_btn_filter = this.AddLayerButton(
+			"Filter Layer",
+			"filter_b_and_w",
+			() => { return { filter: "hue-rotate(35deg)" } },
+			"Add a layer that applies a filter to layers behind it."
+		);
 
 		this.RefreshLayerList();
 		BackgroundScene.onLayersChanged.RequestSubscription(() => { this.RefreshLayerList(); this.RefreshProfileButtons(); });
@@ -788,7 +817,7 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.e_profile_root.style.borderBottom = "2px solid #505050ff";
 
 		this.e_name_input = addElement("input", null, this.e_profile_root);
-		this.e_name_input.title = "Active Profile Name";
+		GlobalTooltip.RegisterReceiver(this.e_name_input, "Active Profile Name", "Active Profile Name");
 		this.e_name_input.type = "text";
 		this.e_name_input.value = BackgroundScene.activeProfile.name ?? "Default";
 		this.e_name_input.style.position = "absolute";
@@ -810,7 +839,7 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 
 		this.e_btn_profile_prev = addElement("div", null, this.e_profile_root);
 		this.e_btn_profile_prev.innerText = "PREV";
-		this.e_btn_profile_prev.title = "Previous Profile";
+		GlobalTooltip.RegisterReceiver(this.e_btn_profile_prev, "Previous Profile", "Switch Back To The Previous Profile");
 		this.e_btn_profile_prev.style.cursor = "pointer";
 		this.e_btn_profile_prev.style.position = "absolute";
 		this.e_btn_profile_prev.style.width = "3.5rem";
@@ -838,7 +867,7 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.e_btn_profile_next = addElement("div", null, this.e_profile_root);
 		this.e_btn_profile_next.style.cursor = "pointer";
 		this.e_btn_profile_next.innerText = "NEXT";
-		this.e_btn_profile_next.title = "Next Profile";
+		GlobalTooltip.RegisterReceiver(this.e_btn_profile_next, "Next Profile", "Switch Back To The Next Profile");
 		this.e_btn_profile_next.style.position = "absolute";
 		this.e_btn_profile_next.style.width = "3.5rem";
 		this.e_btn_profile_next.style.height = "1rem";
@@ -865,7 +894,7 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.e_btn_profile_remove = addElement("div", null, this.e_profile_root);
 		this.e_btn_profile_remove.style.cursor = "pointer";
 		this.e_btn_profile_remove.innerText = "DELETE";
-		this.e_btn_profile_remove.title = "Delete Profile";
+		GlobalTooltip.RegisterReceiver(this.e_btn_profile_remove, "Delete Profile", "Delete The Current Profile");
 		this.e_btn_profile_remove.style.position = "absolute";
 		this.e_btn_profile_remove.style.width = "3.5rem";
 		this.e_btn_profile_remove.style.height = "1rem";
@@ -900,7 +929,7 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.e_btn_profile_prev.style.display = atStart ? "none" : "block";
 		this.e_btn_profile_next.style.color = atEnd ? "green" : "white";
 		this.e_btn_profile_next.innerText = atEnd ? "ADD" : "NEXT";
-		this.e_btn_profile_next.title = atEnd ? "Add Profile" : "Next Profile";
+		GlobalTooltip.RegisterReceiver(this.e_btn_profile_next, atEnd ? "Add Profile" : "Next Profile", atEnd ? "Add Profile" : "Go To Next Profile");
 
 		this.e_btn_profile_next.style.height = atStart ? "2rem" : "1rem";
 		this.e_btn_profile_next.style.lineHeight = atStart ? "2rem" : "1rem";
@@ -941,11 +970,20 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.e_layerListRoot.appendChild(this.e_layerListContainer);
 	}
 
-	AddLayerButton(layerType, icon, defaultData = {})
+	AddLayerButton(layerType, icon, defaultData = () => { }, description = "")
 	{
 		const e_btn = addElement("div", null, this.e_listButtons);
-		e_btn.addEventListener("click", e => { BackgroundScene.AddLayer(new BackgroundSceneLayer(BackgroundScene.activeProfile.layers.length, layerType, defaultData)); });
-		e_btn.title = "Add " + layerType;
+		e_btn.addEventListener(
+			"click",
+			e =>
+			{
+				const newLayerId = BackgroundScene.activeProfile.layers.length;
+				var newLayer = new BackgroundSceneLayer(newLayerId, layerType, defaultData());
+				BackgroundScene.AddLayer(newLayer);
+			}
+		);
+
+		GlobalTooltip.RegisterReceiver(e_btn, "Add " + layerType, description);
 		e_btn.style.cursor = "pointer";
 		e_btn.style.marginLeft = "0.25rem";
 		e_btn.style.marginRight = "0.25rem";
@@ -1045,8 +1083,7 @@ WindowManager.instance.windowTypes.push(
 		key: BackgroundSceneSettingsWindow.window_kind,
 		icon: "gradient",
 		desc: "Customize the background!",
-		model: (x, y) => { return new BackgroundSceneSettingsWindow(x, y); },
-		wip: true
+		model: (x, y) => { return new BackgroundSceneSettingsWindow(x, y); }
 	}
 );
 

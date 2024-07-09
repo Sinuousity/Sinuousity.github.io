@@ -1,9 +1,14 @@
+import { EventSource } from "./eventsource.js";
 import { RunningTimeout } from "./runningtimeout.js";
 import { SaveIndicator } from "./saveindicator.js";
 console.info("[ +Module ] Stored Objects");
 
 export class StoredObject
 {
+	onStored = new EventSource();
+	onRestored = new EventSource();
+	onDirtied = new EventSource();
+
 	constructor(storeDelaySeconds = 0.5, autostart = false)
 	{
 		this.storeKey = "";
@@ -13,7 +18,11 @@ export class StoredObject
 	GetState() { return {}; }
 	ApplyState() { }
 
-	ExtendTimer() { this.storeTimeout.ExtendTimer(); }
+	ExtendTimer()
+	{
+		this.onDirtied.Invoke();
+		this.storeTimeout.ExtendTimer();
+	}
 
 	Store()
 	{
@@ -29,6 +38,7 @@ export class StoredObject
 
 		SaveIndicator.AddShowTime();
 		this.AfterStore();
+		this.onStored.Invoke();
 	}
 	AfterStore() { }
 
@@ -49,6 +59,7 @@ export class StoredObject
 		if (storedObject == null) return;
 		this.ApplyState(storedObject);
 		this.AfterRestore();
+		this.onRestored.Invoke();
 	}
 	AfterRestore() { }
 }

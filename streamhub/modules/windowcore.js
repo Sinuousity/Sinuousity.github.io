@@ -2,6 +2,7 @@ import { GlobalSettings } from "./globalsettings.js";
 import { WindowManager } from "./windowmanager.js";
 import { UserInput } from "./userinput.js";
 import { GlobalTooltip } from "./globaltooltip.js";
+import { addElement } from "../hubscript.js";
 
 console.info("[ +Module ] Window Core");
 
@@ -74,6 +75,67 @@ export class WindowBase
 			width: this.e_window_root.clientWidth,
 			height: this.e_window_root.clientHeight
 		};
+	}
+
+	AddWindowHelpButton()
+	{
+		this.e_window_btn_help = this.CreateTopBarButton("cyan", () => { this.ToggleWindowHelpOverlay(); }, "Help", "help")
+	}
+
+	CreateWindowHelpElements()
+	{
+		if (this.e_overlay_window_help) return;
+
+		this.e_overlay_window_help = addElement("div", null, this.e_content);
+		this.e_overlay_window_help.draggable = false;
+		this.e_overlay_window_help.style = "z-index:500; position:absolute; inset:0px; background-color:#000000c0;"
+			+ " transition-property:opacity; transition-duration:0.2s; transition-timing-function:ease-in-out;"
+			+ " backdrop-filter:blur(2px);"
+			+ " opacity:0.0;"
+			+ " pointer-events:all; user-select:none;";
+		this.e_overlay_window_help.style.cursor = "help";
+		this.e_overlay_window_help.addEventListener("click", e =>
+		{
+			this.showingOverlay_WindowHelp = false;
+			this.e_overlay_window_help.style.opacity = "0.0";
+			this.e_overlay_window_help.style.pointerEvents = "none";
+		});
+
+		this.e_overlay_window_help_text = addElement("div", null, this.e_overlay_window_help);
+
+		this.e_overlay_window_help_text.style = "position:absolute; top:50%; left:50%; width: 90%; text-align:center; transform:translate(-50%,-50%);";
+		this.e_overlay_window_help_text.style.verticalAlign = "center";
+		this.e_overlay_window_help_text.innerText = "This is a helpful description of this window's content. Unless it isn't!";
+	}
+
+	ToggleWindowHelpOverlay()
+	{
+		if (!this.e_content) return;
+
+		this.CreateWindowHelpElements();
+
+		if (this.showingOverlay_WindowHelp)
+		{
+			this.e_overlay_window_help.style.opacity = "0.0";
+			this.e_overlay_window_help.style.pointerEvents = "none";
+			this.showingOverlay_WindowHelp = false;
+			return;
+		}
+		else
+		{
+			this.e_overlay_window_help.style.opacity = "1.0";
+			this.e_overlay_window_help.style.pointerEvents = "all";
+			this.showingOverlay_WindowHelp = true;
+		}
+	}
+
+	SetWindowHelpText(helpText = "This is a helpful description of this window's content. Unless it isn't!")
+	{
+		this.CreateWindowHelpElements();
+		this.e_overlay_window_help.style.opacity = "0.0";
+		this.e_overlay_window_help.style.pointerEvents = "none";
+		this.showingOverlay_WindowHelp = false;
+		this.e_overlay_window_help_text.innerText = helpText;
 	}
 
 	ApplyStateData(state)
@@ -289,10 +351,11 @@ export class WindowBase
 		return e_overlay;
 	}
 
-	CreateControlsColumn()
+	CreateControlsColumn(isFlexChild = false)
 	{
 		this.e_controls_column = document.createElement("div");
 		this.e_controls_column.className = "window-control-column";
+		if (isFlexChild) this.e_controls_column.style.position = "relative";
 		this.e_content.appendChild(this.e_controls_column);
 	}
 
@@ -303,6 +366,8 @@ export class WindowBase
 		e_section_title.innerText = title;
 		if (this.e_controls_column) this.e_controls_column.appendChild(e_section_title);
 		else this.e_content.appendChild(e_section_title);
+
+		return e_section_title;
 	}
 
 	AddControl(label)

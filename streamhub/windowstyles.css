@@ -206,6 +206,13 @@
 
 
 
+.window-content input
+{
+	transition-property: color, border;
+	transition-duration: 0.15s;
+	transition-timing-function: ease-in-out;
+}
+
 .window-content input[type="text"]
 {
 	border: unset !important;
@@ -226,6 +233,44 @@
 	border: solid #4b4b4b 2px !important;
 }
 .window-content input[type="text"]:focus
+{
+	color: white !important;
+	outline-offset: -2px !important;
+}
+
+
+.window-content textarea
+{
+	color: #8a8a8a !important;
+	appearance: none !important;
+	box-shadow: none !important;
+	border-image: none !important;
+	border-style: inset !important;
+	border: solid transparent 2px !important;
+
+	text-wrap: wrap !important;
+	text-overflow: ellipsis !important;
+	word-wrap: break-word !important;
+	word-break: break-all !important;
+	word-wrap: break-word !important;
+	overflow-wrap: break-word !important;
+
+	border-radius: 0.4rem;
+	line-height: 1rem;
+	min-height: 3rem;
+
+	background-color: #00000030 !important;
+
+	transition-property: color, border;
+	transition-duration: 0.15s;
+	transition-timing-function: ease-in-out;
+}
+.window-content textarea:hover
+{
+	color: #e6e6e6 !important;
+	border: solid #4b4b4b 2px !important;
+}
+.window-content textarea:focus
 {
 	color: white !important;
 	outline-offset: -2px !important;

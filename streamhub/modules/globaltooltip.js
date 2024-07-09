@@ -4,7 +4,7 @@ console.info("[ +Module ] Global Tooltip");
 
 export class GlobalTooltipReceiver
 {
-	constructor(element = {}, label = "", longLabel = "")
+	constructor(element = null, label = "", longLabel = "")
 	{
 		this.element = element;
 		this.label = label;
@@ -23,6 +23,13 @@ export class GlobalTooltipReceiver
 		if (!this.element) return;
 		this.element.removeEventListener("mouseover", e => { this.startHover(e); });
 		this.element.removeEventListener("mouseleave", e => { this.endHover(e); });
+	}
+
+	IsValid()
+	{
+		if (!this.element) return false;
+		if (!this.element.remove) return false;
+		return true;
 	}
 
 	static Default = new GlobalTooltipReceiver(null, "", "");
@@ -44,15 +51,46 @@ export class GlobalTooltip
 
 	static CleanHoveredList()
 	{
-		GlobalTooltip.hovered = GlobalTooltip.hovered.filter(x => x != null && x.element.remove);
-		GlobalTooltip.CheckVisibility();
+		let invalidSourceIndices = [];
+		for (var ii = 0; ii < GlobalTooltip.hovered.length; ii++)
+		{
+			const sourceId = ii;
+			if (GlobalTooltip.hovered[sourceId].IsValid()) continue;
+			invalidSourceIndices.push(sourceId);
+		}
+
+		for (var ii = invalidSourceIndices.length - 1; ii > -1; ii--)
+		{
+			const invalidSourceId = ii;
+			const targetId = invalidSourceIndices[invalidSourceId];
+			GlobalTooltip.hovered[targetId].RemoveEventListeners();
+			GlobalTooltip.hovered.splice(targetId, 1);
+		}
+
+		if (invalidSourceIndices.length > 0)
+			console.log("global tooltip :: hover targets cleaned : " + invalidSourceIndices.length + " invalid");
+	}
+
+	static visibilityCheckTimeoutId = -1;
+	static CheckVisibilityDelayed()
+	{
+		if (GlobalTooltip.visibilityCheckTimeoutId != -1) return;
+		GlobalTooltip.visibilityCheckTimeoutId = window.setTimeout(
+			() =>
+			{
+				GlobalTooltip.CheckVisibility();
+				GlobalTooltip.visibilityCheckTimeoutId = -1;
+			},
+			33
+		);
 	}
 
 	static CheckVisibility()
 	{
-		if (GlobalTooltip.showing && GlobalTooltip.hovered.length < 1) 
+		//GlobalTooltip.CleanHoveredList();
+
+		if (GlobalTooltip.showing && GlobalTooltip.hovered.length < 1)
 		{
-			GlobalTooltip.hovered = [];
 			GlobalTooltip.e_tooltip_root.style.transitionProperty = "opacity";
 			GlobalTooltip.Hide();
 		}
@@ -62,22 +100,19 @@ export class GlobalTooltip
 		}
 	}
 
-	static StartHover(receiver = GlobalTooltipReceiver.Default)
+	static StartHover(receiver)
 	{
 		var id = GlobalTooltip.hovered.indexOf(receiver);
 		if (id < 0) GlobalTooltip.hovered.push(receiver);
 		GlobalTooltip.JumpTo(receiver);
-		GlobalTooltip.CleanHoveredList();
+		GlobalTooltip.CheckVisibilityDelayed();
 	}
 
-	static EndHover(receiver = GlobalTooltipReceiver.Default)
+	static EndHover(receiver)
 	{
-		if (!GlobalTooltip.showing) return;
-
 		var id = GlobalTooltip.hovered.indexOf(receiver);
 		if (id > -1) GlobalTooltip.hovered.splice(id, 1);
-
-		GlobalTooltip.CleanHoveredList();
+		GlobalTooltip.CheckVisibilityDelayed();
 	}
 
 	static CreateElements()
@@ -125,14 +160,14 @@ export class GlobalTooltip
 
 	static ReleaseReceiver(element)
 	{
-		if (element == null) return;
+		if (!element) return;
 
-		var receiver = GlobalTooltip.hovered.find(x => { return x.element === element; });
-		if (receiver == null) return;
+		var receiverIndex = GlobalTooltip.hovered.findIndex(x => { return x.element === element; });
+		if (receiverIndex == -1) return;
 
-		receiver.RemoveEventListeners();
-		var receiverIndex = GlobalTooltip.hovered.indexOf(receiver);
-		if (receiverIndex > -1) GlobalTooltip.hovered.splice(receiverIndex, 1);
+		GlobalTooltip.hovered[receiverIndex].RemoveEventListeners();
+		GlobalTooltip.hovered.splice(receiverIndex, 1);
+		GlobalTooltip.CheckVisibility();
 	}
 
 	static Show()
@@ -142,10 +177,12 @@ export class GlobalTooltip
 
 		GlobalTooltip.e_tooltip_root.style.opacity = 1.0;
 
+		const longLabel = GlobalTooltip.hovered[GlobalTooltip.hovered.length - 1].longLabel;
+
 		GlobalTooltip.timeoutId_showMoreTimer = window.setTimeout(
 			() =>
 			{
-				GlobalTooltip.e_tooltip_label.innerText = GlobalTooltip.hovered[GlobalTooltip.hovered.length - 1].longLabel;
+				GlobalTooltip.e_tooltip_label.innerText = longLabel;
 				GlobalTooltip.timeoutId_showMoreTimer = -1;
 			},
 			1500
@@ -188,7 +225,7 @@ export class GlobalTooltip
 
 		e_rect_mid_y += e_rect.height * 0.5;
 
-		GlobalTooltip.Show();
+		GlobalTooltip.CheckVisibility();
 		GlobalTooltip.e_tooltip_root.style.transitionProperty = "opacity, top, bottom, left";
 	}
 }
@@ -197,4 +234,4 @@ export class GlobalTooltip
 
 GlobalTooltip.CreateElements();
 
-window.setInterval(() => { GlobalTooltip.CleanHoveredList(); }, 1234);
+//window.setInterval(() => { GlobalTooltip.CleanHoveredList(); }, 1234);

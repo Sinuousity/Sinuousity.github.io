@@ -230,6 +230,7 @@ html
 	bottom: 0;
 	left: 0;
 	right: 0;
+	overflow: hidden;
 }
 
 body
@@ -243,9 +244,6 @@ body
 	left: 0;
 	right: 0;
 
-	background-size: cover;
-	background-blend-mode: screen;
-	background: radial-gradient(circle at -10% -10%, #2c2c2c 0px, #1b1b1b 500px);
 	background-color: #1b1b1b;
 
 	text-align: center;

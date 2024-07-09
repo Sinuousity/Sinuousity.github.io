@@ -23,6 +23,9 @@ var e_menu_windows = {};
 var e_site_tag = {};
 var e_save_indicator = {};
 
+var e_doc_root = document.querySelector(':root');
+console.log("FOUND DOC ROOT");
+
 console.info("[ +Module ] Hub Core");
 OnBodyLoad();
 //(() => { OnBodyLoad(); })(); // lol nice
@@ -46,12 +49,20 @@ var global_time_seconds = 0.0;
 function anim_time_loop(timestamp)
 {
 	if (ts_time_prev == -1) ts_time_prev = timestamp;
-	if (ts_time_prev == timestamp) return;
+	if (ts_time_prev == timestamp) 
+	{
+		requestAnimationFrame(t => { anim_time_loop(t); });
+		return;
+	}
 	var dtMs = timestamp - ts_time_prev;
 	var dtSeconds = dtMs * 0.001;
 	ts_time_prev = timestamp;
 	global_time_seconds += dtSeconds;
-	requestAnimationFrame(t => { anim_time_loop(t); })
+
+	document.documentElement.style.setProperty('--time', global_time_seconds + 's');
+	document.documentElement.style.setProperty('--time-angle', (((global_time_seconds / 60.0) % 1.0) * 360.0) + 'deg');
+
+	requestAnimationFrame(t => { anim_time_loop(t); });
 }
 requestAnimationFrame(t => { anim_time_loop(t); });
 
@@ -87,7 +98,7 @@ function RestoreLocalStorageContent()
 	if (GlobalSettings.instance.bool_resetAllData)
 	{
 		RaffleState.instance.TryStore();
-		ItemLibrary.instance.Store();
+		ItemLibrary.builtIn.Store();
 		ViewerInventoryManager.instance.Store();
 		CreatureRoster.instance.Store();
 	}
@@ -99,7 +110,7 @@ function RestoreLocalStorageContent()
 	}
 
 	RaffleState.instance.TryRestore();
-	ItemLibrary.instance.Restore();
+	ItemLibrary.builtIn.Restore();
 	ViewerInventoryManager.instance.Restore();
 	CreatureRoster.instance.Restore();
 	GlobalSettings.RestoreOrGetInitialState();

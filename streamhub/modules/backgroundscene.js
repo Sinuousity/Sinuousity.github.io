@@ -240,6 +240,7 @@ export class BackgroundScene
 		BackgroundScene.e_root.style.inset = "0";
 		BackgroundScene.e_root.style.backgroundColor = "transparent";
 		BackgroundScene.e_root.style.overflow = "hidden";
+		BackgroundScene.e_root.style.borderRadius = "0.396rem";
 
 		for (var layerIndex = 0; layerIndex < BackgroundScene.activeProfile.layers.length; layerIndex++)
 		{
@@ -336,7 +337,44 @@ export class BackgroundScene
 				if (layerInfo.data.blur && layerInfo.data.blur > 0) e_layer.style.filter = "blur(" + layerInfo.data.blur + "px)";
 				if (layerInfo.data.opacity) e_layer.style.opacity = layerInfo.data.opacity + "%";
 				break;
+
+			case "Video":
+				e_layer = document.createElement("video");
+
+				var e_video_src_mp4 = document.createElement("source");
+				e_video_src_mp4.type = "video/mp4";
+				e_layer.appendChild(e_video_src_mp4);
+
+				e_layer.muted = true;
+				e_layer.autoplay = true;
+				e_layer.loop = true;
+				e_layer.playbackRate = 0.9;
+				e_layer.style.position = "absolute";
+				e_layer.style.top = "50%";
+				e_layer.style.left = "50%";
+
+				e_layer.style.overflow = "hidden";
+
+				var posx = -50;
+				var posy = -50;
+				if (layerInfo.data.positionX) posx += Number(layerInfo.data.positionX) * 20;
+				if (layerInfo.data.positionY) posy += Number(layerInfo.data.positionY) * 20;
+				e_layer.style.transform = `translate(${posx}%, ${posy}%)`;
+
+				var sclx = 100;
+				var scly = 100;
+				if (layerInfo.data.scaleX) sclx = Number(layerInfo.data.scaleX);
+				if (layerInfo.data.scaleY) scly = Number(layerInfo.data.scaleY);
+				e_layer.style.transform += ` scale(${sclx}%, ${scly}%)`;
+
+				if (layerInfo.data.src) e_video_src_mp4.src = layerInfo.data.src;
+				if (layerInfo.data.scaleX) e_layer.style.transform += " scale(" + layerInfo.data.scale + "%)";
+				if (layerInfo.data.blur && layerInfo.data.blur > 0) e_layer.style.filter = "blur(" + layerInfo.data.blur + "px)";
+				if (layerInfo.data.opacity) e_layer.style.opacity = layerInfo.data.opacity + "%";
+				break;
 		}
+		e_layer.style.mixBlendMode = layerInfo.data.blendMode ?? "normal";
+		e_layer.style.borderRadius = (layerInfo.data.borderRadius ?? "0") + "%";
 		e_layer.style.pointerEvents = "none";
 		e_layer.style.userSelect = "none";
 		e_layer.draggable = false;
@@ -365,6 +403,7 @@ export class BackgroundScene
 			case "Gradient Fill": l.data.gradient = newData; break;
 			case "Filter Layer": l.data.filter = newData; break;
 			case "Image": l.data.src = newData; break;
+			case "Video": l.data.src = newData; break;
 		}
 	}
 }
@@ -494,11 +533,17 @@ class LayerListItem
 			case "Solid Fill":
 				this.AddTextInput("Layer Name", l.name, x => { l.name = x; BackgroundScene.EmitChange(true, false); });
 				this.AddTextInput("Color", l.data.color, x => { l.data.color = x; });
+				this.AddSlider("Opacity", 0, 100, 1, l.data.opacity ?? 100, x => { l.data.opacity = x; });
+				this.AddSlider("Border Radius", 0, 100, 1, l.data.borderRadius ?? 0, x => { l.data.borderRadius = x; });
+				this.AddTextInput("Blend Mode", l.data.blendMode ?? "", x => { l.data.blendMode = x; });
 				break;
 
 			case "Gradient Fill":
 				this.AddTextInput("Layer Name", l.name, x => { l.name = x; BackgroundScene.EmitChange(true, false); });
 				this.AddTextInput("Gradient CSS", l.data.gradient, x => { l.data.gradient = x; });
+				this.AddSlider("Opacity", 0, 100, 1, l.data.opacity ?? 100, x => { l.data.opacity = x; });
+				this.AddSlider("Border Radius", 0, 100, 1, l.data.borderRadius ?? 0, x => { l.data.borderRadius = x; });
+				this.AddTextInput("Blend Mode", l.data.blendMode ?? "", x => { l.data.blendMode = x; });
 				break;
 
 			case "Filter Layer":
@@ -509,23 +554,39 @@ class LayerListItem
 			case "Pattern":
 				this.AddTextInput("Layer Name", l.name, x => { l.name = x; BackgroundScene.EmitChange(true, false); });
 				this.AddTextInput("Background Image CSS", l.data.src, x => { l.data.src = x; });
-				this.AddSlider("Opacity", 0, 100, 1, l.data.opacity ?? 100, x => { l.data.opacity = x; });
 				this.AddSlider("Scale X", 1, 30, 1, l.data.scaleX ?? 10, x => { l.data.scaleX = x; });
 				this.AddSlider("Scale Y", 1, 30, 1, l.data.scaleY ?? 10, x => { l.data.scaleY = x; });
 				this.AddSlider("Speed X", -1.0, 1.0, 0.1, l.data.speedX ?? 0.0, x => { l.data.speedX = x; });
 				//this.AddSlider("Speed Y", -1.0, 1.0, 0.1, l.data.speedY ?? 0.0, x => { l.data.speedY = x; });
 				this.AddSlider("Blur", 0, 20, 1, l.data.blur ?? 0, x => { l.data.blur = x; });
+				this.AddSlider("Opacity", 0, 100, 1, l.data.opacity ?? 100, x => { l.data.opacity = x; });
+				this.AddTextInput("Blend Mode", l.data.blendMode ?? "", x => { l.data.blendMode = x; });
 				break;
 
 			case "Image":
 				this.AddTextInput("Layer Name", l.name, x => { l.name = x; BackgroundScene.EmitChange(true, false); });
 				this.AddTextInput("Image URL", l.data.src, x => { l.data.src = x; });
+				this.AddSlider("Position X", -10, 10, 0.1, l.data.positionX ?? 0, x => { l.data.positionX = x; });
+				this.AddSlider("Position Y", -10, 10, 0.1, l.data.positionY ?? 0, x => { l.data.positionY = x; });
+				this.AddSlider("Scale X", 5, 600, 5, l.data.scaleX ?? 100, x => { l.data.scaleX = x; });
+				this.AddSlider("Scale Y", 5, 600, 5, l.data.scaleY ?? 100, x => { l.data.scaleY = x; });
+				this.AddSlider("Blur", 0, 20, 0.25, l.data.blur ?? 0, x => { l.data.blur = x; });
 				this.AddSlider("Opacity", 0, 100, 1, l.data.opacity ?? 100, x => { l.data.opacity = x; });
-				this.AddSlider("Position X", -10, 10, 1, l.data.positionX ?? 0, x => { l.data.positionX = x; });
-				this.AddSlider("Position Y", -10, 10, 1, l.data.positionY ?? 0, x => { l.data.positionY = x; });
-				this.AddSlider("Scale X", 10, 300, 10, l.data.scaleX ?? 100, x => { l.data.scaleX = x; });
-				this.AddSlider("Scale Y", 10, 300, 10, l.data.scaleY ?? 100, x => { l.data.scaleY = x; });
-				this.AddSlider("Blur", 0, 20, 1, l.data.blur ?? 0, x => { l.data.blur = x; });
+				this.AddSlider("Border Radius", 0, 100, 1, l.data.borderRadius ?? 0, x => { l.data.borderRadius = x; });
+				this.AddTextInput("Blend Mode", l.data.blendMode ?? "", x => { l.data.blendMode = x; });
+				break;
+
+			case "Video":
+				this.AddTextInput("Layer Name", l.name, x => { l.name = x; BackgroundScene.EmitChange(true, false); });
+				this.AddTextInput("Video URL", l.data.src ?? "https://i.imgur.com/BWYPTQP.mp4", x => { l.data.src = x; });
+				this.AddSlider("Position X", -10, 10, 0.1, l.data.positionX ?? 0, x => { l.data.positionX = x; });
+				this.AddSlider("Position Y", -10, 10, 0.1, l.data.positionY ?? 0, x => { l.data.positionY = x; });
+				this.AddSlider("Scale X", 5, 600, 5, l.data.scaleX ?? 100, x => { l.data.scaleX = x; });
+				this.AddSlider("Scale Y", 5, 600, 5, l.data.scaleY ?? 100, x => { l.data.scaleY = x; });
+				this.AddSlider("Blur", 0, 20, 0.25, l.data.blur ?? 0, x => { l.data.blur = x; });
+				this.AddSlider("Opacity", 0, 100, 1, l.data.opacity ?? 100, x => { l.data.opacity = x; });
+				this.AddSlider("Border Radius", 0, 100, 1, l.data.borderRadius ?? 0, x => { l.data.borderRadius = x; });
+				this.AddTextInput("Blend Mode", l.data.blendMode ?? "", x => { l.data.blendMode = x; });
 				break;
 		}
 	}
@@ -543,7 +604,7 @@ class LayerListItem
 	AddTextInput(label, initValue, onChange = x => { })
 	{
 		const e_field_root = addElement("div", null, this.e_optionsRoot);
-		e_field_root.title = label;
+		GlobalTooltip.RegisterReceiver(e_field_root, label, label);
 		e_field_root.style.position = "relative";
 		e_field_root.style.flexGrow = "1.0";
 		e_field_root.style.flexShrink = "1.0";
@@ -555,7 +616,6 @@ class LayerListItem
 		const e_field = addElement("input", null, e_field_root);
 		const e_label = addElement("div", null, e_field_root, label);
 
-		e_field.title = label;
 		e_field.type = "text";
 		e_field.value = initValue;
 
@@ -614,6 +674,7 @@ class LayerListItem
 	AddSlider(label, min, max, step, initValue, onChange = x => { })
 	{
 		const e_slider_root = addElement("div", null, this.e_optionsRoot);
+		GlobalTooltip.RegisterReceiver(e_slider_root, label, label);
 		e_slider_root.title = initValue;
 		e_slider_root.style.position = "relative";
 		e_slider_root.style.flexGrow = "1.0";
@@ -771,7 +832,13 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 			"Image",
 			"insert_photo",
 			() => { return { src: "./../streamhub/images/nobody.png" } },
-			"Add a centered image pattern, enter a URL to use an image from the web"
+			"Add a centered image, use a URL for an image from the web"
+		);
+		this.e_btn_video = this.AddLayerButton(
+			"Video",
+			"live_tv",
+			() => { return { src: "https://i.imgur.com/BWYPTQP.mp4" } },
+			"Add a centered video, use a URL for a video from the web"
 		);
 		this.e_btn_pattern = this.AddLayerButton(
 			"Pattern",

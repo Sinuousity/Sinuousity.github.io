@@ -24,7 +24,6 @@ export class DebugWindow extends DraggableWindow
 		this.e_content.style.overflowY = "auto";
 		this.e_content.style.textOverflow = "ellipsis";
 		this.e_content.style.textWrap = "nowrap";
-		this.e_content.style.wordWrap = "break-word";
 		this.e_content.style.width = "100%";
 
 		console.info = this.proxy(console, console.info);
@@ -43,8 +42,10 @@ export class DebugWindow extends DraggableWindow
 			var fullMessage = [].concat(Array.prototype.slice.apply(arguments));
 			if (DebugWindow.instance != null)
 			{
-				DebugWindow.instance.e_content.innerHTML += `<span style='font-size:0.6rem;padding-right:0.5rem;'>${new Date().toLocaleTimeString('en-US')}</span>`;
+				var prevContent = DebugWindow.instance.e_content.innerHTML;
+				DebugWindow.instance.e_content.innerHTML = `<span style='font-size:0.6rem;padding-right:0.5rem;'>${new Date().toLocaleTimeString('en-US')}</span>`;
 				DebugWindow.instance.e_content.innerHTML += fullMessage.join(' ') + "<br>";
+				DebugWindow.instance.e_content.innerHTML += prevContent + "<br>";
 			}
 			method.apply(context, fullMessage);
 		}

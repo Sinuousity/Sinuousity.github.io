@@ -75,6 +75,7 @@ export class TwitchListener
 		} catch (error)
 		{
 			this.connected = false;
+			console.warn(`TWITCH WS OPEN ERROR: '${error}'`);
 			return;
 		}
 

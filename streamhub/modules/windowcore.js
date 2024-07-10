@@ -170,8 +170,8 @@ export class WindowBase
 
 	ApplyPosition()
 	{
-		this.e_window_root.style.left = this.position_x + "px";
-		this.e_window_root.style.top = this.position_y + "px";
+		this.e_window_root.style.left = `max(0px, ${this.position_x}px)`;
+		this.e_window_root.style.top = `max(0px, ${this.position_y}px)`;
 	}
 
 	Show()
@@ -656,6 +656,8 @@ export class DraggableWindow extends WindowBase
 		this.drag_start_pos_y = UserInput.instance.mousePositionY;
 
 		//this.e_window_root.style.pointerEvents = "none";
+		this.e_window_root.style.maxWidth = (document.body.offsetWidth - 8) + "px";
+		this.e_window_root.style.maxHeight = (document.body.offsetHeight - 8) + "px";
 		this.e_window_drag_handle.style.cursor = "grabbing";
 		document.addEventListener("mousemove", this.ContinueDrag.bind(this));
 		document.addEventListener("mouseup", this.EndDrag.bind(this));
@@ -682,11 +684,11 @@ export class DraggableWindow extends WindowBase
 		//this.position_x = Math.round(this.position_x * 0.2) * 5.0;
 		//this.position_y = Math.round(this.position_y * 0.2) * 5.0;
 
-		this.position_x = Math.max(0, this.position_x);
-		this.position_y = Math.max(0, this.position_y);
-
 		this.position_x = Math.min(document.body.offsetWidth - this.e_window_root.offsetWidth, this.position_x);
 		this.position_y = Math.min(document.body.offsetHeight - this.e_window_root.offsetHeight, this.position_y);
+
+		this.position_x = Math.max(0, this.position_x);
+		this.position_y = Math.max(0, this.position_y);
 
 		var xdeltasign = Math.sign(dragDeltaX);
 		var screenx = Math.abs(dragDeltaX) / 100.0;
@@ -694,7 +696,7 @@ export class DraggableWindow extends WindowBase
 		screenx *= screenx;
 		this.e_window_root.style.transitionDuration = "0.06s";
 		this.e_window_root.style.rotate = (20.0 * screenx * xdeltasign) + "deg";
-		this.e_window_root.style.scale = "101%";
+		//this.e_window_root.style.scale = "101%";
 		this.e_window_root.style.outlineOffset = "4px";
 		this.e_window_root.style.outline = "2px solid #FFbb00ff";
 		this.e_window_root.style.backgroundColor = "#ffffff15";
@@ -710,7 +712,7 @@ export class DraggableWindow extends WindowBase
 		this.e_window_drag_handle.style.cursor = "grab";
 		this.e_window_root.style.transitionDuration = "0.2s";
 		this.e_window_root.style.rotate = "0deg";
-		this.e_window_root.style.scale = "100%";
+		//this.e_window_root.style.scale = "100%";
 		this.e_window_root.style.outlineOffset = "1px";
 		this.e_window_root.style.outline = "2px solid transparent";
 		this.e_window_root.style.backgroundColor = "#ffffff08";

@@ -563,7 +563,7 @@ body
 	right: 0;
 	width: 100%;
 
-	transform: translate(40%, -80%) rotateZ(30deg);
+	transform: translate(40%, -50%) rotateZ(30deg);
 	background-color: #00ccff5d;
 	color: white !important;
 	box-shadow: #0000002c 0px 0px 5px 1px;

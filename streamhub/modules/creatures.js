@@ -60,33 +60,72 @@ export class CreatureRosterWindow extends ItemStoreWindowBase
 		targetItem.imageSrc = this.e_edit_field_imageSrc.value;
 		targetItem.canAppear = this.e_edit_tgl_canAppear.checked;
 		targetItem.evasionChance = this.e_edit_field_evadeChance.value;
+		targetItem.pointValue = this.e_edit_field_pointValue.value;
 		this.store.MarkDirty();
 	}
 
 	//override
 	PopulateEditOverlay()
 	{
-		this.AppendEditOverlayTitle("Editing " + this.currentEditTarget.name);
-		this.e_edit_field_name = this.AppendEditOverlayTextField("Name", this.currentEditTarget.name ?? "Mysterious Creature", "Enter Creature Name");
-		GlobalTooltip.RegisterReceiver(this.e_edit_field_name.parentElement, "Creature Name", "A name for this creature.");
+		let creature = this.currentEditTarget;
 
-		this.e_edit_tgl_canAppear = this.AppendEditOverlayToggle("Can Appear", this.currentEditTarget.canAppear ?? true);
-		GlobalTooltip.RegisterReceiver(this.e_edit_tgl_canAppear.parentElement, "Can Appear", "Can this creature appear at all?");
+		this.AppendEditOverlayTitle("Editing " + creature.name);
+		this.e_edit_field_name = this.AppendEditOverlayTextField("Name", creature.name ?? "Mysterious Creature", "Enter Creature Name");
+		GlobalTooltip.RegisterReceiver(
+			this.e_edit_field_name.parentElement,
+			"Creature Name",
+			"A name for this creature."
+		);
 
-		this.e_edit_field_rarity = this.AppendEditOverlayNumberField("Rarity", this.currentEditTarget.rarity ?? 1.0, 0.01);
-		GlobalTooltip.RegisterReceiver(this.e_edit_field_rarity.parentElement, "Appearance Rarity", "A number that represents how rare this creature is, relative to all other creatures.");
+		this.e_edit_field_desc = this.AppendEditOverlayTextArea("Description", creature.description ?? "", "Enter Creature Description");
+		GlobalTooltip.RegisterReceiver(
+			this.e_edit_field_desc.parentElement,
+			"Creature Description",
+			"A more detailed description of the creature, for fun."
+		);
 
-		this.e_edit_field_duration = this.AppendEditOverlayNumberField("Duration", this.currentEditTarget.duration ?? 5, 1);
-		GlobalTooltip.RegisterReceiver(this.e_edit_field_duration.parentElement, "Appearance Duration (seconds)", "The number of seconds this creature stays for during appearances.");
+		const imgSrcDefault = "./../streamhub/images/nobody.png";
+		this.e_edit_field_imageSrc = this.AppendEditOverlayTextField("Image Source", creature.imageSrc ?? imgSrcDefault, "Enter Creature Image Source");
+		GlobalTooltip.RegisterReceiver(
+			this.e_edit_field_imageSrc.parentElement,
+			"Creature Image Source",
+			"You can use a URL or any other valid HTML img src attribute value."
+		);
 
-		this.e_edit_field_evadeChance = this.AppendEditOverlayNumberField("Evade Chance", this.currentEditTarget.evasionChance ?? 0.0, 0.01);
-		GlobalTooltip.RegisterReceiver(this.e_edit_field_evadeChance.parentElement, "Evasion Chance ( 0.0 - 1.0 )", "The chance this creature evades all attempts to be caught.");
+		this.e_edit_field_rarity = this.AppendEditOverlayNumberField("Rarity", creature.rarity ?? 1.0, 0.01);
+		GlobalTooltip.RegisterReceiver(
+			this.e_edit_field_rarity.parentElement,
+			"Appearance Rarity",
+			"A number that represents how rare this creature is, relative to all other creatures."
+		);
 
-		this.e_edit_field_desc = this.AppendEditOverlayTextArea("Description", this.currentEditTarget.description ?? "", "Enter Creature Description");
-		GlobalTooltip.RegisterReceiver(this.e_edit_field_desc.parentElement, "Creature Description", "A more detailed description of the creature, for fun.");
+		this.e_edit_field_duration = this.AppendEditOverlayNumberField("Duration", creature.duration ?? 5, 1);
+		GlobalTooltip.RegisterReceiver(
+			this.e_edit_field_duration.parentElement,
+			"Appearance Duration (seconds)",
+			"The number of seconds this creature stays for during appearances."
+		);
 
-		this.e_edit_field_imageSrc = this.AppendEditOverlayTextField("Image Source", this.currentEditTarget.imageSrc ?? "./../streamhub/images/nobody.png", "Enter Creature Image Source");
-		GlobalTooltip.RegisterReceiver(this.e_edit_field_imageSrc.parentElement, "Creature Image Source", "You can use a URL or any other valid HTML img src attribute value.")
+		this.e_edit_field_pointValue = this.AppendEditOverlayNumberField("SE Points", creature.pointValue ?? 0, 1);
+		GlobalTooltip.RegisterReceiver(
+			this.e_edit_field_pointValue.parentElement,
+			"StreamElements Points",
+			"The number of StreamElements Loyalty Points awarded for catching this creature."
+		);
+
+		this.e_edit_field_evadeChance = this.AppendEditOverlayNumberField("Evade Chance", creature.evasionChance ?? 0.0, 0.01);
+		GlobalTooltip.RegisterReceiver(
+			this.e_edit_field_evadeChance.parentElement,
+			"Evasion Chance ( 0.0 - 1.0 )",
+			"The chance this creature evades all attempts to be caught."
+		);
+
+		this.e_edit_tgl_canAppear = this.AppendEditOverlayToggle("Can Appear", creature.canAppear ?? true);
+		GlobalTooltip.RegisterReceiver(
+			this.e_edit_tgl_canAppear.parentElement,
+			"Can Appear",
+			"Can this creature appear at all?"
+		);
 	}
 
 	//override
@@ -100,6 +139,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: CreatureRosterWindow.window_kind,
 		icon: "bug_report",
+		desc: "Create, modify, or remove creatures from the Creature Roster!",
 		model: (x, y) => { return new CreatureRosterWindow(x, y); },
 		wip: true
 	}

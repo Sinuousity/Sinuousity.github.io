@@ -502,6 +502,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: CreatureCatchingWindow.window_kind,
 		icon: "android",
+		desc: "Edit creature appearance settings!",
 		model: (x, y) => { return new CreatureCatchingWindow(x, y); },
 		wip: true
 	}

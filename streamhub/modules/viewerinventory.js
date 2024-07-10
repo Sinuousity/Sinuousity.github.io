@@ -473,6 +473,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: "Viewer Inventories",
 		icon: "inbox",
+		desc: "View who has what and how much of it!",
 		model: (x, y) => { return new ViewerInventoryWindow(x, y); },
 		wip: true
 	}

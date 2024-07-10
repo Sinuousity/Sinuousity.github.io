@@ -649,5 +649,21 @@ export class ItemGiverWindow extends DraggableWindow
 
 
 
-WindowManager.instance.windowTypes.push({ key: ItemLibraryWindow.window_kind, icon: "toys", model: (x, y) => { return new ItemLibraryWindow(x, y); }, wip: true });
-WindowManager.instance.windowTypes.push({ key: ItemGiverWindow.window_kind, icon: "card_giftcard", model: (x, y) => { return new ItemGiverWindow(x, y); }, wip: true });
+WindowManager.instance.windowTypes.push(
+	{
+		key: ItemLibraryWindow.window_kind,
+		icon: "toys",
+		desc: "Create, edit, or remove items from the Item Library!",
+		model: (x, y) => { return new ItemLibraryWindow(x, y); },
+		wip: true
+	}
+);
+WindowManager.instance.windowTypes.push(
+	{
+		key: ItemGiverWindow.window_kind,
+		icon: "card_giftcard",
+		desc: "Give an item to a specific viewer. (Better method TBA)",
+		model: (x, y) => { return new ItemGiverWindow(x, y); },
+		wip: true
+	}
+);

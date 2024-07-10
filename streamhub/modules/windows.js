@@ -58,12 +58,14 @@ export class ServiceCredentialWindow extends DraggableWindow
 	{
 		this.AddSectionTitle("StreamElements");
 
-		var txt_seAccountId = this.AddTextField("Account ID", GlobalSettings.instance.text_seAccountId, (e) => { GlobalSettings.instance.text_seAccountId = e.value; });
+		const accountIdOption = OptionManager.GetOption("se.account.id");
+		var txt_seAccountId = this.AddTextField("Account ID", accountIdOption.value, (e) => { OptionManager.SetOptionValue("se.account.id", e.value); });
 		txt_seAccountId.style.height = "2rem";
 		txt_seAccountId.style.lineHeight = "2rem";
 		txt_seAccountId.children[1].className += " hover-obscure";
 
-		var txt_seJwtToken = this.AddTextArea("JWT Token", GlobalSettings.instance.text_seJwtToken, (e) => { GlobalSettings.instance.text_seJwtToken = e.value; });
+		const jwtTokenOption = OptionManager.GetOption("se.jwt.token");
+		var txt_seJwtToken = this.AddTextArea("JWT Token", jwtTokenOption.value, (e) => { OptionManager.SetOptionValue("se.jwt.token", e.value); });
 		txt_seJwtToken.style.height = "10rem";
 		txt_seJwtToken.children[1].className += " hover-obscure";
 	}

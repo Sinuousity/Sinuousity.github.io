@@ -1,8 +1,11 @@
+import { EventSource } from "./eventsource.js";
+
 console.info("[ +Module ] User Input");
 
 export class UserInput
 {
 	static instance = new UserInput();
+	static afterMousePositionChanged = new EventSource();
 
 	constructor()
 	{
@@ -52,6 +55,8 @@ export class UserInput
 
 		this.mousePositionNormalizedX = this.mousePositionX / document.documentElement.clientWidth;
 		this.mousePositionNormalizedY = this.mousePositionY / document.documentElement.clientHeight;
+
+		UserInput.afterMousePositionChanged.Invoke();
 
 		/*
 		var glowposx = this.mousePositionNormalizedX * 100;

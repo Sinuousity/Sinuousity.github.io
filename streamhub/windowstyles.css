@@ -694,7 +694,8 @@
 }
 .window-control input[type="button"]:hover
 {
-	background-color: rgba(105, 105, 105, 0.918);
+	background-color: #969696ea;
+	color: #fffffff0;
 	scale: 105%;
 }
 

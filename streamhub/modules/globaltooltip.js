@@ -1,4 +1,5 @@
 import { addElement } from "../hubscript.js";
+import { UserInput } from "./userinput.js";
 
 console.info("[ +Module ] Global Tooltip");
 
@@ -216,7 +217,6 @@ export class GlobalTooltip
 		var e_rect_mid_y = e_rect.y + e_rect.height * 0.5;
 
 		var x = e_rect_mid_x;
-		GlobalTooltip.e_tooltip_root.style.left = x + "px";
 
 		if (e_rect_mid_y > (window.innerHeight * 0.5)) // bottom side
 		{
@@ -227,19 +227,19 @@ export class GlobalTooltip
 		else // top side
 		{
 			var y = e_rect_mid_y + e_rect.height * 0.5;
-			GlobalTooltip.e_tooltip_root.style.bottom = "unset";
 			GlobalTooltip.e_tooltip_root.style.top = y + "px";
+			GlobalTooltip.e_tooltip_root.style.bottom = "unset";
 		}
 
 		if (e_rect_mid_x > (window.innerWidth * 0.5)) // right side
 		{
 			GlobalTooltip.e_tooltip_root.style.left = "unset";
-			GlobalTooltip.e_tooltip_root.style.right = (window.innerWidth - x) + "px";
+			GlobalTooltip.e_tooltip_root.style.right = "var(--mouse-x-neg)";
 		}
 		else // left side
 		{
+			GlobalTooltip.e_tooltip_root.style.left = "var(--mouse-x)";
 			GlobalTooltip.e_tooltip_root.style.right = "unset";
-			GlobalTooltip.e_tooltip_root.style.left = x + "px";
 		}
 
 		e_rect_mid_y += e_rect.height * 0.5;

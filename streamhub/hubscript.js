@@ -11,9 +11,11 @@ import { ItemLibrary } from "./modules/itemlibrary.js";
 import { CreatureRoster } from "./modules/creatures.js";
 import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
+import { StreamElements, StreamElementsWindow } from "./modules/streamelementslistener.js";
 import { SaveIndicator } from "./modules/saveindicator.js";
 import "./modules/globaltooltip.js";
 import { GlobalTooltip } from "./modules/globaltooltip.js";
+import { UserInput } from "./modules/userinput.js";
 
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
@@ -23,6 +25,7 @@ const resetStoredState = false;
 var e_menu_windows = {};
 var e_site_tag = {};
 var e_save_indicator = {};
+var sub_mouse_motion;
 
 var e_doc_root = document.querySelector(':root');
 console.log("FOUND DOC ROOT");
@@ -43,6 +46,16 @@ function OnBodyLoad()
 	RestoreWindowState();
 	//AddCssReloadButton();
 	UpdateSiteTag();
+
+	sub_mouse_motion = UserInput.afterMousePositionChanged.RequestSubscription(
+		() =>
+		{
+			document.documentElement.style.setProperty('--mouse-x', UserInput.instance.mousePositionX + 'px');
+			document.documentElement.style.setProperty('--mouse-y', UserInput.instance.mousePositionY + 'px');
+			document.documentElement.style.setProperty('--mouse-x-neg', (document.documentElement.clientWidth - UserInput.instance.mousePositionX) + 'px');
+			document.documentElement.style.setProperty('--mouse-y-neg', (document.documentElement.clientHeight - UserInput.instance.mousePositionY) + 'px');
+		}
+	);
 }
 
 var ts_time_prev = -1;
@@ -143,7 +156,9 @@ function SetWindowMenuOptions()
 
 		if (wt.desc) 
 		{
-			GlobalTooltip.RegisterReceiver(e_btn_open, wt.desc, null);
+			if (wt.comingSoon) GlobalTooltip.RegisterReceiver(e_btn_open, wt.desc + " ( Coming Soon! )", null);
+			else if (wt.wip) GlobalTooltip.RegisterReceiver(e_btn_open, wt.desc + " ( Work In Progress! Some things may not work yet! )", null);
+			else GlobalTooltip.RegisterReceiver(e_btn_open, wt.desc, null);
 		}
 
 		e_menu_windows.appendChild(e_btn_open);

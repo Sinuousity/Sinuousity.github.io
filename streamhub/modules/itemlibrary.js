@@ -74,6 +74,7 @@ export class ItemStoreBase extends StoredObject
 export class ItemStoreWindowBase extends DraggableWindow
 {
 	store = ItemLibrary.builtIn;
+	searchString = "";
 
 	constructor(windowKind, icon, pos_x, pos_y, store)
 	{
@@ -97,10 +98,12 @@ export class ItemStoreWindowBase extends DraggableWindow
 		this.currentEditTarget = {};
 
 		this.CreateContentContainer();
-		this.e_content.overflowY = "hidden";
+		this.e_content.overflowX = "hidden";
+		this.e_content.overflowY = "auto";
 		this.e_content.style.display = "flex";
 		this.e_content.style.flexDirection = "column";
 
+		this.CreateFilterElements();
 		this.CreateListElements();
 
 		this.AddWindowHelpButton();
@@ -111,18 +114,66 @@ export class ItemStoreWindowBase extends DraggableWindow
 
 	onWindowClose()
 	{
+		super.onWindowClose();
 		this.store.onRestored.RemoveSubscription(this.sub_dataRestored);
 		this.store.onDirtied.RemoveSubscription(this.sub_dataDirty);
+	}
+
+	CreateFilterElements()
+	{
+		this.e_filter_root = document.createElement("div");
+		this.e_filter_root.style.position = "relative";
+		this.e_filter_root.style.height = "2rem";
+		this.e_filter_root.style.flexShrink = "0.0";
+		this.e_content.appendChild(this.e_filter_root);
+
+		this.e_filter_input = addElement("input", null, this.e_filter_root);
+		this.e_filter_input.style.textAlign = "center";
+		this.e_filter_input.style.fontWeight = "bold";
+		this.e_filter_input.style.borderRadius = "0";
+		this.e_filter_input.style.position = "absolute";
+		this.e_filter_input.style.inset = "0";
+		this.e_filter_input.type = "text";
+		this.e_filter_input.placeholder = "Filter Items";
+		GlobalTooltip.RegisterReceiver(
+			this.e_filter_input,
+			"Search by item name or description",
+			"Filter all items in this list to items that contain the text entered here. Not case sensitive"
+		);
+
+		this.e_filter_input.addEventListener(
+			"change",
+			e =>
+			{
+				this.searchString = this.e_filter_input.value.toLowerCase().trim();
+				if (this.searchString == "")
+				{
+					this.e_filter_input.style.background = "unset";
+				}
+				else
+				{
+					this.e_filter_input.style.background = "linear-gradient(0deg, #fff0 -10%, #fc08 110%)";
+				}
+				this.RefreshItemList();
+			}
+		);
 	}
 
 	CreateListElements()
 	{
 		this.e_root = document.createElement("div");
-		this.e_root.className = "creature-menu-root"
+		this.e_root.style.display = "flex";
+		this.e_root.style.flexDirection = "column";
+		this.e_root.style.flexShrink = "1";
+		this.e_root.style.flexGrow = "1";
+		this.e_root.style.overflowX = "hidden";
+		this.e_root.style.overflowY = "auto";
+		this.e_root.style.padding = "0.25rem";
+		this.e_root.style.borderRadius = "1rem";
 		this.e_content.appendChild(this.e_root);
 
 		this.e_btn_add = document.createElement("div");
-		this.e_btn_add.className = "window-content-button"
+		this.e_btn_add.className = "window-content-button";
 		this.e_btn_add.style.backgroundColor = "#00ff0030";
 		this.e_btn_add.style.color = "#00ff00";
 		this.e_btn_add.innerText = "ADD NEW";
@@ -147,6 +198,7 @@ export class ItemStoreWindowBase extends DraggableWindow
 		if (this.e_items.length < 1) return;
 		for (var ii = 0; ii < this.e_items.length; ii++)
 		{
+			GlobalTooltip.ReleaseAllReceivers(this.e_items[ii]);
 			this.e_items[ii].remove();
 		}
 		this.e_items = [];
@@ -161,8 +213,19 @@ export class ItemStoreWindowBase extends DraggableWindow
 			const thisItemIndex = ii;
 			const targetItem = this.store.items[thisItemIndex];
 
+			if (this.searchString != "")
+			{
+				let match = false;
+				if (!match && targetItem.name.toLowerCase().includes(this.searchString)) match = true;
+				if (!match && targetItem.description.toLowerCase().includes(this.searchString)) match = true;
+				if (!match) continue;
+			}
+
 			const e_btn = document.createElement("div");
-			e_btn.className = "window-content-button"
+			e_btn.className = "window-content-button";
+			e_btn.style.height = "1.5rem";
+			e_btn.style.lineHeight = "1.5rem";
+			e_btn.style.fontSize = "0.9rem";
 			e_btn.innerText = (thisItemIndex + 1) + ") " + targetItem.name;
 			e_btn.addEventListener("click", () => { this.StartEditing(thisItemIndex); });
 
@@ -174,8 +237,16 @@ export class ItemStoreWindowBase extends DraggableWindow
 			this.e_root.insertBefore(e_btn, this.e_btn_add);
 			this.e_items.push(e_btn);
 
-			GlobalTooltip.RegisterReceiver(e_btn, "Edit " + targetItem.name, "Edit " + targetItem.name);
+			this.ApplyListItemTooltip(e_btn, targetItem);
 		}
+
+		this.e_btn_add.style.display = this.searchString == "" ? "block" : "none";
+	}
+
+	//override please
+	ApplyListItemTooltip(e_btn, targetItem)
+	{
+		GlobalTooltip.RegisterReceiver(e_btn, "Edit " + targetItem.name, targetItem.description);
 	}
 
 	StartEditing(itemIndex)
@@ -191,7 +262,7 @@ export class ItemStoreWindowBase extends DraggableWindow
 		this.e_edit_overlay.style.overflowX = "hidden";
 		this.e_edit_overlay.style.overflowY = "auto";
 
-		this.e_root.style.overflowY = "hidden";
+		//this.e_root.style.overflowY = "hidden";
 		this.e_root.style.filter = "blur(4px)";
 
 		this.e_content.appendChild(this.e_edit_overlay);
@@ -233,7 +304,7 @@ export class ItemStoreWindowBase extends DraggableWindow
 		this.e_edit_overlay.remove();
 		this.e_edit_overlay = null;
 		this.e_root.style.filter = "none";
-		this.e_root.overflowY = "auto";
+		this.e_root.style.overflowY = "auto";
 	}
 
 	// override please
@@ -277,29 +348,29 @@ export class ItemStoreWindowBase extends DraggableWindow
 		e_controls_root.style.padding = "0";
 
 		var e_btn_delete = this.AddItemEditButton(
-			"Delete Item",
+			"Delete",
 			"#ff0000",
-			"x",
+			"delete_forever",
 			e =>
 			{
 				this.StopEditing();
-				ItemLibrary.builtIn.Remove(deleteTargetIndex);
+				this.store.Remove(deleteTargetIndex);
 				this.RefreshItemList();
 			}, false
 		);
-		var e_btn_discard = this.AddItemEditButton("Discard Changes", "#ffff00", "✖", e => { this.StopEditing(false); }, true);
-		var e_btn_save = this.AddItemEditButton("Save Changes", "#00ff00", "✓", e => { this.StopEditing(); }, true);
+		var e_btn_discard = this.AddItemEditButton("Discard", "#ffff00", "chevron_left", e => { this.StopEditing(false); }, true);
+		var e_btn_save = this.AddItemEditButton("Save", "#00ff00", "save", e => { this.StopEditing(); }, true);
 
 		GlobalTooltip.RegisterReceiver(e_btn_delete, "Delete Item", "Delete this item from existence. Cannot be undone!");
 		GlobalTooltip.RegisterReceiver(e_btn_discard, "Discard Changes", "Discard the changes made above and return to the item list.");
 		GlobalTooltip.RegisterReceiver(e_btn_save, "Save Changes", "Apply and save the changes made above and return to the item list.");
 
-		e_btn_delete.style.borderRadius = "0.4rem 0rem 0rem 0.4rem";
-		e_btn_discard.style.borderRadius = "0rem 0rem 0rem 0rem";
+		e_btn_discard.style.borderRadius = "0.4rem 0rem 0rem 0.4rem";
+		e_btn_delete.style.borderRadius = "0rem 0rem 0rem 0rem";
 		e_btn_save.style.borderRadius = "0rem 0.4rem 0.4rem 0rem";
 
-		e_controls_root.appendChild(e_btn_delete);
 		e_controls_root.appendChild(e_btn_discard);
+		e_controls_root.appendChild(e_btn_delete);
 		e_controls_root.appendChild(e_btn_save);
 	}
 
@@ -307,7 +378,7 @@ export class ItemStoreWindowBase extends DraggableWindow
 	{
 		var e_btn = document.createElement("div");
 		e_btn.className = "list-item-button";
-		e_btn.style.width = "8rem";
+		e_btn.style.width = "6rem";
 		e_btn.style.flexGrow = flexGrow ? "1" : "0";
 		e_btn.style.flexShrink = "1";
 		e_btn.style.lineHeight = "2rem";
@@ -324,6 +395,8 @@ export class ItemStoreWindowBase extends DraggableWindow
 
 		var e_icon = document.createElement("span");
 		e_icon.className = "list-item-icon";
+		e_icon.style.fontFamily = "'Material Icons'";
+		e_icon.style.fontSize = "1.5rem";
 		e_icon.innerText = iconText;
 		e_btn.appendChild(e_icon);
 
@@ -381,6 +454,7 @@ export class ItemStoreWindowBase extends DraggableWindow
 		var e = document.createElement("textarea");
 		e.rows = 3;
 		e.columns = 32;
+		e.style.wordBreak = "break-word";
 		e.style.resize = "vertical";
 		e.style.left = "0";
 		e.style.right = "0";

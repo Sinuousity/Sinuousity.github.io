@@ -1,3 +1,4 @@
+import { GlobalTooltip } from "./globaltooltip.js";
 import { StoredObject } from "./storedobject.js";
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
@@ -177,6 +178,7 @@ export class ViewerInventoryManager extends StoredObject
 	constructor()
 	{
 		super(0.369, false);
+		this.logJSON = true;
 		this.storeKey = "data_viewer_inventories";
 	}
 
@@ -297,6 +299,12 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_viewer_list_container.appendChild(this.e_btn_add);
 	}
 
+	PrettyNum(value = 0)
+	{
+		var valueRounded = Math.round(value * 8);
+		return valueRounded / 8;
+	}
+
 	RefreshViewerList()
 	{
 		this.ClearViewerList();
@@ -324,7 +332,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 			var e_summary = document.createElement("div");
 			e_summary.className = "viewer-info-summary";
-			e_summary.innerHTML = `<span>${totalItemCount} items</span>|<span>${totalItemWeight}kg</span>|<span>${totalItemValue}gp</span>`;
+			e_summary.innerHTML = `<span>${totalItemCount} items</span>|<span>${this.PrettyNum(totalItemWeight)}kg</span>|<span>${this.PrettyNum(totalItemValue)}gp</span>`;
 
 			var e_arrow = document.createElement("span");
 			e_arrow.innerText = "➜";
@@ -342,6 +350,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 		for (var ii = 0; ii < this.e_viewers.length; ii++)
 		{
 			var v = this.e_viewers[ii];
+			GlobalTooltip.ReleaseAllReceivers(v);
 			v.remove();
 		}
 		this.e_viewers = [];
@@ -354,6 +363,8 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 		this.e_viewer_info = document.createElement("div");
 		this.e_viewer_info.className = "viewer-info-overlay";
+		this.e_viewer_info.style.overflowX = "hidden";
+		this.e_viewer_info.style.overflowY = "auto";
 
 		this.RecreateViewerInfoContent();
 
@@ -364,6 +375,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 	RecreateViewerInfoContent()
 	{
+		GlobalTooltip.ReleaseAllReceivers(this.e_viewer_info);
 		this.e_viewer_info.innerHTML = "";
 
 		var e_back = document.createElement("div");
@@ -397,6 +409,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.targetBagIndex = -1;
 
 		this.e_viewer_list_container.style.filter = "none";
+		GlobalTooltip.ReleaseAllReceivers(this.e_viewer_info);
 		this.e_viewer_info.remove();
 		this.e_viewer_info = {};
 
@@ -411,7 +424,26 @@ export class ViewerInventoryWindow extends DraggableWindow
 		{
 
 			e_item_info.innerText = itemSlot.count + " " + itemSlot.item.name;
-			if (itemSlot.count > 1) e_item_info.innerText += "s";
+			if (itemSlot.count > 1)
+			{
+				if (e_item_info.innerText.endsWith("y"))
+				{
+					e_item_info.innerText = e_item_info.innerText.substring(0, e_item_info.innerText.length - 1) + "ies";
+				}
+				else if (e_item_info.innerText.endsWith("o"))
+				{
+					e_item_info.innerText += "es";
+				}
+				else if (e_item_info.innerText.endsWith("s"))
+				{
+				}
+				else
+				{
+					if (e_item_info.innerText.endsWith("x") || e_item_info.innerText.endsWith("z"))
+						e_item_info.innerText += "e";
+					e_item_info.innerText += "s";
+				}
+			}
 			if (itemSlot.item.weight) e_item_info.innerText += ` | ${itemSlot.item.weight} kg`;
 			if (itemSlot.item.tradeValue) e_item_info.innerText += ` | ${itemSlot.item.tradeValue} gp`;
 		}
@@ -432,10 +464,9 @@ export class ViewerInventoryWindow extends DraggableWindow
 		e_item_info.appendChild(e_btn_delete);
 
 		this.e_viewer_info.appendChild(e_item_info);
-	}
 
-	onWindowShow() { };
-	onWindowClose() { };
+		if (itemSlot.item) GlobalTooltip.RegisterReceiver(e_item_info, itemSlot.item.name, itemSlot.item.description);
+	}
 }
 
 WindowManager.instance.windowTypes.push(

@@ -5,6 +5,8 @@ import "./storedobject.js";
 import { OptionManager } from "./globalsettings.js";
 import { addElement } from "../hubscript.js";
 import { EventSource } from "./eventsource.js";
+import { ChatCollector } from "./chatcollector.js";
+import { ViewerInventoryManager } from "./viewerinventory.js";
 
 console.info("[ +Module ] Creature Catching");
 
@@ -191,6 +193,8 @@ export class CreatureCatchState
 	static appearanceLoopDelayMs = 200;
 	static appearanceLoopDelaySec = CreatureCatchState.appearanceLoopDelayMs * 0.001;
 
+	static sub_OnNewChat;
+
 	static StartRandomAppearanceLoop()
 	{
 		if (CreatureCatchState.intervalId_randomAppearanceLoop != -1) return;
@@ -200,14 +204,39 @@ export class CreatureCatchState
 			CreatureCatchState.appearanceLoopDelayMs
 		);
 		console.info("creature catch loop started");
+
+		ChatCollector.sub_OnNewChat = ChatCollector.onMessageReceived.RequestSubscription(CreatureCatchState.CheckChatForKeyPhrase);
 	}
 
 	static StopRandomAppearanceLoop()
 	{
 		if (CreatureCatchState.intervalId_randomAppearanceLoop == -1) return;
+		ChatCollector.onMessageReceived.RemoveSubscription(ChatCollector.sub_OnNewChat);
 		window.clearInterval(CreatureCatchState.intervalId_randomAppearanceLoop);
 		CreatureCatchState.intervalId_randomAppearanceLoop = -1;
 		console.info("creature catch loop stopped");
+	}
+
+	static CheckChatForKeyPhrase(chatMessage)
+	{
+		if (CreatureCatchState.activeAppearance == null) return;
+
+		let chatUsername = chatMessage.username;
+		let chatContent = "";
+		chatContent = chatMessage.message;
+
+		let keyphrase = OptionManager.GetOptionValue(option_key_creature_catching_keyphrase);
+
+		if (chatContent.startsWith(keyphrase))
+		{
+			console.log(CreatureCatchState.activeAppearance.creature.name + " caught by " + chatUsername + "!");
+			var creatureItem = {
+				name: CreatureCatchState.activeAppearance.creature.name,
+				description: CreatureCatchState.activeAppearance.creature.description,
+				rarity: CreatureCatchState.activeAppearance.creature.rarity,
+			};
+			ViewerInventoryManager.AddItemCount(chatMessage.source, chatMessage.username, creatureItem, 1);
+		}
 	}
 
 	static stepRandomAppearanceLoop()

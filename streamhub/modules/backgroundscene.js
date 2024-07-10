@@ -304,8 +304,7 @@ export class BackgroundScene
 				{
 
 					e_layer.style.animation = "backgroundscene-pattern-scroll";
-					e_layer.style.animationDuration = "10s";
-					if (layerInfo.data.speedX) e_layer.style.animationDuration = (10.0 / (Math.abs(layerInfo.data.speedX) + 0.01)) + "s";
+					e_layer.style.animationDuration = (30.0 / (Math.abs(layerInfo.data.speedX) + 0.01)) + "s";
 					e_layer.style.animationIterationCount = "infinite";
 					e_layer.style.animationTimingFunction = "linear";
 					e_layer.style.animationDirection = layerInfo.data.speedX >= 0.0 ? "normal" : "reverse";
@@ -597,6 +596,7 @@ class LayerListItem
 		this.expanded = false;
 		this.e_root.style.height = "1.4rem";
 		this.e_root.style.border = "solid transparent 2px";
+		GlobalTooltip.ReleaseAllReceivers(this.e_optionsRoot);
 		this.e_optionsRoot.remove();
 		this.e_optionsRoot = {};
 	}
@@ -1087,6 +1087,7 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 	{
 		if (recreateItems)
 		{
+			GlobalTooltip.ReleaseAllReceivers(this.e_layerListContainer);
 			this.e_layerListContainer.innerHTML = "";
 
 			for (var layerIndex in BackgroundScene.activeProfile.layers)

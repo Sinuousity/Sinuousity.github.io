@@ -46,7 +46,7 @@ export class GlobalTooltip
 	static e_tooltip_arrow;
 	static e_tooltip_label;
 
-	static timeoutId_showTimer = -1;
+	//static timeoutId_showTimer = -1;
 	static timeoutId_showMoreTimer = -1;
 
 	static CleanHoveredList()
@@ -74,7 +74,7 @@ export class GlobalTooltip
 	static visibilityCheckTimeoutId = -1;
 	static CheckVisibilityDelayed()
 	{
-		if (GlobalTooltip.visibilityCheckTimeoutId != -1) return;
+		if (GlobalTooltip.visibilityCheckTimeoutId != -1) window.clearTimeout(GlobalTooltip.visibilityCheckTimeoutId);
 		GlobalTooltip.visibilityCheckTimeoutId = window.setTimeout(
 			() =>
 			{
@@ -89,21 +89,21 @@ export class GlobalTooltip
 	{
 		//GlobalTooltip.CleanHoveredList();
 
-		if (GlobalTooltip.showing && GlobalTooltip.hovered.length < 1)
+		if (GlobalTooltip.hovered.length > 0)
+		{
+			GlobalTooltip.Show();
+		}
+		else if (GlobalTooltip.showing)
 		{
 			GlobalTooltip.e_tooltip_root.style.transitionProperty = "opacity";
 			GlobalTooltip.Hide();
-		}
-		else if (!GlobalTooltip.showing && GlobalTooltip.hovered.length > 0)
-		{
-			GlobalTooltip.Show();
 		}
 	}
 
 	static StartHover(receiver)
 	{
 		var id = GlobalTooltip.hovered.indexOf(receiver);
-		if (id < 0) GlobalTooltip.hovered.push(receiver);
+		if (id == -1) GlobalTooltip.hovered.push(receiver);
 		GlobalTooltip.JumpTo(receiver);
 		GlobalTooltip.CheckVisibilityDelayed();
 	}
@@ -133,7 +133,7 @@ export class GlobalTooltip
 		GlobalTooltip.e_tooltip_root.style.top = "0px";
 		GlobalTooltip.e_tooltip_root.style.left = "0px";
 		GlobalTooltip.e_tooltip_root.style.padding = "0.5rem";
-		GlobalTooltip.e_tooltip_root.style.transform = "translate(-50%,0%)";
+		//GlobalTooltip.e_tooltip_root.style.transform = "translate(-50%,0%)";
 		GlobalTooltip.e_tooltip_root.style.transitionProperty = "opacity";
 		GlobalTooltip.e_tooltip_root.style.transitionDuration = "0.15s";
 		GlobalTooltip.e_tooltip_root.style.transitionTimingFunction = "ease-in-out";
@@ -172,21 +172,29 @@ export class GlobalTooltip
 
 	static Show()
 	{
+		if (GlobalTooltip.timeoutId_showMoreTimer != -1)
+		{
+			window.clearTimeout(GlobalTooltip.timeoutId_showMoreTimer);
+			GlobalTooltip.timeoutId_showMoreTimer = -1;
+		}
+
+		const longLabel = GlobalTooltip.hovered[GlobalTooltip.hovered.length - 1].longLabel;
+		if (typeof longLabel == 'string' && longLabel != "")
+		{
+			GlobalTooltip.timeoutId_showMoreTimer = window.setTimeout(
+				() =>
+				{
+					GlobalTooltip.e_tooltip_label.innerText = longLabel;
+					GlobalTooltip.timeoutId_showMoreTimer = -1;
+				},
+				1500
+			);
+		}
+
 		if (GlobalTooltip.showing) return;
 		GlobalTooltip.showing = true;
 
 		GlobalTooltip.e_tooltip_root.style.opacity = 1.0;
-
-		const longLabel = GlobalTooltip.hovered[GlobalTooltip.hovered.length - 1].longLabel;
-
-		GlobalTooltip.timeoutId_showMoreTimer = window.setTimeout(
-			() =>
-			{
-				GlobalTooltip.e_tooltip_label.innerText = longLabel;
-				GlobalTooltip.timeoutId_showMoreTimer = -1;
-			},
-			1500
-		);
 	}
 
 	static Hide()
@@ -195,7 +203,7 @@ export class GlobalTooltip
 		GlobalTooltip.showing = false;
 
 		if (GlobalTooltip.timeoutId_showMoreTimer != -1) window.clearTimeout(GlobalTooltip.timeoutId_showMoreTimer);
-		if (GlobalTooltip.timeoutId_showTimer != -1) window.clearTimeout(GlobalTooltip.timeoutId_showTimer);
+		//if (GlobalTooltip.timeoutId_showTimer != -1) window.clearTimeout(GlobalTooltip.timeoutId_showTimer);
 		GlobalTooltip.e_tooltip_root.style.opacity = 0.0;
 	}
 
@@ -210,20 +218,45 @@ export class GlobalTooltip
 		var x = e_rect_mid_x;
 		GlobalTooltip.e_tooltip_root.style.left = x + "px";
 
-		if (e_rect_mid_y > (window.innerHeight * 0.5))
+		if (e_rect_mid_y > (window.innerHeight * 0.5)) // bottom side
 		{
 			var y = window.innerHeight - e_rect_mid_y + e_rect.height * 0.5;
 			GlobalTooltip.e_tooltip_root.style.top = "unset";
 			GlobalTooltip.e_tooltip_root.style.bottom = y + "px";
 		}
-		else
+		else // top side
 		{
 			var y = e_rect_mid_y + e_rect.height * 0.5;
 			GlobalTooltip.e_tooltip_root.style.bottom = "unset";
 			GlobalTooltip.e_tooltip_root.style.top = y + "px";
 		}
 
+		if (e_rect_mid_x > (window.innerWidth * 0.5)) // right side
+		{
+			GlobalTooltip.e_tooltip_root.style.left = "unset";
+			GlobalTooltip.e_tooltip_root.style.right = (window.innerWidth - x) + "px";
+		}
+		else // left side
+		{
+			GlobalTooltip.e_tooltip_root.style.right = "unset";
+			GlobalTooltip.e_tooltip_root.style.left = x + "px";
+		}
+
 		e_rect_mid_y += e_rect.height * 0.5;
+
+		var tooltip_rect = GlobalTooltip.e_tooltip_root.getBoundingClientRect();
+		var halfWidth = tooltip_rect.width * 0.5;
+		var leftX = tooltip_rect.x;
+		var rightX = tooltip_rect.x + tooltip_rect.width;
+		var maxX = window.innerWidth - 16;
+		if (leftX <= 16) 
+		{
+			GlobalTooltip.e_tooltip_root.style.left = (16 + halfWidth) + "px";
+		}
+		else if (rightX >= maxX) 
+		{
+			GlobalTooltip.e_tooltip_root.style.left = (maxX - halfWidth) + "px";
+		}
 
 		GlobalTooltip.CheckVisibility();
 		GlobalTooltip.e_tooltip_root.style.transitionProperty = "opacity, top, bottom, left";

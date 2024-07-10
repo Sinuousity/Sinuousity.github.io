@@ -13,6 +13,7 @@ export class StoredObject
 	{
 		this.storeKey = "";
 		this.storeTimeout = new RunningTimeout(() => { this.Store(); }, storeDelaySeconds, autostart, 70);
+		this.logJSON = false;
 	}
 
 	GetState() { return {}; }
@@ -55,6 +56,7 @@ export class StoredObject
 
 		var stored_json = localStorage.getItem(this.storeKey);
 		if (!stored_json) return;
+		if (this.logJSON === true) console.info("JSON LOAD: " + stored_json);
 		var storedObject = JSON.parse(stored_json);
 		if (storedObject == null) return;
 		this.ApplyState(storedObject);

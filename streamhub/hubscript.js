@@ -13,6 +13,7 @@ import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
 import { SaveIndicator } from "./modules/saveindicator.js";
 import "./modules/globaltooltip.js";
+import { GlobalTooltip } from "./modules/globaltooltip.js";
 
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
@@ -60,7 +61,7 @@ function anim_time_loop(timestamp)
 	global_time_seconds += dtSeconds;
 
 	document.documentElement.style.setProperty('--time', global_time_seconds + 's');
-	document.documentElement.style.setProperty('--time-angle', (((global_time_seconds / 60.0) % 1.0) * 360.0) + 'deg');
+	document.documentElement.style.setProperty('--time-angle', (((global_time_seconds / 45.0) % 1.0) * 360.0) + 'deg');
 
 	requestAnimationFrame(t => { anim_time_loop(t); });
 }
@@ -140,7 +141,10 @@ function SetWindowMenuOptions()
 		if (wt.wip) var e_wip = addElement("div", "menu-windows-button-band-wip", e_btn_open, "WIP");
 		if (wt.icon) addElement("i", "menu-windows-button-icon", e_btn_open, wt.icon, x => { x.setAttribute("draggable", "false"); });
 
-		if (wt.desc) e_btn_open.title = wt.desc;
+		if (wt.desc) 
+		{
+			GlobalTooltip.RegisterReceiver(e_btn_open, wt.desc, null);
+		}
 
 		e_menu_windows.appendChild(e_btn_open);
 	}

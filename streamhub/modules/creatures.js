@@ -9,14 +9,18 @@ console.info("[ +Module ] Creatures");
 
 export class Creature
 {
-	constructor(name, rarity, duration, desc = "")
+	constructor(name, rarity, duration, description = "")
 	{
 		this.name = name;
-		this.desc = desc;
+		this.description = description;
 		this.rarity = rarity;
 		this.duration = duration;
 		this.imageSrc = "";
 		this.canAppear = true;
+		this.pointValue = 15;
+		this.pointValueMax = 15;
+		this.usePointValueMax = false;
+		this.evasionChance = 0.0;
 	}
 
 	static GetDefault()
@@ -44,25 +48,29 @@ export class CreatureRosterWindow extends ItemStoreWindowBase
 		this.SetWindowHelpText(help);
 	}
 
+	//override
 	ApplyEditedProperties()
 	{
 		if (this.currentEditTargetIndex < 0) return;
-		this.store.items[this.currentEditTargetIndex].name = this.e_edit_field_name.value;
-		this.store.items[this.currentEditTargetIndex].desc = this.e_edit_field_desc.value;
-		this.store.items[this.currentEditTargetIndex].rarity = this.e_edit_field_rarity.value;
-		this.store.items[this.currentEditTargetIndex].duration = this.e_edit_field_duration.value;
-		this.store.items[this.currentEditTargetIndex].imageSrc = this.e_edit_field_imageSrc.value;
-		this.store.items[this.currentEditTargetIndex].canAppear = this.e_edit_tgl_canAppear.checked;
+		var targetItem = this.store.items[this.currentEditTargetIndex];
+		targetItem.name = this.e_edit_field_name.value;
+		targetItem.description = this.e_edit_field_desc.value;
+		targetItem.rarity = this.e_edit_field_rarity.value;
+		targetItem.duration = this.e_edit_field_duration.value;
+		targetItem.imageSrc = this.e_edit_field_imageSrc.value;
+		targetItem.canAppear = this.e_edit_tgl_canAppear.checked;
+		targetItem.evasionChance = this.e_edit_field_evadeChance.value;
 		this.store.MarkDirty();
 	}
 
+	//override
 	PopulateEditOverlay()
 	{
 		this.AppendEditOverlayTitle("Editing " + this.currentEditTarget.name);
 		this.e_edit_field_name = this.AppendEditOverlayTextField("Name", this.currentEditTarget.name ?? "Mysterious Creature", "Enter Creature Name");
 		GlobalTooltip.RegisterReceiver(this.e_edit_field_name.parentElement, "Creature Name", "A name for this creature.");
 
-		this.e_edit_tgl_canAppear = this.AppendEditOverlayToggle("Can Appear", this.currentEditTarget.canAppear);
+		this.e_edit_tgl_canAppear = this.AppendEditOverlayToggle("Can Appear", this.currentEditTarget.canAppear ?? true);
 		GlobalTooltip.RegisterReceiver(this.e_edit_tgl_canAppear.parentElement, "Can Appear", "Can this creature appear at all?");
 
 		this.e_edit_field_rarity = this.AppendEditOverlayNumberField("Rarity", this.currentEditTarget.rarity ?? 1.0, 0.01);
@@ -71,11 +79,20 @@ export class CreatureRosterWindow extends ItemStoreWindowBase
 		this.e_edit_field_duration = this.AppendEditOverlayNumberField("Duration", this.currentEditTarget.duration ?? 5, 1);
 		GlobalTooltip.RegisterReceiver(this.e_edit_field_duration.parentElement, "Appearance Duration (seconds)", "The number of seconds this creature stays for during appearances.");
 
+		this.e_edit_field_evadeChance = this.AppendEditOverlayNumberField("Evade Chance", this.currentEditTarget.evasionChance ?? 0.0, 0.01);
+		GlobalTooltip.RegisterReceiver(this.e_edit_field_evadeChance.parentElement, "Evasion Chance ( 0.0 - 1.0 )", "The chance this creature evades all attempts to be caught.");
+
 		this.e_edit_field_desc = this.AppendEditOverlayTextArea("Description", this.currentEditTarget.description ?? "", "Enter Creature Description");
 		GlobalTooltip.RegisterReceiver(this.e_edit_field_desc.parentElement, "Creature Description", "A more detailed description of the creature, for fun.");
 
-		this.e_edit_field_imageSrc = this.AppendEditOverlayTextField("Image Source", this.currentEditTarget.imageSrc, "Enter Creature Image Source");
+		this.e_edit_field_imageSrc = this.AppendEditOverlayTextField("Image Source", this.currentEditTarget.imageSrc ?? "./../streamhub/images/nobody.png", "Enter Creature Image Source");
 		GlobalTooltip.RegisterReceiver(this.e_edit_field_imageSrc.parentElement, "Creature Image Source", "You can use a URL or any other valid HTML img src attribute value.")
+	}
+
+	//override
+	ApplyListItemTooltip(e_btn, targetItem)
+	{
+		GlobalTooltip.RegisterReceiver(e_btn, "Edit " + targetItem.name, targetItem.description);
 	}
 }
 

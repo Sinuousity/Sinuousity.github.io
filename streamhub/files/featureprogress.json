@@ -15,9 +15,10 @@
 					"comment": "Save and load user options and any other persistent data seamlessly"
 				},
 				{
-					"name": "Service Credentials Window",
+					"name": "Notifications",
 					"progress": 1.0,
-					"comment": "Manage your third-party service credentials. Avoid opening this one while streaming!"
+					"deprecated": true,
+					"comment": "Shows some text information at the top of the screen"
 				},
 				{
 					"name": "Save Status Indicator",
@@ -40,6 +41,11 @@
 					"comment": "A set of methods for Hub features to use that make it easier to read / write files and get data from the web"
 				},
 				{
+					"name": "Service Credentials Window",
+					"progress": 1.0,
+					"comment": "Manage your third-party service credentials. Avoid opening this one while streaming!"
+				},
+				{
 					"name": "MultiPlatform User Cache",
 					"progress": 1.0,
 					"comment": "Allows you to view data that has been cached for viewers, like profile images"
@@ -48,6 +54,11 @@
 					"name": "MultiPlatform Chat Window",
 					"progress": 0.9,
 					"comment": "One chat to rule them all! Combines messages from all sources. Sending messages as your bot is coming soon!"
+				},
+				{
+					"name": "Feature Progress Window",
+					"progress": 1.0,
+					"comment": "You're looking at it! Shows you what is done and what is not done"
 				}
 			]
 		},
@@ -141,8 +152,8 @@
 				},
 				{
 					"name": "Layer Type: Pattern",
-					"progress": 1.0,
-					"comment": "Uses the 'background' CSS property to create repeating patterns with images or gradients."
+					"progress": 0.9,
+					"comment": "Uses the 'background' CSS property to create repeating patterns with images or gradients. Currently has a time looping seam when using X Speed :/"
 				},
 				{
 					"name": "Layer Type: Video",
@@ -182,6 +193,47 @@
 			]
 		},
 		{
+			"name": "Raffle Overlay",
+			"desc": "Spin to choose one winner from whoever joined via keyphrase in chat",
+			"goals": [
+				{
+					"name": "Settings Window",
+					"progress": 0.95,
+					"comment": "Adds a new window with numerous settings. Controls section may not always be in sync"
+				},
+				{
+					"name": "Infinite Slide Overlay",
+					"progress": 1.0,
+					"comment": "A slide of entries that never ends and can scroll either direction forever"
+				},
+				{
+					"name": "Crazy Speed Visuals",
+					"progress": 1.0,
+					"comment": "Blur when fast"
+				},
+				{
+					"name": "Profile Images",
+					"progress": 1.0,
+					"comment": "Use viewer profile pictures in the slide, no matter what platform they're tuning in from"
+				},
+				{
+					"name": "Slide Transform Options",
+					"progress": 1.0,
+					"comment": "Allows you to change how entries move as they slide past"
+				},
+				{
+					"name": "Keyphrase Detection Options",
+					"progress": 1.0,
+					"comment": "Adds options to customise keyphrase detection"
+				},
+				{
+					"name": "Overlay Raffle Controls",
+					"progress": 1.0,
+					"comment": "Adds several in-context buttons to edit the raffle state and remove entries by hand"
+				}
+			]
+		},
+		{
 			"name": "Viewer Inventories",
 			"desc": "View and edit items in viewers' inventories.",
 			"goals": [
@@ -193,12 +245,12 @@
 				{
 					"name": "Viewer Inventory Viewer",
 					"progress": 1.0,
-					"comment": "View who has what and how much of it"
+					"comment": "See who has what and how much of it"
 				},
 				{
 					"name": "Give Item Window",
 					"progress": 1.0,
-					"comment": "Give a specific item to a specific viewer"
+					"comment": "Manually give a specific item to a specific viewer"
 				},
 				{
 					"name": "Random Item Rewards",

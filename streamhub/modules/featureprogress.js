@@ -70,9 +70,20 @@ export class FeatureProgressWindow extends DraggableWindow
 			{
 				let goal = feature.goals[jj];
 				let e_goal = this.AddSectionTitle(goal.name);
-				if (goal.comment) GlobalTooltip.RegisterReceiver(e_goal, goal.comment, null);
-				e_goal.style.color = (goal.progress >= 1.0) ? "#1f1" : (goal.progress >= 0.1) ? "yellow" : ((goal.blocked === true) ? "red" : "gray");
+				if (goal.comment) 
+				{
+					if (goal.deprecated === true)
+						GlobalTooltip.RegisterReceiver(e_goal, "[WILL BE REMOVED] " + goal.comment, null);
+					else GlobalTooltip.RegisterReceiver(e_goal, goal.comment, null);
+				}
+
+				e_goal.style.color = "gray";
+				if (goal.deprecated === true) e_goal.style.color = "dimgray";
+				else if (goal.blocked === true) e_goal.style.color = "#f00";
+				else e_goal.style.color = (goal.progress >= 1.0) ? "#1f1" : (goal.progress >= 0.1) ? "yellow" : "gray";
+
 				e_goal.style.border = "none";
+				e_goal.style.textDecoration = goal.deprecated === true ? "line-through" : "unset";
 				e_goal.style.opacity = "0.5";
 				e_goal.style.flexShrink = "0";
 				e_goal.style.flexGrow = "0";
@@ -114,9 +125,20 @@ export class FeatureProgressWindow extends DraggableWindow
 					}
 				);
 
-				if (goal.blocked === true)
+				if (goal.deprecated === true)
 				{
 					let e_planned_label = addElement("div", "", e_goal);
+					e_planned_label.style.fontSize = "0.6rem";
+					e_planned_label.style.position = "absolute";
+					e_planned_label.style.right = "0.5rem";
+					e_planned_label.style.top = "0";
+					e_planned_label.style.bottom = "0";
+					e_planned_label.innerText = "DEPRECATED";
+				}
+				else if (goal.blocked === true)
+				{
+					let e_planned_label = addElement("div", "", e_goal);
+					e_planned_label.style.textDecoration = goal.deprecated === true ? "line-through" : "unset";
 					e_planned_label.style.fontSize = "0.6rem";
 					e_planned_label.style.position = "absolute";
 					e_planned_label.style.right = "0.5rem";

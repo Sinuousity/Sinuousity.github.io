@@ -42,6 +42,7 @@ export class FeatureProgressWindow extends DraggableWindow
 		this.window_kind = FeatureProgressWindow.windowKind;
 
 		this.e_window_root.style.minWidth = "360px";
+		this.e_window_root.style.minHeight = "8rem";
 
 		this.SetIcon("assignment_turned_in");
 		this.SetTitle(FeatureProgressWindow.windowKind);
@@ -65,6 +66,7 @@ export class FeatureProgressWindow extends DraggableWindow
 			e_feature.style.overflow = "hidden";
 			e_feature.style.textOverflow = "ellipsis";
 			e_feature.style.wordBreak = "break-all";
+			if (feature.desc) GlobalTooltip.RegisterReceiver(e_feature, feature.desc, null);
 
 			for (var jj = 0; jj < feature.goals.length; jj++)
 			{
@@ -180,6 +182,9 @@ export class FeatureProgressWindow extends DraggableWindow
 				}
 			}
 		}
+
+		var e_bottom_space = addElement("div", null, this.e_controls_column);
+		e_bottom_space.style.minHeight = "2rem";
 	}
 }
 

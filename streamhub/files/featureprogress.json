@@ -107,7 +107,7 @@
 		},
 		{
 			"name": "API Integration: StreamElements",
-			"desc": "Integrations with Twitch's chat and data APIs.",
+			"desc": "Integrations with StreamElements APIs.",
 			"goals": [
 				{
 					"name": "Points",
@@ -137,7 +137,7 @@
 				{
 					"name": "Contests",
 					"progress": 0.0,
-					"comment": "Will trigger events based on when a StreamElements contest begins or ends and who won."
+					"comment": "Will trigger events based on when a StreamElements contest begins or ends, based on who won."
 				}
 			]
 		},
@@ -304,39 +304,86 @@
 					"comment": "Allows some creatures to appear more frequently than others. Not currently in use!"
 				},
 				{
-					"name": "Creature Points Rewards",
+					"name": "Points Rewards",
 					"progress": 1.0,
 					"comment": "Allows StreamElements points to be rewarded when a creature is caught"
 				},
 				{
-					"name": "Creature Appearance Settings",
+					"name": "Appearance Settings",
 					"progress": 1.0,
 					"comment": "Edit how frequently creatures appear"
 				},
 				{
-					"name": "Creature Appearance Overlay",
+					"name": "Appearance Overlay",
 					"progress": 1.0,
 					"comment": "Adds an image popup for creature appearances"
 				},
 				{
-					"name": "Creature Appearance Positioning",
+					"name": "Appearance Positioning",
 					"progress": 0.0,
 					"comment": "Will allow you to set which sides of the screen that creatures will appear on"
 				},
 				{
-					"name": "Creature Animation",
+					"name": "Appearance Idle Animation",
 					"progress": 1.0,
 					"comment": "Creatures do a little meandering during their appearances"
 				},
 				{
-					"name": "Entry Animation",
+					"name": "Appearance Entry Animation",
 					"progress": 0.0,
 					"comment": "Will add an animation to show when a viewer has joined the catch event"
 				},
 				{
-					"name": "Creature Caught Animation",
+					"name": "Appearance Caught Animation",
 					"progress": 0.0,
 					"comment": "Will add an animation to show that the creature was caught"
+				}
+			]
+		},
+		{
+			"name": "Scratch Pad",
+			"desc": "A tool for quickly drawing something, similar to Microsoft's Paint. Coming Eventually!",
+			"goals": [
+				{
+					"name": "Simple Drawing Tools",
+					"progress": 0.0,
+					"comment": "Use a brush of adjustable size and softness to draw on a canvas in the color of your choice"
+				},
+				{
+					"name": "Canvas Layers",
+					"progress": 0.0,
+					"comment": "Keep different parts of your artwork on their own layers"
+				},
+				{
+					"name": "Filter Layers",
+					"progress": 0.0,
+					"comment": "A special kind of layer that affects the result of all layers below it"
+				},
+				{
+					"name": "Layer Blending",
+					"progress": 0.0,
+					"comment": "Use different layer blending modes like Add, Overlay, Multiply, etc"
+				},
+				{
+					"name": "Image Import",
+					"progress": 0.0,
+					"comment": "Import an image as a new layer"
+				},
+				{
+					"name": "Image Export",
+					"progress": 0.0,
+					"comment": "Export your artwork as an image file"
+				}
+			]
+		},
+		{
+			"name": "Suggestions Box",
+			"desc": "A quick an easy way to submit suggestions, requests, bug reports, or a thank you",
+			"goals": [
+				{
+					"name": "Suggestions Box Window",
+					"progress": 0.0,
+					"comment": "Submit a message directly to the Hub developer, me!"
 				}
 			]
 		}

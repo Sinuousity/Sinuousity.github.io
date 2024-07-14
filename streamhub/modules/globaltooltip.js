@@ -134,6 +134,7 @@ export class GlobalTooltip
 		GlobalTooltip.e_tooltip_root.style.top = "0px";
 		GlobalTooltip.e_tooltip_root.style.left = "0px";
 		GlobalTooltip.e_tooltip_root.style.padding = "0.5rem";
+		GlobalTooltip.e_tooltip_root.style.maxWidth = "15rem";
 		//GlobalTooltip.e_tooltip_root.style.transform = "translate(-50%,0%)";
 		GlobalTooltip.e_tooltip_root.style.transitionProperty = "opacity";
 		GlobalTooltip.e_tooltip_root.style.transitionDuration = "0.15s";

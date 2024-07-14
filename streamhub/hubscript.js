@@ -2,6 +2,7 @@
 import { DebugWindow } from "./modules/debugwindow.js";
 import { WindowManager } from "./modules/windowmanager.js";
 import { BackgroundSceneSettingsWindow } from "./modules/backgroundscene.js";
+import { StreamElements, StreamElementsWindow } from "./modules/streamelementslistener.js";
 import { TwitchListener } from "./modules/twitchlistener.js";
 import { KickState } from "./modules/kicklistener.js";
 import { RaffleState } from "./modules/raffle.js";
@@ -11,9 +12,9 @@ import { ItemLibrary } from "./modules/itemlibrary.js";
 import { CreatureRoster } from "./modules/creatures.js";
 import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
-import { StreamElements, StreamElementsWindow } from "./modules/streamelementslistener.js";
 import { SaveIndicator } from "./modules/saveindicator.js";
 import "./modules/globaltooltip.js";
+import "./modules/featureprogress.js";
 import { GlobalTooltip } from "./modules/globaltooltip.js";
 import { UserInput } from "./modules/userinput.js";
 
@@ -28,7 +29,6 @@ var e_save_indicator = {};
 var sub_mouse_motion;
 
 var e_doc_root = document.querySelector(':root');
-console.log("FOUND DOC ROOT");
 
 console.info("[ +Module ] Hub Core");
 OnBodyLoad();
@@ -74,7 +74,10 @@ function anim_time_loop(timestamp)
 	global_time_seconds += dtSeconds;
 
 	document.documentElement.style.setProperty('--time', global_time_seconds + 's');
-	document.documentElement.style.setProperty('--time-angle', (((global_time_seconds / 45.0) % 1.0) * 360.0) + 'deg');
+	document.documentElement.style.setProperty('--time-angle', (((global_time_seconds / 60.0) % 1.0) * 360.0) + 'deg');
+	document.documentElement.style.setProperty('--time-angle-45s', (((global_time_seconds / 45.0) % 1.0) * 360.0) + 'deg');
+	document.documentElement.style.setProperty('--time-angle-10s', (((global_time_seconds / 10.0) % 1.0) * 360.0) + 'deg');
+	document.documentElement.style.setProperty('--time-angle-1s', (((global_time_seconds / 1.0) % 1.0) * 360.0) + 'deg');
 
 	requestAnimationFrame(t => { anim_time_loop(t); });
 }
@@ -142,6 +145,21 @@ function SetWindowMenuOptions()
 	for (var wti = 0; wti < WindowManager.instance.windowTypes.length; wti++)
 	{
 		const wt = WindowManager.instance.windowTypes[wti];
+
+		if (wt.shortcutKey)
+		{
+			window.addEventListener("keydown", e =>
+			{
+				if (e.key === wt.shortcutKey) 
+				{
+					if (document.activeElement !== document.body) return;
+					var w = WindowManager.instance.GetExistingWindow(wt.key);
+					if (w) w.Close();
+					else WindowManager.instance.GetNewWindowAnywhere(wt.key);
+				}
+			});
+		}
+
 		if (wt.key.startsWith("hidden:")) continue;
 
 		var e_btn_open = addElement("div", "menu-windows-button", null, "", x => { if (!wt.comingSoon) x.addEventListener("click", () => { RequestWindow(wt.key); }); });
@@ -156,9 +174,12 @@ function SetWindowMenuOptions()
 
 		if (wt.desc) 
 		{
-			if (wt.comingSoon) GlobalTooltip.RegisterReceiver(e_btn_open, wt.desc + " ( Coming Soon! )", null);
-			else if (wt.wip) GlobalTooltip.RegisterReceiver(e_btn_open, wt.desc + " ( Work In Progress! Some things may not work yet! )", null);
-			else GlobalTooltip.RegisterReceiver(e_btn_open, wt.desc, null);
+			let desc = "";
+			if (wt.shortcutKey) desc += "[ Hotkey: " + wt.shortcutKey.toUpperCase() + " ] ";
+			desc += wt.desc;
+			if (wt.comingSoon) desc += " ( Coming Soon! )";
+			if (wt.wip) desc += " ( Work-In-Progress! )";
+			GlobalTooltip.RegisterReceiver(e_btn_open, desc, null);
 		}
 
 		e_menu_windows.appendChild(e_btn_open);

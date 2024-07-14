@@ -1,5 +1,6 @@
 import { addElement } from "../hubscript.js";
 import { EventSource } from "./eventsource.js";
+import { FileUtils } from "./fileutils.js";
 import { OptionManager } from "./globalsettings.js";
 import { GlobalTooltip } from "./globaltooltip.js";
 import { DraggableWindow } from "./windowcore.js";
@@ -104,6 +105,12 @@ export class BackgroundScene
 	static AddNewProfile()
 	{
 		BackgroundScene.loadedProfiles.push(BackgroundSceneProfile.GetDefault());
+		BackgroundScene.EmitChange(false, false);
+	}
+
+	static AppendProfile(profile)
+	{
+		BackgroundScene.loadedProfiles.push(profile);
 		BackgroundScene.EmitChange(false, false);
 	}
 
@@ -796,6 +803,59 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.SetIcon("gradient");
 		this.window_kind = BackgroundSceneSettingsWindow.window_kind;
 
+		this.AddMenuBarMenu(
+			"File",
+			[
+				{
+					label: "Save Profile As File",
+					action: async () =>
+					{
+						await FileUtils.SaveToFile(
+							JSON.stringify(BackgroundScene.activeProfile),
+							'CustomHubBackgroundProfile.txt',
+							'save_background_profile',
+							'documents'
+						);
+					}
+				},
+				{
+					label: "Load Profile From File",
+					action: async () =>
+					{
+						let result = await FileUtils.LoadFromFile();
+						if (result === '') return;
+						BackgroundScene.AppendProfile(JSON.parse(result));
+					}
+				}
+			]
+		);
+
+		const presetAName = JSON.parse(profilePresetA).name;
+		const presetBName = JSON.parse(profilePresetB).name;
+		const presetCName = JSON.parse(profilePresetC).name;
+		const presetDName = JSON.parse(profilePresetD).name;
+		this.AddMenuBarMenu(
+			"Presets",
+			[
+				{
+					label: "Add Profile: " + (presetAName ?? "Preset A"),
+					action: () => { BackgroundScene.AppendProfile(JSON.parse(profilePresetA)); }
+				},
+				{
+					label: "Add Profile: " + (presetBName ?? "Preset B"),
+					action: () => { BackgroundScene.AppendProfile(JSON.parse(profilePresetB)); }
+				},
+				{
+					label: "Add Profile: " + (presetCName ?? "Preset C"),
+					action: () => { BackgroundScene.AppendProfile(JSON.parse(profilePresetC)); }
+				},
+				{
+					label: "Add Profile: " + (presetDName ?? "Preset D"),
+					action: () => { BackgroundScene.AppendProfile(JSON.parse(profilePresetD)); }
+				}
+			]
+		);
+
 		this.CreateContentContainer();
 		this.e_content.style.display = "flex";
 		this.e_content.style.flexDirection = "column";
@@ -804,7 +864,16 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 
 		this.listItems = [];
 		this.CreateLayerListContainer();
+		this.CreateAddLayerBar();
 
+		this.RefreshLayerList();
+		BackgroundScene.onLayersChanged.RequestSubscription(() => { this.RefreshLayerList(); this.RefreshProfileButtons(); });
+		BackgroundScene.onLayerDataChanged.RequestSubscription(() => { this.RefreshLayerList(false); this.RefreshProfileButtons(); });
+		BackgroundScene.onProfileChanged.RequestSubscription(() => { this.e_name_input.innerText = BackgroundScene.activeProfile.name; });
+	}
+
+	CreateAddLayerBar()
+	{
 		this.e_listButtons = addElement("div", null, this.e_content);
 		this.e_listButtons.style.position = "relative";
 		this.e_listButtons.style.height = "3rem";
@@ -862,11 +931,6 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 			() => { return { filter: "hue-rotate(35deg)" } },
 			"Add a layer that applies a filter to layers behind it."
 		);
-
-		this.RefreshLayerList();
-		BackgroundScene.onLayersChanged.RequestSubscription(() => { this.RefreshLayerList(); this.RefreshProfileButtons(); });
-		BackgroundScene.onLayerDataChanged.RequestSubscription(() => { this.RefreshLayerList(false); this.RefreshProfileButtons(); });
-		BackgroundScene.onProfileChanged.RequestSubscription(() => { this.e_name_input.innerText = BackgroundScene.activeProfile.name; });
 	}
 
 	CreateProfileSelection()
@@ -883,107 +947,120 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.e_profile_root.style.borderRight = "2px solid #505050ff";
 		this.e_profile_root.style.borderBottom = "2px solid #505050ff";
 
-		this.e_name_input = addElement("input", null, this.e_profile_root);
-		GlobalTooltip.RegisterReceiver(this.e_name_input, "Active Profile Name", "Active Profile Name");
-		this.e_name_input.type = "text";
-		this.e_name_input.value = BackgroundScene.activeProfile.name ?? "Default";
-		this.e_name_input.style.position = "absolute";
-		this.e_name_input.style.left = "3.5rem";
-		this.e_name_input.style.right = "3.5rem";
-		this.e_name_input.style.top = "0";
-		this.e_name_input.style.bottom = "0";
-		this.e_name_input.style.textAlign = "center";
-		this.e_name_input.style.borderRadius = "0 !important";
-		this.e_name_input.addEventListener("key", e => { if (e.key == 'escape') this.e_name_input.remove(); });
-		this.e_name_input.addEventListener(
-			"change",
-			x =>
-			{
-				BackgroundScene.activeProfile.name = this.e_name_input.value;
-				BackgroundScene.EmitChange(false, false);
-			}
-		);
+		(() => // add profile name input
+		{
+			this.e_name_input = addElement("input", null, this.e_profile_root);
+			GlobalTooltip.RegisterReceiver(this.e_name_input, "Active Profile Name", null);
+			this.e_name_input.name = "input-text-active-profile-name";
+			this.e_name_input.type = "text";
+			this.e_name_input.value = BackgroundScene.activeProfile.name ?? "Default";
+			this.e_name_input.style.position = "absolute";
+			this.e_name_input.style.left = "3.5rem";
+			this.e_name_input.style.right = "7rem";
+			this.e_name_input.style.top = "0";
+			this.e_name_input.style.bottom = "0";
+			this.e_name_input.style.textAlign = "center";
+			this.e_name_input.style.borderRadius = "0px";
+			this.e_name_input.addEventListener("key", e => { if (e.key == 'escape') this.e_name_input.remove(); });
+			this.e_name_input.addEventListener(
+				"change",
+				x =>
+				{
+					BackgroundScene.activeProfile.name = this.e_name_input.value;
+					BackgroundScene.EmitChange(false, false);
+				}
+			);
+		})();
 
-		this.e_btn_profile_prev = addElement("div", null, this.e_profile_root);
-		this.e_btn_profile_prev.innerText = "PREV";
-		GlobalTooltip.RegisterReceiver(this.e_btn_profile_prev, "Previous Profile", "Switch Back To The Previous Profile");
-		this.e_btn_profile_prev.style.cursor = "pointer";
-		this.e_btn_profile_prev.style.position = "absolute";
-		this.e_btn_profile_prev.style.width = "3.5rem";
-		this.e_btn_profile_prev.style.height = "2rem";
-		this.e_btn_profile_prev.style.lineHeight = "2rem";
-		this.e_btn_profile_prev.style.left = "0rem";
-		this.e_btn_profile_prev.style.top = "0";
-		this.e_btn_profile_prev.style.textAlign = "center";
-		this.e_btn_profile_prev.style.fontSize = "0.7rem";
-		this.e_btn_profile_prev.style.color = "#00aaaaff";
-		this.e_btn_profile_prev.style.backgroundColor = "#00aaaa30";
-		this.e_btn_profile_prev.style.borderRadius = "0 0 0 0.5rem";
-		this.e_btn_profile_prev.style.opacity = "60%";
-		this.e_btn_profile_prev.addEventListener("mouseenter", e => { this.e_btn_profile_prev.style.opacity = "100%"; });
-		this.e_btn_profile_prev.addEventListener("mouseleave", e => { this.e_btn_profile_prev.style.opacity = "60%"; });
-		this.e_btn_profile_prev.addEventListener(
-			"click",
-			x =>
-			{
-				BackgroundScene.SetActiveProfileIndex(BackgroundScene.activeProfileId - 1);
-				this.RefreshProfileButtons();
-			}
-		);
+		(() => // add prev button
+		{
+			this.e_btn_profile_prev = addElement("div", null, this.e_profile_root);
+			this.e_btn_profile_prev.innerText = "PREV";
+			GlobalTooltip.RegisterReceiver(this.e_btn_profile_prev, "Previous Profile", "Switch Back To The Previous Profile");
+			this.e_btn_profile_prev.style.cursor = "pointer";
+			this.e_btn_profile_prev.style.position = "absolute";
+			this.e_btn_profile_prev.style.width = "3.5rem";
+			this.e_btn_profile_prev.style.height = "2rem";
+			this.e_btn_profile_prev.style.lineHeight = "2rem";
+			this.e_btn_profile_prev.style.left = "0rem";
+			this.e_btn_profile_prev.style.top = "0";
+			this.e_btn_profile_prev.style.textAlign = "center";
+			this.e_btn_profile_prev.style.fontSize = "0.7rem";
+			this.e_btn_profile_prev.style.color = "#00aaaaff";
+			this.e_btn_profile_prev.style.backgroundColor = "#00aaaa30";
+			this.e_btn_profile_prev.style.borderRadius = "0 0 0 0.5rem";
+			this.e_btn_profile_prev.style.opacity = "60%";
+			this.e_btn_profile_prev.addEventListener("mouseenter", e => { this.e_btn_profile_prev.style.opacity = "100%"; });
+			this.e_btn_profile_prev.addEventListener("mouseleave", e => { this.e_btn_profile_prev.style.opacity = "60%"; });
+			this.e_btn_profile_prev.addEventListener(
+				"click",
+				x =>
+				{
+					BackgroundScene.SetActiveProfileIndex(BackgroundScene.activeProfileId - 1);
+					this.RefreshProfileButtons();
+				}
+			);
+		})();
 
-		this.e_btn_profile_next = addElement("div", null, this.e_profile_root);
-		this.e_btn_profile_next.style.cursor = "pointer";
-		this.e_btn_profile_next.innerText = "NEXT";
-		GlobalTooltip.RegisterReceiver(this.e_btn_profile_next, "Next Profile", "Switch Back To The Next Profile");
-		this.e_btn_profile_next.style.position = "absolute";
-		this.e_btn_profile_next.style.width = "3.5rem";
-		this.e_btn_profile_next.style.height = "1rem";
-		this.e_btn_profile_next.style.lineHeight = "1rem";
-		this.e_btn_profile_next.style.right = "0";
-		this.e_btn_profile_next.style.top = "0";
-		this.e_btn_profile_next.style.textAlign = "center";
-		this.e_btn_profile_next.style.fontSize = "0.6rem";
-		this.e_btn_profile_next.style.color = "#00ff00ff";
-		this.e_btn_profile_next.style.backgroundColor = "#00ff0030";
-		this.e_btn_profile_next.style.borderRadius = "0rem";
-		this.e_btn_profile_next.style.opacity = "60%";
-		this.e_btn_profile_next.addEventListener("mouseenter", e => { this.e_btn_profile_next.style.opacity = "100%"; });
-		this.e_btn_profile_next.addEventListener("mouseleave", e => { this.e_btn_profile_next.style.opacity = "60%"; });
-		this.e_btn_profile_next.addEventListener(
-			"click",
-			x =>
-			{
-				BackgroundScene.SetActiveProfileIndex(BackgroundScene.activeProfileId + 1);
-				this.RefreshProfileButtons();
-			}
-		);
+		(() => // add next/add button
+		{
+			this.e_btn_profile_next = addElement("div", null, this.e_profile_root);
+			this.e_btn_profile_next.style.cursor = "pointer";
+			this.e_btn_profile_next.innerText = "NEXT";
+			GlobalTooltip.RegisterReceiver(this.e_btn_profile_next, "Next Profile", "Switch Back To The Next Profile");
+			this.e_btn_profile_next.style.position = "absolute";
+			this.e_btn_profile_next.style.width = "3.5rem";
+			this.e_btn_profile_next.style.height = "2rem";
+			this.e_btn_profile_next.style.lineHeight = "2rem";
+			this.e_btn_profile_next.style.right = "0";
+			this.e_btn_profile_next.style.top = "0";
+			this.e_btn_profile_next.style.textAlign = "center";
+			this.e_btn_profile_next.style.fontSize = "0.6rem";
+			this.e_btn_profile_next.style.color = "#00ff00ff";
+			this.e_btn_profile_next.style.backgroundColor = "#00ff0030";
+			this.e_btn_profile_next.style.borderRadius = "0 0 0.5rem 0";
+			this.e_btn_profile_next.style.opacity = "60%";
+			this.e_btn_profile_next.addEventListener("mouseenter", e => { this.e_btn_profile_next.style.opacity = "100%"; });
+			this.e_btn_profile_next.addEventListener("mouseleave", e => { this.e_btn_profile_next.style.opacity = "60%"; });
+			this.e_btn_profile_next.addEventListener(
+				"click",
+				x =>
+				{
+					BackgroundScene.SetActiveProfileIndex(BackgroundScene.activeProfileId + 1);
+					this.RefreshProfileButtons();
+				}
+			);
+		})();
 
-		this.e_btn_profile_remove = addElement("div", null, this.e_profile_root);
-		this.e_btn_profile_remove.style.cursor = "pointer";
-		this.e_btn_profile_remove.innerText = "DELETE";
-		GlobalTooltip.RegisterReceiver(this.e_btn_profile_remove, "Delete Profile", "Delete The Current Profile");
-		this.e_btn_profile_remove.style.position = "absolute";
-		this.e_btn_profile_remove.style.width = "3.5rem";
-		this.e_btn_profile_remove.style.height = "1rem";
-		this.e_btn_profile_remove.style.lineHeight = "1rem";
-		this.e_btn_profile_remove.style.fontSize = "0.6rem";
-		this.e_btn_profile_remove.style.borderRadius = "0rem 0rem 0.5rem 0rem";
-		this.e_btn_profile_remove.style.color = "#ff0000ff";
-		this.e_btn_profile_remove.style.right = "0";
-		this.e_btn_profile_remove.style.bottom = "0";
-		this.e_btn_profile_remove.style.textAlign = "center";
-		this.e_btn_profile_remove.style.backgroundColor = "#ff000030";
-		this.e_btn_profile_remove.style.opacity = "60%";
-		this.e_btn_profile_remove.addEventListener("mouseenter", e => { this.e_btn_profile_remove.style.opacity = "100%"; });
-		this.e_btn_profile_remove.addEventListener("mouseleave", e => { this.e_btn_profile_remove.style.opacity = "60%"; });
-		this.e_btn_profile_remove.addEventListener(
-			"click",
-			x =>
-			{
-				BackgroundScene.DeleteActiveProfile();
-				this.RefreshProfileButtons();
-			}
-		);
+		(() => // add remove button
+		{
+			this.e_btn_profile_remove = addElement("div", null, this.e_profile_root);
+			this.e_btn_profile_remove.style.cursor = "pointer";
+			this.e_btn_profile_remove.innerText = "DELETE";
+			GlobalTooltip.RegisterReceiver(this.e_btn_profile_remove, "Delete Profile", "Delete The Current Profile");
+			this.e_btn_profile_remove.style.position = "absolute";
+			this.e_btn_profile_remove.style.width = "3.5rem";
+			this.e_btn_profile_remove.style.height = "2rem";
+			this.e_btn_profile_remove.style.lineHeight = "2rem";
+			this.e_btn_profile_remove.style.fontSize = "0.6rem";
+			this.e_btn_profile_remove.style.borderRadius = "0rem 0rem 0rem 0rem";
+			this.e_btn_profile_remove.style.color = "#ff0000ff";
+			this.e_btn_profile_remove.style.right = "3.5rem";
+			this.e_btn_profile_remove.style.bottom = "0";
+			this.e_btn_profile_remove.style.textAlign = "center";
+			this.e_btn_profile_remove.style.backgroundColor = "#ff000030";
+			this.e_btn_profile_remove.style.opacity = "60%";
+			this.e_btn_profile_remove.addEventListener("mouseenter", e => { this.e_btn_profile_remove.style.opacity = "100%"; });
+			this.e_btn_profile_remove.addEventListener("mouseleave", e => { this.e_btn_profile_remove.style.opacity = "60%"; });
+			this.e_btn_profile_remove.addEventListener(
+				"click",
+				x =>
+				{
+					BackgroundScene.DeleteActiveProfile();
+					this.RefreshProfileButtons();
+				}
+			);
+		})();
 
 		this.RefreshProfileButtons();
 	}
@@ -998,9 +1075,6 @@ export class BackgroundSceneSettingsWindow extends DraggableWindow
 		this.e_btn_profile_next.innerText = atEnd ? "ADD" : "NEXT";
 		GlobalTooltip.RegisterReceiver(this.e_btn_profile_next, atEnd ? "Add Profile" : "Next Profile", atEnd ? "Add Profile" : "Go To Next Profile");
 
-		this.e_btn_profile_next.style.height = atStart ? "2rem" : "1rem";
-		this.e_btn_profile_next.style.lineHeight = atStart ? "2rem" : "1rem";
-		this.e_btn_profile_next.style.borderRadius = atStart ? "0 0 0.5rem 0" : "0rem";
 		this.e_btn_profile_next.style.color = atEnd ? "#00ff00ff" : "#00aaaaff";
 		this.e_btn_profile_next.style.backgroundColor = atEnd ? "#00ff0030" : "#00aaaa30";
 
@@ -1151,15 +1225,19 @@ WindowManager.instance.windowTypes.push(
 		key: BackgroundSceneSettingsWindow.window_kind,
 		icon: "gradient",
 		desc: "Customize the background!",
-		model: (x, y) => { return new BackgroundSceneSettingsWindow(x, y); }
+		model: (x, y) => { return new BackgroundSceneSettingsWindow(x, y); },
+		shortcutKey: 'b'
 	}
 );
 
 
-
-const default_profiles_json = '[{"layers":[{"orderIndex":0,"enabled":true,"name":"Background Fill","type":"Solid Fill","data":{"color":"black"}},{"orderIndex":1,"enabled":true,"name":"Background Grid","type":"Pattern","data":{"src":"radial-gradient(circle at center,#ffff 49%, #dddf 51%)","scaleX":"6","scaleY":"6","speedX":"0.1","speedY":0,"opacity":"8","blur":"0"}},{"orderIndex":2,"enabled":true,"name":"Fog Back","type":"Solid Fill","data":{"color":"#ff880020"}},{"orderIndex":3,"enabled":true,"name":"Bottom Glow","type":"Gradient Fill","data":{"gradient":"linear-gradient(0deg, #ffffff20, transparent 69%)"}},{"orderIndex":4,"enabled":true,"name":"Corner Glow","type":"Gradient Fill","data":{"gradient":"radial-gradient(circle at 0% 100%, #ffaa3388 0%, transparent 100%)"}},{"orderIndex":5,"enabled":true,"name":"Logo","type":"Image","data":{"src":"./../streamhub/images/channel_logo_cutout.png","blur":"12","positionX":"0","positionY":"0","opacity":"100","scaleY":"40","scaleX":"40"}},{"orderIndex":6,"enabled":true,"name":"Fog Front","type":"Solid Fill","data":{"color":"#aa690098"}},{"orderIndex":7,"enabled":true,"name":"Post","type":"Filter Layer","data":{"filter":"hue-rotate(15deg) contrast(300%) saturate(70%)"}},{"orderIndex":8,"enabled":true,"name":"Fog Front Copy","type":"Solid Fill","data":{"color":"#aa690058"}},{"orderIndex":9,"enabled":true,"name":"Vignette","type":"Gradient Fill","data":{"gradient":"radial-gradient(circle at center, transparent 70%, black 300%)"}}],"name":"Default"}]';
+const profilePresetA = `{"name":"Qoioqx","layers":[{"orderIndex":0,"enabled":true,"name":"Background Fill","type":"Solid Fill","data":{"color":"black","borderRadius":"0"}},{"orderIndex":1,"enabled":true,"name":"Background Grid","type":"Pattern","data":{"src":"radial-gradient(circle at center,#ffff 49%, #dddf 51%)","scaleX":"6","scaleY":"6","speedX":"0.1","speedY":0,"opacity":"8","blur":"0"}},{"orderIndex":2,"enabled":true,"name":"Fog Back","type":"Solid Fill","data":{"color":"#ff880020"}},{"orderIndex":3,"enabled":true,"name":"Bottom Glow","type":"Gradient Fill","data":{"gradient":"linear-gradient(0deg, #ffffff20, transparent 69%)"}},{"orderIndex":4,"enabled":true,"name":"Corner Glow","type":"Gradient Fill","data":{"gradient":"radial-gradient(circle at 0% 100%, #ffaa3388 0%, transparent 100%)"}},{"orderIndex":5,"enabled":true,"name":"Logo","type":"Image","data":{"src":"./../streamhub/images/channel_logo_cutout.png","blur":"7","positionX":"0","positionY":"0","opacity":"100","scaleY":"50","scaleX":"50","borderRadius":"0"}},{"orderIndex":6,"enabled":true,"name":"Fog Front","type":"Solid Fill","data":{"color":"#aa690098"}},{"orderIndex":7,"enabled":true,"name":"Post","type":"Filter Layer","data":{"filter":"hue-rotate(15deg) contrast(300%) saturate(70%)"}},{"orderIndex":8,"enabled":true,"name":"Fog Front Copy","type":"Solid Fill","data":{"color":"#aa690058"}},{"orderIndex":9,"enabled":true,"name":"Vignette","type":"Gradient Fill","data":{"gradient":"radial-gradient(circle at center, transparent 70%, black 300%)"}}]}`;
+const profilePresetB = `{"name":"Color-Key","layers":[{"orderIndex":0,"enabled":true,"name":"Black","type":"Solid Fill","data":{"color":"#000f"}},{"orderIndex":1,"enabled":true,"name":"Green","type":"Solid Fill","data":{"color":"#0f0f"}},{"orderIndex":2,"enabled":true,"name":"Magenta","type":"Solid Fill","data":{"color":"#f0ff"}}]}`;
+const profilePresetC = `{"name":"Weird Pattern","layers":[{"orderIndex":0,"enabled":true,"name":"","type":"Solid Fill","data":{"color":"#fa1f","borderRadius":"0","opacity":"100"}},{"orderIndex":1,"enabled":true,"name":"","type":"Pattern","data":{"src":"radial-gradient(circle at top, #000, #fff, #000, #fff, #000, #fff, #000)","scaleX":"14","scaleY":"9","speedX":"0.1","speedY":0,"opacity":"88","blur":"9","blendMode":"difference"}},{"orderIndex":2,"enabled":true,"name":"Pattern Copy","type":"Pattern","data":{"src":"radial-gradient(ellipse at center, #000, #fff, #000, #fff, #000)","scaleX":"13","scaleY":"15","speedX":"-0.1","speedY":0,"opacity":"79","blur":"12","blendMode":"difference"}},{"orderIndex":3,"enabled":true,"name":"soften","type":"Filter Layer","data":{"filter":"contrast(3500%) blur(4px)"}},{"orderIndex":4,"enabled":true,"name":"sharpen","type":"Filter Layer","data":{"filter":"contrast(800%)"}},{"orderIndex":5,"enabled":true,"name":"huerotate","type":"Filter Layer","data":{"filter":"hue-rotate(var(--time-angle))","borderRadius":"0"}}]}`;
+const profilePresetD = `{"name":"Video Example","layers":[{"orderIndex":0,"enabled":false,"name":"background","type":"Solid Fill","data":{"color":"black","borderRadius":"0","opacity":"100"}},{"orderIndex":1,"enabled":true,"name":"clouds","type":"Video","data":{"src":"https://i.imgur.com/YjfZHY1.mp4","scaleX":"240","scaleY":"245","blur":"2","opacity":"100","borderRadius":"0"}},{"orderIndex":2,"enabled":true,"name":"radial rainbow","type":"Gradient Fill","data":{"gradient":"radial-gradient(ellipse at center, red, green, blue, red)","blendMode":"screen","opacity":"100"}},{"orderIndex":3,"enabled":true,"name":"vertical rainbow","type":"Gradient Fill","data":{"gradient":"linear-gradient(0deg, red, blue, green, red)","blendMode":"screen","opacity":"100"}},{"orderIndex":4,"enabled":true,"name":"","type":"Filter Layer","data":{"filter":"hue-rotate( var(--time-angle) )","opacity":"100"}},{"orderIndex":5,"enabled":false,"name":"drive","type":"Video","data":{"src":"https://i.imgur.com/1KiG1n8_lq.mp4","scaleX":"600","scaleY":"600","blur":"1.5","borderRadius":"2","blendMode":"","positionY":"-1.8","opacity":"73"}},{"orderIndex":6,"enabled":true,"name":"shore","type":"Video","data":{"src":"https://i.imgur.com/YSolRI7_lq.mp4","scaleX":"600","scaleY":"505","blur":"2","borderRadius":"0","blendMode":"overlay","positionY":"1","opacity":"100","positionX":"0.3"}},{"orderIndex":7,"enabled":false,"name":"mountain Copy","type":"Video","data":{"src":"https://i.imgur.com/n8HxxN3_lq.mp4","scaleX":"485","scaleY":"485","blur":"2.25","borderRadius":"100","blendMode":"","positionY":"0","opacity":"80","positionX":"0"}},{"orderIndex":8,"enabled":false,"name":"mountain","type":"Video","data":{"src":"https://i.imgur.com/n8HxxN3_lq.mp4","scaleX":"215","scaleY":"215","blur":"0","borderRadius":"100","blendMode":"","positionY":"0","opacity":"100","positionX":"0"}},{"orderIndex":9,"enabled":false,"name":"mountain Copy","type":"Video","data":{"src":"https://i.imgur.com/n8HxxN3_lq.mp4","scaleX":"215","scaleY":"215","blur":"2","borderRadius":"100","blendMode":"exclusion","positionY":"0","opacity":"100","positionX":"0"}},{"orderIndex":10,"enabled":true,"name":"Filter Layer Copy","type":"Filter Layer","data":{"filter":"blur(8px) ","borderRadius":"0"}}]}`;
+const default_profiles_json = `[${profilePresetA},${profilePresetB},${profilePresetC},${profilePresetD}]`;
 
 OptionManager.AppendOption(key_option_active_profile_index, 0);
 OptionManager.AppendOption(key_option_background_scene_profiles, default_profiles_json, "Profiles");
 
-window.setTimeout(() => { BackgroundScene.LoadProfiles(); }, 25);
+window.setTimeout(() => { BackgroundScene.LoadProfiles(); }, 20);

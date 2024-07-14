@@ -24,7 +24,7 @@ export class ChatCollector
 
 	static Append(username, message, source = "unknown", color = "white")
 	{
-		MultiPlatformUserCache.GetUser(username, source);
+		MultiPlatformUserCache.GetUser(username, source, true);
 		var m = new MultiChatMessage(username, message, source, color);
 		ChatCollector.messages.push(m);
 		ChatCollector.onMessageReceived.Invoke(m);
@@ -88,6 +88,7 @@ WindowManager.instance.windowTypes.push(
 		key: "MultiChat",
 		icon: "people",
 		desc: "Combines messages from all sources. You should check here to make sure messages are coming in!",
-		model: (x, y) => { return new MultiChatWindow(x, y); }
+		model: (x, y) => { return new MultiChatWindow(x, y); },
+		shortcutKey: 'c'
 	}
 );

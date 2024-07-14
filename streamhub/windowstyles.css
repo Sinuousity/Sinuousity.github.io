@@ -14,7 +14,7 @@
 	width: 300px;
 	background-color: #ffffff08;
 
-	box-shadow: #0000007a 0px 0px 18px 6px;
+	box-shadow: #0006 0px 0px 9px 0px;
 
 	border-radius: 0.6rem;
 	border: solid #575757 2px;
@@ -48,6 +48,94 @@
 
 	backdrop-filter: blur(5px);
 }
+
+.window-menu-bar
+{
+	z-index: 130;
+	position: absolute;
+	display: flex;
+	flex-direction: row;
+	overflow: visible;
+	top: 2rem;
+	line-height: 1.5rem;
+	height: 1.5rem;
+	left: 0;
+	right: 0;
+	background-color: #272727;
+	border-top: solid 2px #3f3f3f;
+	border-bottom: solid 2px #3f3f3f;
+	cursor: default;
+}
+
+.window-menu-bar-menu
+{
+	cursor: pointer;
+	z-index: 140;
+	position: relative;
+	min-width: 5rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	padding-top: 0.1rem;
+	background-color: #0005;
+	color: #fffa;
+
+	transition-property: color, background-color, padding;
+	transition-duration: 0.15s;
+	transition-timing-function: ease-in-out;
+}
+.window-menu-bar-menu:hover
+{
+	padding-top: 0rem;
+	background-color: #fffa;
+	color: #000f;
+}
+
+.window-context-menu
+{
+	z-index: 150;
+	position: absolute;
+	border-radius: 0rem 0rem 0.369rem 0.369rem;
+	outline-style: solid;
+	outline-color: #444;
+	outline-width: 2px;
+	overflow: hidden;
+	opacity: 50%;
+
+	transition-property: opacity;
+	transition-duration: 0.2s;
+	transition-timing-function: ease-in-out;
+
+}
+.window-context-menu:hover
+{
+	opacity: 100%;
+}
+
+.window-context-menu-item
+{
+	padding-top: 0.15rem;
+	padding-bottom: 0.15rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+	text-align: left;
+	min-width: 5rem;
+	cursor: pointer;
+	z-index: 160;
+	position: relative;
+	color: #fff5;
+	background-color: #000c;
+
+	transition-property: color, background-color;
+	transition-duration: 0.15s;
+	transition-timing-function: ease-in-out;
+}
+.window-context-menu-item:hover
+{
+	color: #ffff;
+	background-color: #000e;
+}
+
+
 
 .window-drag-handle
 {
@@ -168,20 +256,20 @@
 
 	border-radius: 0.4rem 0.4rem 0.4rem 0.4rem;
 	border: solid transparent 2px;
-	scale: 100%;
+	scale: 98% 90%;
 
-	transition-property: opacity, background-color, padding-left, scale;
+	transition-property: opacity, background-color, scale, border;
 	transition-timing-function: ease-in-out;
-	transition-delay: 0.3s;
+	transition-delay: 0.1s;
 	transition-duration: 0.15s;
 }
 .window-content-button:hover
 {
-	padding-left: 1.5rem;
+	z-index: 5;
 	background-color: #2b2b2b;
 	border: solid #4b4b4b 2px;
 	opacity: 100%;
-	scale: 110%;
+	scale: 100%;
 	transition-delay: 0s;
 	transition-duration: 0s;
 }
@@ -385,10 +473,10 @@
 	text-align: left;
 
 	color: #ffffff80;
-	background-color: #181818a0;
+	background-color: #18181820;
 	background: linear-gradient(135deg, #0f0f0fa0, #2c2c2ca0);
 
-	backdrop-filter: blur(7px) saturate(50%);
+	backdrop-filter: blur(7px) saturate(80%);
 	transform: translateZ(0);
 }
 
@@ -533,7 +621,7 @@
 	letter-spacing: 0.06rem;
 	text-align: left;
 
-	border-bottom: solid gray 1.5px;
+	border-bottom: solid #fff2 2px;
 }
 
 .window-control-column
@@ -605,9 +693,9 @@
 	text-align: center;
 }
 
-.window-control input:hover
+.window-control input[type="button"]:hover
 {
-	scale: 105%;
+	scale: 101% 105%;
 	opacity: 100%;
 }
 .window-control input

@@ -20,6 +20,8 @@ export class WindowBase
 		this.e_window_btn_close = {};
 		this.e_window_icon = {};
 		this.e_title = {};
+		this.e_context_menu_root = {};
+		this.showing_context_menu = false;
 
 		this.position_x = 0.0;
 		this.position_y = 0.0;
@@ -34,6 +36,11 @@ export class WindowBase
 		this.e_window_btn_close = this.CreateTopBarButton("red", () => { this.Close(); }, "Close", "close");
 
 		this.SetTitle(title);
+
+		this.e_context_menu_root = addElement("div", "window-context-menu", this.e_window_root);
+		this.e_context_menu_root.style.marginTop = "3.6rem";
+		this.e_context_menu_root.style.opacity = "0.0";
+		this.e_context_menu_root.style.pointerEvents = "none";
 
 		this.created = true;
 
@@ -211,6 +218,8 @@ export class WindowBase
 		this.e_window_root.className = "window-root";
 		this.e_window_root.setAttribute("draggable", "false");
 		this.e_window_root.addEventListener("mousedown", () => { WindowManager.instance.BringToFront(this); });
+		this.e_window_root.style.maxWidth = (document.documentElement.clientWidth - 24) + "px";
+		this.e_window_root.style.maxHeight = (document.documentElement.clientHeight - 24) + "px";
 		this.ApplyPosition();
 	}
 
@@ -228,6 +237,104 @@ export class WindowBase
 		this.e_window_button_group = document.createElement("div");
 		this.e_window_button_group.className = "window-button-group";
 		this.e_window_top_bar.appendChild(this.e_window_button_group);
+	}
+
+	CreateMenuBar()
+	{
+		this.e_window_menu_bar = document.createElement("div");
+		this.e_window_menu_bar.name = "window-menu-bar";
+		this.e_window_menu_bar.className = "window-menu-bar";
+		this.e_window_menu_bar.setAttribute("draggable", "false");
+		this.e_window_root.appendChild(this.e_window_menu_bar);
+		this.e_window_root.addEventListener("mouseleave", e => { this.StartHideContextMenu() });
+		this.e_window_menu_bar.addEventListener("mouseenter", e => { this.CancelHideContextMenu() });
+		this.e_window_menu_bar.addEventListener("mouseleave", e => { this.StartHideContextMenu() });
+
+		if (this.e_content) this.e_content.style.marginTop = "3.6rem";
+	}
+
+	AddMenuBarMenu(menuLabel = "MENU", items = [])
+	{
+		if (!this.e_window_menu_bar) this.CreateMenuBar();
+		const e_menu_btn = addElement("div", "window-menu-bar-menu", this.e_window_menu_bar);
+		e_menu_btn.innerText = menuLabel;
+		e_menu_btn.addEventListener(
+			"click",
+			e =>
+			{
+				if (this.showing_context_menu) { this.HideContextMenu(); }
+				else
+				{
+					this.ShowContextMenu(items);
+					this.MoveContextMenuToElement(e_menu_btn);
+				}
+			}
+		);
+		e_menu_btn.addEventListener(
+			"mouseenter",
+			e =>
+			{
+				if (this.showing_context_menu)
+				{
+					//this.HideContextMenu();
+					this.ShowContextMenu(items);
+					this.MoveContextMenuToElement(e_menu_btn);
+				}
+			}
+		);
+		return e_menu_btn;
+	}
+
+	MoveContextMenuToElement(e)
+	{
+		if (!this.e_context_menu_root) return;
+		var windowRect = this.e_window_root.getBoundingClientRect();
+		var eRect = e.getBoundingClientRect();
+		var menuX = eRect.x - windowRect.x;
+		this.e_context_menu_root.style.left = menuX + "px";
+	}
+
+	ShowContextMenu(items = [{ label: "Do Nothing", action: () => { } }])
+	{
+		if (!this.e_context_menu_root) return;
+		this.showing_context_menu = true;
+		this.e_context_menu_root.innerHTML = "";
+		this.e_context_menu_root.style.pointerEvents = "all";
+		this.e_context_menu_root.style.opacity = "1.0";
+
+		this.e_context_menu_root.addEventListener("mouseleave", e => { this.StartHideContextMenu(); });
+		this.e_context_menu_root.addEventListener("mouseenter", e => { this.CancelHideContextMenu(); });
+
+		for (const ii in items)
+		{
+			const i = items[ii];
+			if (!i.label) continue;
+			var e_item_btn = addElement("div", "window-context-menu-item", this.e_context_menu_root);
+			e_item_btn.innerText = i.label;
+			if (!i.action) continue;
+			e_item_btn.addEventListener("click", e => { i.action(); this.HideContextMenu(); });
+		}
+	}
+
+	HideContextMenu()
+	{
+		if (!this.showing_context_menu) return;
+		if (this.timeout_context_menu != -1) window.clearTimeout(this.timeout_context_menu);
+		this.timeout_context_menu = -1;
+		this.e_context_menu_root.style.pointerEvents = "none";
+		this.e_context_menu_root.style.opacity = "0.0";
+		this.showing_context_menu = false;
+	}
+
+	StartHideContextMenu()
+	{
+		this.CancelHideContextMenu();
+		this.timeout_context_menu = window.setTimeout(() => { this.HideContextMenu(); }, 400);
+	}
+
+	CancelHideContextMenu()
+	{
+		if (this.timeout_context_menu != -1) window.clearTimeout(this.timeout_context_menu);
 	}
 
 	CreateDropZone(dropAction)
@@ -318,6 +425,8 @@ export class WindowBase
 		this.e_content = document.createElement("div");
 		this.e_content.className = "window-content";
 		this.e_window_root.insertBefore(this.e_content, this.e_window_top_bar);
+
+		if (this.e_window_menu_bar) this.e_content.style.marginTop = "3.6rem";
 
 		if (addObscurer)
 		{
@@ -425,6 +534,8 @@ export class WindowBase
 		e_input.min = minValue;
 		e_input.max = maxValue;
 		e_input.value = initialValue;
+		e_input.style.left = "2rem";
+		e_input.style.right = "2rem";
 
 		const willDirtySettings = dirtiesSettings;
 		var onChanged = () =>
@@ -438,7 +549,24 @@ export class WindowBase
 		};
 		e_input.addEventListener("change", onChanged);
 
+		var e_min = addElement("div", null, e_root);
+		e_min.style.position = "absolute";
+		e_min.style.color = "#fff5";
+		e_min.style.fontSize = "0.7rem";
+		e_min.style.left = "0";
+		e_min.style.width = "2rem";
+		e_min.innerText = minValue;
+
 		e_root.appendChild(e_input);
+
+		var e_max = addElement("div", null, e_root);
+		e_max.style.position = "absolute";
+		e_max.style.color = "#fff5";
+		e_max.style.fontSize = "0.7rem";
+		e_max.style.right = "0";
+		e_max.style.width = "2rem";
+		e_max.innerText = maxValue;
+
 		e_control.appendChild(e_root);
 
 		return e_control;
@@ -656,8 +784,8 @@ export class DraggableWindow extends WindowBase
 		this.drag_start_pos_y = UserInput.instance.mousePositionY;
 
 		//this.e_window_root.style.pointerEvents = "none";
-		this.e_window_root.style.maxWidth = (document.body.offsetWidth - 8) + "px";
-		this.e_window_root.style.maxHeight = (document.body.offsetHeight - 8) + "px";
+		//this.e_window_root.style.maxWidth = (document.body.offsetWidth - 8) + "px";
+		//this.e_window_root.style.maxHeight = (document.body.offsetHeight - 8) + "px";
 		this.e_window_drag_handle.style.cursor = "grabbing";
 		document.addEventListener("mousemove", this.ContinueDrag.bind(this));
 		document.addEventListener("mouseup", this.EndDrag.bind(this));

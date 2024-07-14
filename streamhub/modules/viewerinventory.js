@@ -17,7 +17,7 @@ export class ViewerInventorySlot
 
 export class ViewerInventory
 {
-	constructor(viewerSource, username, itemSlots = [])
+	constructor(viewerSource = "", username = "", itemSlots = [])
 	{
 		this.viewerSource = viewerSource;
 		this.username = username;
@@ -70,7 +70,7 @@ export class ViewerInventoryManager extends StoredObject
 	static inventories = [];
 	static changeReceivers = [];
 
-	static IndexOfInventory(viewerSource, username)
+	static IndexOfInventory(viewerSource = "", username = "")
 	{
 		if (viewerSource.length < 1) return;
 		if (username.length < 1) return;
@@ -106,12 +106,12 @@ export class ViewerInventoryManager extends StoredObject
 
 
 
-	static UserMatch(inv, viewerSource, username)
+	static UserMatch(inv = {}, viewerSource = "", username = "")
 	{
 		return inv.viewerSource == viewerSource && inv.username == username;
 	}
 
-	static IndexOfItem(inv, item)
+	static IndexOfItem(inv = {}, item = {})
 	{
 		if (typeof item == 'string')
 		{
@@ -134,12 +134,12 @@ export class ViewerInventoryManager extends StoredObject
 		return -1;
 	}
 
-	static HasItem(inv, item)
+	static HasItem(inv = {}, item = {})
 	{
 		return ViewerInventoryManager.IndexOfItem(inv, item) > -1;
 	}
 
-	static GetItemCount(inv, item)
+	static GetItemCount(inv = {}, item = {})
 	{
 		var id = ViewerInventoryManager.IndexOfItem(inv, item);
 		if (id < 0) return 0;
@@ -147,7 +147,7 @@ export class ViewerInventoryManager extends StoredObject
 		return 1;
 	}
 
-	static AddItemCount(viewerSource, username, item, count = 1)
+	static AddItemCount(viewerSource = "", username = "", item = {}, count = 1)
 	{
 		var inventoryId = ViewerInventoryManager.IndexOfInventory(viewerSource, username);
 		if (inventoryId < 0)
@@ -178,7 +178,7 @@ export class ViewerInventoryManager extends StoredObject
 	constructor()
 	{
 		super(0.369, false);
-		this.logJSON = true;
+		this.logJSON = false;
 		this.storeKey = "data_viewer_inventories";
 	}
 
@@ -475,6 +475,7 @@ WindowManager.instance.windowTypes.push(
 		icon: "inbox",
 		desc: "View who has what and how much of it!",
 		model: (x, y) => { return new ViewerInventoryWindow(x, y); },
-		wip: true
+		wip: true,
+		shortcutKey: 'i'
 	}
 );

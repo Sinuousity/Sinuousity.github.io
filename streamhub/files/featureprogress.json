@@ -1,0 +1,252 @@
+{
+	"features": [
+		{
+			"name": "Hub Core",
+			"desc": "The main components required to bring everything together.",
+			"goals": [
+				{
+					"name": "Sub-Window System",
+					"progress": 1.0,
+					"comment": "Flexible system of draggable windows to be used by all aspects of the Hub"
+				},
+				{
+					"name": "Persistent Data Manager",
+					"progress": 1.0,
+					"comment": "Save and load user options and any other persistent data seamlessly"
+				},
+				{
+					"name": "Service Credentials Window",
+					"progress": 1.0,
+					"comment": "Manage your third-party service credentials in a window where the content is obscured to help prevent on-stream leaks"
+				},
+				{
+					"name": "Notification System",
+					"progress": 1.0,
+					"comment": "Shows notifications at the top of the screen. Rarely used"
+				},
+				{
+					"name": "Debug Output Window",
+					"progress": 1.0,
+					"comment": "View output messages that can tell you about errors or important information"
+				},
+				{
+					"name": "Window Hotkeys",
+					"progress": 1.0,
+					"comment": "Use hotkeys to toggle viewing each kind of window"
+				},
+				{
+					"name": "Fetch and File Utilities",
+					"progress": 1.0,
+					"comment": "A set of methods for Hub features to use that make it easier to read / write files and get data from the web"
+				},
+				{
+					"name": "MultiPlatform User Cache",
+					"progress": 1.0,
+					"comment": "Allows you to view data that has been cached for viewers, like profile images"
+				},
+				{
+					"name": "MultiPlatform Chat Window",
+					"progress": 1.0,
+					"comment": "One chat to rule them all! Combines messages from all sources"
+				}
+			]
+		},
+		{
+			"name": "API Integration: Twitch",
+			"desc": "Integrations with Twitch's chat and data APIs.",
+			"goals": [
+				{
+					"name": "Chat: Read",
+					"progress": 1.0,
+					"comment": "Read messages coming in from Twitch"
+				},
+				{
+					"name": "Chat: Write",
+					"progress": 1.0,
+					"comment": "Write messages back to Twitch"
+				},
+				{
+					"name": "Profile Data",
+					"progress": 1.0,
+					"comment": "Gets profile data like display name and profile image URLs"
+				}
+			]
+		},
+		{
+			"name": "API Integration: Kick",
+			"desc": "Integrations with Kick's chat and data APIs.",
+			"goals": [
+				{
+					"name": "Chat: Read",
+					"progress": 1.0,
+					"comment": "Read messages coming in from Kick"
+				},
+				{
+					"name": "Chat: Write",
+					"progress": 0.0,
+					"blocked": true,
+					"comment": "The Kick API Doesn't Support This Yet!"
+				},
+				{
+					"name": "Profile Data",
+					"progress": 1.0,
+					"comment": "Gets profile data like display name and profile image URLs"
+				}
+			]
+		},
+		{
+			"name": "API Integration: StreamElements",
+			"desc": "Integrations with Twitch's chat and data APIs.",
+			"goals": [
+				{
+					"name": "Points Balance Fetch",
+					"progress": 1.0,
+					"comment": "Fetch SteamElements Points balance info."
+				},
+				{
+					"name": "Points Leaderboard",
+					"progress": 1.0,
+					"comment": "View the top 10 point holders."
+				},
+				{
+					"name": "Points Purchasing",
+					"progress": 1.0,
+					"comment": "Viewers can use StreamElements Points as a currency to perform actions like entering a raffle."
+				},
+				{
+					"name": "Tips Integration",
+					"progress": 0.0,
+					"comment": "Will trigger Hub events based when a StreamElements tip is received."
+				},
+				{
+					"name": "Tips Leaderboard Integration",
+					"progress": 0.0,
+					"comment": "Will allow you to see the top SE tip contributors."
+				},
+				{
+					"name": "Contest Integration",
+					"progress": 0.0,
+					"comment": "Will trigger events based on when a StreamElements contest begins or ends and who won."
+				}
+			]
+		},
+		{
+			"name": "Background Scene Editor",
+			"desc": "A tool to create custom animated backgrounds using layers of CSS.",
+			"goals": [
+				{
+					"name": "Core Layer Types",
+					"progress": 1.0,
+					"comment": "Solid Fill, Gradient Fill, Image"
+				},
+				{
+					"name": "Layer Type: Pattern",
+					"progress": 1.0,
+					"comment": "Uses the 'background' CSS property to create repeating patterns with images or gradients."
+				},
+				{
+					"name": "Layer Type: Video",
+					"progress": 1.0,
+					"comment": "A video layer via URL. Example videos are Imgur URLs"
+				},
+				{
+					"name": "Layer Type: Filter",
+					"progress": 1.0,
+					"comment": "A layer that changes layers below it. You can use any CSS filter function like 'blur()', 'hue-rotate()', or 'contrast()'"
+				},
+				{
+					"name": "Layer Type: WebGL",
+					"progress": 0.0,
+					"comment": "A layer that will take advantage of custom GLSL shaders. Fancy stuff!"
+				},
+				{
+					"name": "Layer Tools",
+					"progress": 1.0,
+					"comment": "Clone layers, move them up or down, delete layers, toggle layers on or off"
+				},
+				{
+					"name": "Scene Profiles",
+					"progress": 1.0,
+					"comment": "Use profiles to store sets of layers for different scenes"
+				},
+				{
+					"name": "Default / Preset Profiles",
+					"progress": 1.0,
+					"comment": "Includes default profiles and allows you to add a profile from presets"
+				},
+				{
+					"name": "Save / Load Profiles As Files",
+					"progress": 1.0,
+					"comment": "Allows you to save and load scene profiles as JSON files"
+				}
+			]
+		},
+		{
+			"name": "Viewer Inventories",
+			"desc": "View and edit items in viewers' inventories.",
+			"goals": [
+				{
+					"name": "Item Library Window",
+					"progress": 1.0,
+					"comment": "Allows you to create and edit any number of custom items for viewers to earn or collect"
+				},
+				{
+					"name": "Viewer Inventory Viewer",
+					"progress": 1.0,
+					"comment": "View who has what and how much of it"
+				},
+				{
+					"name": "Give Item Window",
+					"progress": 1.0,
+					"comment": "Give a specific item to a specific viewer"
+				},
+				{
+					"name": "Random Item Rewards",
+					"progress": 1.0,
+					"comment": "Allows viewers to receive a random item from the Item Library as a reward"
+				},
+				{
+					"name": "Custom Item Properties",
+					"progress": 0.1,
+					"comment": "Allows you to add custom properties to items, which could be used by other Hub features"
+				}
+			]
+		},
+		{
+			"name": "Creature Catching",
+			"desc": "Creatures that you customise will appear and can be caught by chatters.",
+			"goals": [
+				{
+					"name": "Creature Roster Editor",
+					"progress": 1.0,
+					"comment": "Create, modify, and remove creatures from the creature roster."
+				},
+				{
+					"name": "Creature Appearance Settings",
+					"progress": 1.0,
+					"comment": "Edit how frequently creatures appear"
+				},
+				{
+					"name": "Creature Appearance Overlay",
+					"progress": 1.0,
+					"comment": "Adds an image popup for creature appearances"
+				},
+				{
+					"name": "Creature Images",
+					"progress": 1.0,
+					"comment": "Allows creatures to use images from the web, including transparency"
+				},
+				{
+					"name": "Creature Points Rewards",
+					"progress": 1.0,
+					"comment": "Allows StreamElements points to be rewarded when a creature is caught"
+				},
+				{
+					"name": "Creature Rarity",
+					"progress": 0.5,
+					"comment": "Allows some creatures to appear more frequently than others. Not currently in use!"
+				}
+			]
+		}
+	]
+}

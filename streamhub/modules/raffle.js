@@ -423,10 +423,6 @@ export class RaffleOverlay
 
 	constructor()
 	{
-		window.addEventListener("keypress", e =>
-		{
-			var pressedToggleKey = e.key == 'r';
-		});
 
 		MultiPlatformUserCache.onNewUser.RequestSubscription(() => { RaffleOverlay.instance.RefreshEntryImages(); });
 		MultiPlatformUser.onAnyDataCached.RequestSubscription(() => { RaffleOverlay.instance.RefreshEntryImages(); });
@@ -1042,7 +1038,8 @@ WindowManager.instance.windowTypes.push(
 		key: "Raffle",
 		icon: "confirmation_number",
 		desc: "Spin a wheel! Kinda! Viewers can join! You can add any name! It twists!",
-		model: (x, y) => { return new RaffleSettingsWindow(x, y); }
+		model: (x, y) => { return new RaffleSettingsWindow(x, y); },
+		shortcutKey: 'r'
 	}
 );
 

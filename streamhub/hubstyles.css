@@ -333,7 +333,7 @@ body
 	bottom: 1rem;
 	text-align: right;
 	height: 1rem;
-	font-size: 0.7rem;
+	font-size: 0.56rem;
 	line-height: 1rem;
 	font-weight: bold;
 	letter-spacing: 2px;
@@ -475,8 +475,8 @@ body
 }
 .twitchinfobox:hover
 {
-	width: 12rem;
-	height: 20rem;
+	width: 14rem;
+	height: 24rem;
 	opacity: 100%;
 	background-color: #8d6538;
 	border: 3px solid #00000079;

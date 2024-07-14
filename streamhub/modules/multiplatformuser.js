@@ -16,6 +16,8 @@ export class MultiPlatformUser
 	static dataCacheCompletes = 0;
 	static dataCacheErrors = 0;
 
+	static nullUser = new MultiPlatformUser("NULL", "NONE", false);
+
 	constructor(username, platform, fetchData = true)
 	{
 		this.username = username;
@@ -133,6 +135,13 @@ export class MultiPlatformUser
 		this.color = newColor;
 		MultiPlatformUser.onAnyDataCached.Invoke();
 	}
+
+	static SameUser(userA, userB)
+	{
+		if (userA.platform != userB.platform) return false;
+		if (userA.username != userB.username) return false;
+		return true;
+	}
 }
 
 export class MultiPlatformUserCache
@@ -157,9 +166,9 @@ export class MultiPlatformUserCache
 		return u;
 	}
 
-	static GetUser(username, platform = "any")
+	static GetUser(username, platform = "any", addIfNew = false)
 	{
-		if (typeof username != 'string' || typeof platform != 'string') return;
+		if (typeof username != 'string' || typeof platform != 'string') return null;
 
 		username = username.trim();
 		username = username.toLowerCase();
@@ -167,15 +176,17 @@ export class MultiPlatformUserCache
 		platform = platform.trim();
 		platform = platform.toLowerCase();
 
-		if (username == '' || platform == '') return;
+		if (username == '' || platform == '') return null;
 
-		for (var userIndex in MultiPlatformUserCache.users.values)
+		for (var userIndex = 0; userIndex < MultiPlatformUserCache.users.values.length; userIndex++)
 		{
 			var thisUser = MultiPlatformUserCache.users.values[userIndex];
-			if (thisUser.username != username || (platform != "any" && thisUser.platform != platform)) continue;
+			if (thisUser.username != username) continue;
+			if (platform != "any" && thisUser.platform != platform) continue;
 			return thisUser;
 		}
-		return this.Append(username, platform, true);
+		if (addIfNew) return this.Append(username, platform, true);
+		return null;
 	}
 
 	static EnqueueUserDataRequest(user) { MultiPlatformUserCache.profileDataQueue.push(user); }
@@ -337,7 +348,8 @@ WindowManager.instance.windowTypes.push(
 		key: MultiPlatformUserExplorer.window_kind,
 		icon: "assignment_ind",
 		desc: "Browse all the cached viewer data from this session including names, IDs, and profile images. This data is not saved.",
-		model: (x, y) => { return new MultiPlatformUserExplorer(x, y); }
+		model: (x, y) => { return new MultiPlatformUserExplorer(x, y); },
+		shortcutKey: 'v'
 	}
 );
 

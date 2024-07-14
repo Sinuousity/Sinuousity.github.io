@@ -8,6 +8,7 @@ import { SaveIndicator } from "./saveindicator.js";
 import { Lookup } from "./lookup.js";
 import { GlobalTooltip } from "./globaltooltip.js";
 import { addElement } from "../hubscript.js";
+import { Rewards } from "./rewards.js";
 
 console.info("[ +Module ] Item Library");
 
@@ -88,9 +89,8 @@ export class ItemStoreWindowBase extends DraggableWindow
 		this.SetIcon(icon);
 
 		this.window_kind = windowKind;
-		this.e_window_root.style.minWidth = "360px";
-		this.e_window_root.style.maxWidth = "960px";
-		this.e_window_root.style.minHeight = "360px";
+		this.e_window_root.style.minWidth = "340px";
+		this.e_window_root.style.minHeight = "340px";
 
 		this.e_items = [];
 		this.e_edit_overlay = {};
@@ -232,6 +232,8 @@ export class ItemStoreWindowBase extends DraggableWindow
 			const e_spn = document.createElement("span");
 			e_spn.innerText = "edit ➜";
 			e_spn.style.fontSize = "0.555rem";
+			e_spn.style.fontWeight = "normal";
+			e_spn.style.letterSpacing = "0.06rem";
 			e_btn.appendChild(e_spn);
 
 			this.e_root.insertBefore(e_btn, this.e_btn_add);
@@ -482,6 +484,41 @@ export class ItemStoreWindowBase extends DraggableWindow
 		return e;
 	}
 
+	AppendEditOverlaySliderField(fieldName = "NULL", fieldValue = 0.0, sliderMin = 0.0, sliderMax = 1.0, sliderStep = 0.05)
+	{
+		var e_row = this.PrepareEditRow(this.e_edit_overlay);
+		var e_lbl = this.AppendEditOverlayLabel(e_row, fieldName);
+		this.PrepareRowLabel(e_lbl);
+
+		var e = document.createElement("input");
+		e.type = "range";
+		e.min = sliderMin;
+		e.max = sliderMax;
+		e.step = sliderStep;
+		e.value = fieldValue;
+		this.PrepareRowField(e);
+
+		var e_min = document.createElement("div");
+		e_min.style.color = "#fff5";
+		e_min.style.fontSize = "0.7rem";
+		e_min.innerText = sliderMin;
+		e_min.style.minWidth = "1rem";
+		e_min.style.textAlign = "center";
+
+		var e_max = document.createElement("div");
+		e_max.style.color = "#fff5";
+		e_max.style.fontSize = "0.7rem";
+		e_max.innerText = sliderMax;
+		e_max.style.minWidth = "1rem";
+		e_max.style.textAlign = "center";
+
+		e_row.appendChild(e_min);
+		e_row.appendChild(e);
+		e_row.appendChild(e_max);
+
+		return e;
+	}
+
 	PrepareEditRow(parent)
 	{
 		var e_row = addElement("div", null, parent);
@@ -532,8 +569,8 @@ export class ItemStoreWindowBase extends DraggableWindow
 		e_field.style.flexGrow = "1.0";
 		e_field.style.flexShrink = "1.0";
 		e_field.style.minWidth = "1rem";
-		e_field.style.paddingLeft = "0.5rem";
-		e_field.style.paddingRight = "0.5rem";
+		//e_field.style.paddingLeft = "0.5rem";
+		//e_field.style.paddingRight = "0.5rem";
 	}
 
 	AppendEditOverlayToggle(fieldName = "NULL", fieldValue = false)
@@ -655,7 +692,8 @@ WindowManager.instance.windowTypes.push(
 		icon: "toys",
 		desc: "Create, edit, or remove items from the Item Library!",
 		model: (x, y) => { return new ItemLibraryWindow(x, y); },
-		wip: true
+		wip: true,
+		shortcutKey: 'l'
 	}
 );
 WindowManager.instance.windowTypes.push(
@@ -664,6 +702,35 @@ WindowManager.instance.windowTypes.push(
 		icon: "card_giftcard",
 		desc: "Give an item to a specific viewer. (Better method TBA)",
 		model: (x, y) => { return new ItemGiverWindow(x, y); },
-		wip: true
+		wip: true,
+		shortcutKey: 'g'
+	}
+);
+
+
+Rewards.Register(
+	"Add Random Item",
+	(user, options) =>
+	{
+		if (options.minTradeValue) 
+		{
+			while (true)
+			{
+				let itemId = Math.round(Math.random() * (ItemLibrary.builtIn.items.length - 1));
+				let item = ItemLibrary.builtIn.items[itemId];
+				let itemTradeValue = item.tradeValue ?? -1;
+				if (itemTradeValue >= options.minTradeValue)
+				{
+					ViewerInventoryManager.AddItemCount(user.platform, user.username, item, 1);
+					return;
+				}
+			}
+		}
+		else 
+		{
+			let itemId = Math.round(Math.random() * (ItemLibrary.builtIn.items.length - 1));
+			let item = ItemLibrary.builtIn.items[itemId];
+			ViewerInventoryManager.AddItemCount(user.platform, user.username, item, 1);
+		}
 	}
 );

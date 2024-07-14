@@ -7,20 +7,133 @@ import { addElement } from "../hubscript.js";
 import { EventSource } from "./eventsource.js";
 import { ChatCollector } from "./chatcollector.js";
 import { ViewerInventoryManager } from "./viewerinventory.js";
+import { MultiPlatformUser, MultiPlatformUserCache } from "./multiplatformuser.js";
+import { StreamElements } from "./streamelementslistener.js";
+import { Rewards } from "./rewards.js";
 
 console.info("[ +Module ] Creature Catching");
+
+
+export class CreatureCatchEntry
+{
+	username = "nobody";
+	constructor(username = "nobody", count = 1)
+	{
+		this.username = username;
+		this.count = count;
+	}
+}
 
 export class CreatureAppearance
 {
 	flipInterval = -1;
 	spriteFlip = false;
+	willEvadeAll = false;
+	entries = [new CreatureCatchEntry()];
 
 	constructor(creatureId = -1)
 	{
 		this.creatureId = (creatureId == -1) ? Math.round(Math.random() * (CreatureRoster.instance.items.length - 1)) : creatureId;
 		this.creature = CreatureRoster.instance.items[this.creatureId];
+		this.willEvadeAll = this.creature.evasionChance >= Math.random();
 
 		this.spriteFlip = Math.random() > 0.5;
+		this.entries = [];
+	}
+
+	IndexOfEntry(username = "")
+	{
+		for (var ei = 0; ei < this.entries.length; ei++)
+		{
+			if (this.entries[ei].username === username) return ei;
+		}
+		return -1;
+	}
+
+	HasEntered(username = "") { return this.IndexOfEntry(username) != -1; }
+
+	TryEnterFirstTime(username = "")
+	{
+		console.log(username + " entered creature catching");
+		this.entries.push(new CreatureCatchEntry(username, 1));
+	}
+
+	TryEnterExtraTimes(username = "", count = 1)
+	{
+		var extraEntryCost = Number(OptionManager.GetOptionValue(option_key_creature_catching_extraEntryCost));
+		var totalEntryCost = Math.max(count, 0) * extraEntryCost;
+
+		StreamElements.TrySpendUserPoints(
+			username,
+			totalEntryCost,
+			() =>
+			{
+				var existingId = this.IndexOfEntry(username);
+				this.entries[existingId].count += count;
+				console.log(username + " bought " + count + " extra creature catch attempts for " + totalEntryCost + " points!");
+				CreatureCatchState.onAppearanceEntry.Invoke();
+			}
+		);
+	}
+
+	RegisterEntries(username = "", count = 1)
+	{
+		if (!this.HasEntered(username))
+		{
+			this.TryEnterFirstTime(username);
+			count -= 1;
+		}
+
+		if (count < 1)
+		{
+			CreatureCatchState.onAppearanceEntry.Invoke();
+			return;
+		}
+
+		this.TryEnterExtraTimes(username, count);
+	}
+
+	EvaluateCatch()
+	{
+		if (this.entries.length < 1) return false;
+
+		if (this.willEvadeAll)
+		{
+			console.log(`${this.creature.name} evades all capture attempts!`);
+			return false;
+		}
+
+		var expandedEntries = [];
+		for (var ei = 0; ei < this.entries.length; ei++)
+		{
+			var e = this.entries[ei];
+			for (var ii = 0; ii < e.count; ii++)
+				expandedEntries.push(e.username);
+		}
+
+		let winner = expandedEntries[Math.round(Math.random() * (expandedEntries.length - 1))];
+		if (this.creature.pointValue > 0) 
+		{
+			console.log(`${winner} caught ${this.creature.name}! +${this.creature.pointValue} Loyalty Points!`);
+			Rewards.Give({ username: winner }, "Add SE Points", { points: this.creature.pointValue });
+
+			//StreamElements.AddUserPoints(winner, this.creature.pointValue);
+		}
+		else 
+		{
+			console.log(`${winner} caught ${this.creature.name}!`);
+		}
+
+		let creatureItem = {
+			name: this.creature.name,
+			description: this.creature.description,
+			rarity: this.creature.rarity,
+		};
+
+		var user = MultiPlatformUserCache.GetUser(winner, "any", false);
+		if (user != null) ViewerInventoryManager.AddItemCount(user.platform, user.username, creatureItem, 1);
+
+		return true;
 	}
 
 	FlipLoop()
@@ -186,6 +299,8 @@ export class CreatureCatchState
 	static onAppearanceStarted = new EventSource();
 	static onAppearanceEnded = new EventSource();
 
+	static onAppearanceEntry = new EventSource();
+
 	static intervalId_randomAppearanceLoop = -1;
 	static timer_nextAppearance = 5;
 	static timer_currentAppearance = -1;
@@ -205,7 +320,7 @@ export class CreatureCatchState
 		);
 		console.info("creature catch loop started");
 
-		ChatCollector.sub_OnNewChat = ChatCollector.onMessageReceived.RequestSubscription(CreatureCatchState.CheckChatForKeyPhrase);
+		ChatCollector.sub_OnNewChat = ChatCollector.onMessageReceived.RequestSubscription(cm => { CreatureCatchState.CheckChatForKeyPhrase(cm); });
 	}
 
 	static StopRandomAppearanceLoop()
@@ -221,22 +336,19 @@ export class CreatureCatchState
 	{
 		if (CreatureCatchState.activeAppearance == null) return;
 
-		let chatUsername = chatMessage.username;
-		let chatContent = "";
-		chatContent = chatMessage.message;
+		let msgText = chatMessage.message.trim().toLowerCase();
+		msgText = msgText.replace(' 󠀀', '');
 
 		let keyphrase = OptionManager.GetOptionValue(option_key_creature_catching_keyphrase);
+		if (!msgText.includes(keyphrase)) return;
 
-		if (chatContent.startsWith(keyphrase))
+		if (msgText.includes(' '))
 		{
-			console.log(CreatureCatchState.activeAppearance.creature.name + " caught by " + chatUsername + "!");
-			var creatureItem = {
-				name: CreatureCatchState.activeAppearance.creature.name,
-				description: CreatureCatchState.activeAppearance.creature.description,
-				rarity: CreatureCatchState.activeAppearance.creature.rarity,
-			};
-			ViewerInventoryManager.AddItemCount(chatMessage.source, chatMessage.username, creatureItem, 1);
+			var parts = msgText.split(' ');
+			CreatureCatchState.activeAppearance.RegisterEntries(chatMessage.username, Number(parts[1]));
 		}
+		else
+			CreatureCatchState.activeAppearance.RegisterEntries(chatMessage.username, 1);
 	}
 
 	static stepRandomAppearanceLoop()
@@ -300,6 +412,8 @@ export class CreatureCatchState
 	{
 		if (CreatureCatchState.activeAppearance == null) return;
 
+		CreatureCatchState.activeAppearance.EvaluateCatch();
+
 		CreatureCatchState.activeAppearance.RemoveElements();
 		CreatureCatchState.activeAppearance = null;
 		CreatureCatchState.onAppearanceEnded.Invoke();
@@ -336,18 +450,40 @@ export class CreatureCatchingWindow extends DraggableWindow
 		this.e_content.style.flexDirection = "column";
 
 		this.CreateSettingsPage();
+
+		this.e_entryList = addElement("div", null, this.e_content);
+		this.e_entryList.style.height = "1rem";
+		this.e_entryList.style.flexGrow = "1.0";
+
 		this.CreateAppeareanceInfoRoot();
 
 		this.RefreshAppearanceInfo();
 
-		this.sub_AppearStart = CreatureCatchState.onAppearanceStarted.RequestSubscription(() => { this.RefreshAppearanceInfo(); });
-		this.sub_AppearEnd = CreatureCatchState.onAppearanceEnded.RequestSubscription(() => { this.RefreshAppearanceInfo(); });
+		this.sub_AppearStart = CreatureCatchState.onAppearanceStarted.RequestSubscription(() => { this.RefreshAppearanceInfo(); this.RefreshEntryList(); });
+		this.sub_AppearEnd = CreatureCatchState.onAppearanceEnded.RequestSubscription(() => { this.RefreshAppearanceInfo(); this.RefreshEntryList(); });
+		this.sub_AppearEntry = CreatureCatchState.onAppearanceEntry.RequestSubscription(() => { this.RefreshEntryList(); });
+	}
+
+	RefreshEntryList()
+	{
+		this.e_entryList.innerHTML = "";
+
+		if (CreatureCatchState.activeAppearance == null) return;
+		if (CreatureCatchState.activeAppearance.entries.length < 1) return;
+
+		for (var entryId = 0; entryId < CreatureCatchState.activeAppearance.entries.length; entryId++)
+		{
+			var entry = CreatureCatchState.activeAppearance.entries[entryId];
+			var e_entry = addElement("div", null, this.e_entryList);
+			e_entry.innerText = entry.username + " " + entry.count;
+		}
 	}
 
 	onWindowClose()
 	{
 		CreatureCatchState.onAppearanceStarted.RemoveSubscription(this.sub_AppearStart);
 		CreatureCatchState.onAppearanceEnded.RemoveSubscription(this.sub_AppearEnd);
+		CreatureCatchState.onAppearanceEntry.RemoveSubscription(this.sub_AppearEntry);
 	}
 
 	CreateAppeareanceInfoRoot()
@@ -355,6 +491,7 @@ export class CreatureCatchingWindow extends DraggableWindow
 		this.e_appearanceInfoRoot = addElement("div", null, this.e_content);
 		this.e_appearanceInfoRoot.style.position = "relative";
 		this.e_appearanceInfoRoot.style.flexGrow = "1.0";
+		this.e_appearanceInfoRoot.style.height = "1rem";
 
 		this.e_appearanceInfoContainer = addElement("div", null, this.e_appearanceInfoRoot);
 		this.e_appearanceInfoContainer.style.position = "absolute";
@@ -489,12 +626,14 @@ export class CreatureCatchingOverlay
 const option_key_creature_catching_appearances_enabled = "creature.catching.appearances.enabled";
 const option_key_creature_catching_appearances_delay_min = "creature.catching.appearances.delay.min";
 const option_key_creature_catching_appearances_delay_max = "creature.catching.appearances.delay.max";
+const option_key_creature_catching_extraEntryCost = "creature.catching.extra.entry.cost";
 const option_key_creature_catching_keyphrase = "creature.catching.keyphrase";
 const option_key_creature_catching_creature_size = "creature.catching.creature.size";
 OptionManager.AppendOption(option_key_creature_catching_appearances_enabled, false, "Appearances");
 OptionManager.AppendOption(option_key_creature_catching_appearances_delay_min, 30, "Delay Min");
 OptionManager.AppendOption(option_key_creature_catching_appearances_delay_max, 600, "Delay Max");
 OptionManager.AppendOption(option_key_creature_catching_creature_size, 1.0, "Creature Size");
+OptionManager.AppendOption(option_key_creature_catching_extraEntryCost, 15, "Extra Entry Cost");
 OptionManager.AppendOption(option_key_creature_catching_keyphrase, "!catch", "Key Phrase");
 
 
@@ -504,7 +643,8 @@ WindowManager.instance.windowTypes.push(
 		icon: "android",
 		desc: "Edit creature appearance settings!",
 		model: (x, y) => { return new CreatureCatchingWindow(x, y); },
-		wip: true
+		wip: true,
+		shortcutKey: 'n'
 	}
 );
 

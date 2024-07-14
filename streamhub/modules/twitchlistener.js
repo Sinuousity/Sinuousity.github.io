@@ -138,6 +138,11 @@ export class TwitchListener
 		this.ws.send("JOIN #" + this.joinedChannel);
 	}
 
+	SendMessageAsBot(message = "I am a robot. Beep. Boop.")
+	{
+		this.ws.send("PRIVMSG #" + this.joinedChannel + " :" + message);
+	}
+
 	static CheckWindowLocationHashForAccessToken()
 	{
 		var got_access_token = window.location.hash.match(rgx_twitch_access_token);

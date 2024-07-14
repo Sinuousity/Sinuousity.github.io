@@ -46,6 +46,7 @@ export class CreatureRosterWindow extends ItemStoreWindowBase
 		help += " Creatures have a name, description, rarity, and appearance duration.";
 		help += " Each creature can also be excluded from random appearances.";
 		this.SetWindowHelpText(help);
+		this.e_window_root.style.minHeight = "420px";
 	}
 
 	//override
@@ -113,7 +114,7 @@ export class CreatureRosterWindow extends ItemStoreWindowBase
 			"The number of StreamElements Loyalty Points awarded for catching this creature."
 		);
 
-		this.e_edit_field_evadeChance = this.AppendEditOverlayNumberField("Evade Chance", creature.evasionChance ?? 0.0, 0.01);
+		this.e_edit_field_evadeChance = this.AppendEditOverlaySliderField("Evade Chance", creature.evasionChance ?? 0.0, 0.0, 1.0, 0.01);
 		GlobalTooltip.RegisterReceiver(
 			this.e_edit_field_evadeChance.parentElement,
 			"Evasion Chance ( 0.0 - 1.0 )",
@@ -141,6 +142,7 @@ WindowManager.instance.windowTypes.push(
 		icon: "bug_report",
 		desc: "Create, modify, or remove creatures from the Creature Roster!",
 		model: (x, y) => { return new CreatureRosterWindow(x, y); },
-		wip: true
+		wip: true,
+		shortcutKey: 'm'
 	}
 );

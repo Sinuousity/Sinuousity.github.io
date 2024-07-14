@@ -294,14 +294,19 @@
 					"comment": "Create, modify, and remove creatures."
 				},
 				{
+					"name": "Creature Images",
+					"progress": 1.0,
+					"comment": "Allows creatures to use images from the web, including transparency"
+				},
+				{
 					"name": "Creature Rarity",
 					"progress": 0.5,
 					"comment": "Allows some creatures to appear more frequently than others. Not currently in use!"
 				},
 				{
-					"name": "Creature Images",
+					"name": "Creature Points Rewards",
 					"progress": 1.0,
-					"comment": "Allows creatures to use images from the web, including transparency"
+					"comment": "Allows StreamElements points to be rewarded when a creature is caught"
 				},
 				{
 					"name": "Creature Appearance Settings",
@@ -319,9 +324,19 @@
 					"comment": "Will allow you to set which sides of the screen that creatures will appear on"
 				},
 				{
-					"name": "Creature Points Rewards",
+					"name": "Creature Animation",
 					"progress": 1.0,
-					"comment": "Allows StreamElements points to be rewarded when a creature is caught"
+					"comment": "Creatures do a little meandering during their appearances"
+				},
+				{
+					"name": "Entry Animation",
+					"progress": 0.0,
+					"comment": "Will add an animation to show when a viewer has joined the catch event"
+				},
+				{
+					"name": "Creature Caught Animation",
+					"progress": 0.0,
+					"comment": "Will add an animation to show that the creature was caught"
 				}
 			]
 		}

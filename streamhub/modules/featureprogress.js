@@ -47,7 +47,13 @@ export class FeatureProgressWindow extends DraggableWindow
 		this.SetIcon("assignment_turned_in");
 		this.SetTitle(FeatureProgressWindow.windowKind);
 		this.CreateContentContainer();
-		this.CreateControlsColumn();
+		this.e_content.style.display = "flex";
+		this.e_content.style.flexDirection = "column";
+		this.e_content.style.left = "0";
+		this.e_content.style.right = "0";
+		this.CreateControlsColumn(true);
+		this.e_controls_column.style.left = "0";
+		this.e_controls_column.style.right = "0";
 
 		window.setTimeout(() => { this.RefreshContent(); }, 55);
 	}
@@ -84,6 +90,10 @@ export class FeatureProgressWindow extends DraggableWindow
 				else if (goal.blocked === true) e_goal.style.color = "#f00";
 				else e_goal.style.color = (goal.progress >= 1.0) ? "#1f1" : (goal.progress >= 0.1) ? "yellow" : "gray";
 
+				if (goal.progress > 0.0 && goal.progress < 1.0) e_goal.style.cursor = "progress";
+				else if (goal.progress <= 0.0) e_goal.style.cursor = "help";
+				else e_goal.style.cursor = "normal";
+
 				e_goal.style.border = "none";
 				e_goal.style.textDecoration = goal.deprecated === true ? "line-through" : "unset";
 				e_goal.style.opacity = "0.5";
@@ -101,13 +111,22 @@ export class FeatureProgressWindow extends DraggableWindow
 				e_goal.style.overflow = "hidden";
 				e_goal.style.textOverflow = "ellipsis";
 				e_goal.style.wordBreak = "break-all";
-				e_goal.style.transitionProperty = "background-color, opacity";
+				e_goal.style.transitionProperty = "opacity, background-color";
 				e_goal.style.transitionDuration = "0.1s";
+				e_goal.style.transitionDelay = "0s";
 				e_goal.style.transitionTimingFunction = "ease-in-out";
 
-				let progA = Math.round(goal.progress * 100);
-				let progB = progA + 1;
-				e_goal.style.background = `linear-gradient(90deg, #0f02 ${progA}%, transparent ${progB}%)`;
+				if (goal.deprecated === true)
+				{
+					e_goal.style.background = `linear-gradient(45deg, #f805 , #320a)`;
+				}
+				else if (goal.progress > 0.0)
+				{
+					let progA = Math.round(goal.progress * 100);
+					let progB = progA + 1;
+					e_goal.style.background = `linear-gradient(90deg, #0f02 ${progA}%, transparent ${progB}%)`;
+				}
+
 				e_goal.addEventListener(
 					"mouseenter",
 					e =>
@@ -122,62 +141,40 @@ export class FeatureProgressWindow extends DraggableWindow
 					e =>
 					{
 						e_goal.style.opacity = "0.5";
-						e_goal.style.backgroundColor = "#fff0";
 						e_goal.style.fontWeight = "normal";
+						e_goal.style.backgroundColor = "#fff0";
 					}
 				);
 
+				let e_planned_label = addElement("div", "", e_goal);
+				e_planned_label.style.fontSize = "0.6rem";
+				e_planned_label.style.position = "absolute";
+				e_planned_label.style.right = "0.5rem";
+				e_planned_label.style.top = "0";
+				e_planned_label.style.bottom = "0";
+
 				if (goal.deprecated === true)
 				{
-					let e_planned_label = addElement("div", "", e_goal);
-					e_planned_label.style.fontSize = "0.6rem";
-					e_planned_label.style.position = "absolute";
-					e_planned_label.style.right = "0.5rem";
-					e_planned_label.style.top = "0";
-					e_planned_label.style.bottom = "0";
 					e_planned_label.innerText = "DEPRECATED";
 				}
 				else if (goal.blocked === true)
 				{
-					let e_planned_label = addElement("div", "", e_goal);
 					e_planned_label.style.textDecoration = goal.deprecated === true ? "line-through" : "unset";
-					e_planned_label.style.fontSize = "0.6rem";
-					e_planned_label.style.position = "absolute";
-					e_planned_label.style.right = "0.5rem";
-					e_planned_label.style.top = "0";
-					e_planned_label.style.bottom = "0";
 					e_planned_label.innerText = "BLOCKED";
 				}
 				else if (goal.progress <= 0.0)
 				{
-					let e_planned_label = addElement("div", "", e_goal);
-					e_planned_label.style.fontSize = "0.6rem";
-					e_planned_label.style.position = "absolute";
-					e_planned_label.style.right = "0.5rem";
-					e_planned_label.style.top = "0";
-					e_planned_label.style.bottom = "0";
 					e_planned_label.innerText = "PLANNED";
 				}
 				else if (goal.progress < 1.0)
 				{
-					let e_planned_label = addElement("div", "", e_goal);
-					e_planned_label.style.fontSize = "0.6rem";
-					e_planned_label.style.position = "absolute";
-					e_planned_label.style.right = "0.5rem";
-					e_planned_label.style.top = "0";
-					e_planned_label.style.bottom = "0";
 					if (goal.progress < 0.2) e_planned_label.innerText = "STARTED";
 					else if (goal.progress < 0.8) e_planned_label.innerText = "IN PROGRESS";
-					else e_planned_label.innerText = "ALMOST DONE";
+					else if (goal.progress < 0.9) e_planned_label.innerText = "ALMOST DONE";
+					else e_planned_label.innerText = "FINAL TOUCHES";
 				}
 				else
 				{
-					let e_planned_label = addElement("div", "", e_goal);
-					e_planned_label.style.fontSize = "0.6rem";
-					e_planned_label.style.position = "absolute";
-					e_planned_label.style.right = "0.5rem";
-					e_planned_label.style.top = "0";
-					e_planned_label.style.bottom = "0";
 					e_planned_label.innerText = "DONE";
 				}
 			}
@@ -185,6 +182,16 @@ export class FeatureProgressWindow extends DraggableWindow
 
 		var e_bottom_space = addElement("div", null, this.e_controls_column);
 		e_bottom_space.style.minHeight = "2rem";
+
+		/*
+		this.e_developer_info = addElement("div", null, this.e_controls_column);
+		this.e_developer_info.style.position = "relative";
+		this.e_developer_info.style.left = "0";
+		this.e_developer_info.style.right = "0";
+		this.e_developer_info.style.height = "8rem";
+		this.e_developer_info.style.flexShrink = "0";
+		this.e_developer_info.style.borderTop = "solid 2px gray";
+		*/
 	}
 }
 

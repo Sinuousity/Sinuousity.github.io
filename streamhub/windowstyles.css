@@ -23,6 +23,9 @@
 	font-size: 1rem;
 	font-weight: bold;
 
+	scrollbar-color: #0005 #5552 !important;
+	scrollbar-width: thin;
+
 	transition-property: rotate, opacity, transform, scale, outline, outline-offset;
 	transition-duration: 0.1s;
 	transition-timing-function: linear;

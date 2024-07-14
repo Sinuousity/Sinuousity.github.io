@@ -5,11 +5,6 @@
 			"desc": "The main components required to bring everything together.",
 			"goals": [
 				{
-					"name": "Sub-Window System",
-					"progress": 1.0,
-					"comment": "Flexible system of draggable windows to be used by all aspects of the Hub"
-				},
-				{
 					"name": "Persistent Data Manager",
 					"progress": 1.0,
 					"comment": "Save and load user options and any other persistent data seamlessly"
@@ -26,14 +21,29 @@
 					"comment": "Shows at the top left corner any time a data save operation is triggered"
 				},
 				{
+					"name": "Sub-Window Core",
+					"progress": 1.0,
+					"comment": "Flexible system of restoreable windows to be used by all aspects of the Hub"
+				},
+				{
+					"name": "Draggable Sub-Windows",
+					"progress": 1.0,
+					"comment": "Windows you can drag and resize. Should stay on screen"
+				},
+				{
+					"name": "Sub-Window Hotkeys",
+					"progress": 1.0,
+					"comment": "Use hotkeys to toggle viewing each kind of window"
+				},
+				{
 					"name": "Debug Output Window",
 					"progress": 1.0,
 					"comment": "View output messages that can tell you about errors or important information"
 				},
 				{
-					"name": "Window Hotkeys",
+					"name": "Global Tooltips",
 					"progress": 1.0,
-					"comment": "Use hotkeys to toggle viewing each kind of window"
+					"comment": "Custom tooltips for anything you hover your mouse over. Extra info for some items appears after a moment"
 				},
 				{
 					"name": "Fetch and File Utilities",
@@ -46,19 +56,30 @@
 					"comment": "Manage your third-party service credentials. Avoid opening this one while streaming!"
 				},
 				{
-					"name": "MultiPlatform User Cache",
-					"progress": 1.0,
-					"comment": "Allows you to view data that has been cached for viewers, like profile images"
-				},
-				{
-					"name": "MultiPlatform Chat Window",
-					"progress": 0.9,
-					"comment": "One chat to rule them all! Combines messages from all sources. Sending messages as your bot is coming soon!"
+					"name": "Service Credentials Tutorials",
+					"progress": 0.0,
+					"comment": "Will be helpful in finding your credentials for each service"
 				},
 				{
 					"name": "Feature Progress Window",
 					"progress": 1.0,
 					"comment": "You're looking at it! Shows you what is done and what is not done"
+				}
+			]
+		},
+		{
+			"name": "MultiPlatform Users",
+			"desc": "Introduces a unified identity per viewer, independent of their platform, and stores data for that viewer so we don't need to get it again.",
+			"goals": [
+				{
+					"name": "MultiPlatform User Cache",
+					"progress": 1.0,
+					"comment": "Temporarily stores and re-uses viewer profile data like profile images and display names. Clears when you reload the page"
+				},
+				{
+					"name": "MultiChat Window",
+					"progress": 0.9,
+					"comment": "One chat to rule them all! Combines messages from all sources. Sending messages as your bot is coming soon!"
 				}
 			]
 		},
@@ -324,9 +345,14 @@
 					"comment": "Will allow you to set which sides of the screen that creatures will appear on"
 				},
 				{
-					"name": "Appearance Idle Animation",
+					"name": "Creature Idle Animation",
 					"progress": 1.0,
 					"comment": "Creatures do a little meandering during their appearances"
+				},
+				{
+					"name": "Creature Animation Settings",
+					"progress": 0.0,
+					"comment": "Per-creature settings for how they animate during their appearances"
 				},
 				{
 					"name": "Appearance Entry Animation",
@@ -334,9 +360,14 @@
 					"comment": "Will add an animation to show when a viewer has joined the catch event"
 				},
 				{
-					"name": "Appearance Caught Animation",
+					"name": "Appearance Catch Animation",
 					"progress": 0.0,
 					"comment": "Will add an animation to show that the creature was caught"
+				},
+				{
+					"name": "Output Event Messages",
+					"progress": 0.7,
+					"comment": "Will send chat messages as your bot, informing about events and outcomes"
 				}
 			]
 		},

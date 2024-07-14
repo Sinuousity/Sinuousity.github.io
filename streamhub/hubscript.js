@@ -1,6 +1,7 @@
 ﻿import { GlobalSettings, OptionManager } from "./modules/globalsettings.js";
 import { DebugWindow } from "./modules/debugwindow.js";
 import { WindowManager } from "./modules/windowmanager.js";
+import "./modules/featureprogress.js";
 import { BackgroundSceneSettingsWindow } from "./modules/backgroundscene.js";
 import { StreamElements, StreamElementsWindow } from "./modules/streamelementslistener.js";
 import { TwitchListener } from "./modules/twitchlistener.js";
@@ -14,7 +15,6 @@ import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
 import { SaveIndicator } from "./modules/saveindicator.js";
 import "./modules/globaltooltip.js";
-import "./modules/featureprogress.js";
 import { GlobalTooltip } from "./modules/globaltooltip.js";
 import { UserInput } from "./modules/userinput.js";
 

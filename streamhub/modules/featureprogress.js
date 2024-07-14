@@ -54,6 +54,7 @@ export class FeatureProgressWindow extends DraggableWindow
 		this.CreateControlsColumn(true);
 		this.e_controls_column.style.left = "0";
 		this.e_controls_column.style.right = "0";
+		this.e_controls_column.style.scrollBehavior = "smooth";
 
 		window.setTimeout(() => { this.RefreshContent(); }, 55);
 	}
@@ -201,7 +202,6 @@ WindowManager.instance.windowTypes.push(
 		icon: "assignment_turned_in",
 		desc: "See what has been completed and what is planned!",
 		model: (x, y) => { return new FeatureProgressWindow(x, y); },
-		wip: true,
 		shortcutKey: 'p'
 	}
 );

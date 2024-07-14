@@ -41,6 +41,8 @@ export class FeatureProgressWindow extends DraggableWindow
 
 		this.window_kind = FeatureProgressWindow.windowKind;
 
+		this.e_window_root.style.minWidth = "360px";
+
 		this.SetIcon("assignment_turned_in");
 		this.SetTitle(FeatureProgressWindow.windowKind);
 		this.CreateContentContainer();
@@ -79,6 +81,8 @@ export class FeatureProgressWindow extends DraggableWindow
 				e_goal.style.height = "1.2rem";
 				e_goal.style.lineHeight = "1.2rem";
 				e_goal.style.margin = "0";
+				e_goal.style.paddingLeft = "1.5rem";
+				e_goal.style.paddingRight = "0";
 				e_goal.style.right = "0";
 				e_goal.style.textWrap = "nowrap";
 				e_goal.style.overflow = "hidden";

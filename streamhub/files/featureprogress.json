@@ -17,12 +17,12 @@
 				{
 					"name": "Service Credentials Window",
 					"progress": 1.0,
-					"comment": "Manage your third-party service credentials in a window where the content is obscured to help prevent on-stream leaks"
+					"comment": "Manage your third-party service credentials. Avoid opening this one while streaming!"
 				},
 				{
-					"name": "Notification System",
+					"name": "Save Status Indicator",
 					"progress": 1.0,
-					"comment": "Shows notifications at the top of the screen. Rarely used"
+					"comment": "Shows at the top left corner any time a data save operation is triggered"
 				},
 				{
 					"name": "Debug Output Window",
@@ -46,8 +46,8 @@
 				},
 				{
 					"name": "MultiPlatform Chat Window",
-					"progress": 1.0,
-					"comment": "One chat to rule them all! Combines messages from all sources"
+					"progress": 0.9,
+					"comment": "One chat to rule them all! Combines messages from all sources. Sending messages as your bot is coming soon!"
 				}
 			]
 		},
@@ -99,7 +99,7 @@
 			"desc": "Integrations with Twitch's chat and data APIs.",
 			"goals": [
 				{
-					"name": "Points Balance Fetch",
+					"name": "Points",
 					"progress": 1.0,
 					"comment": "Fetch SteamElements Points balance info."
 				},
@@ -111,20 +111,20 @@
 				{
 					"name": "Points Purchasing",
 					"progress": 1.0,
-					"comment": "Viewers can use StreamElements Points as a currency to perform actions like entering a raffle."
+					"comment": "Viewers can use StreamElements Points as a currency to perform actions"
 				},
 				{
-					"name": "Tips Integration",
+					"name": "Tips",
 					"progress": 0.0,
 					"comment": "Will trigger Hub events based when a StreamElements tip is received."
 				},
 				{
-					"name": "Tips Leaderboard Integration",
+					"name": "Tips Leaderboard",
 					"progress": 0.0,
 					"comment": "Will allow you to see the top SE tip contributors."
 				},
 				{
-					"name": "Contest Integration",
+					"name": "Contests",
 					"progress": 0.0,
 					"comment": "Will trigger events based on when a StreamElements contest begins or ends and who won."
 				}
@@ -209,6 +209,26 @@
 					"name": "Custom Item Properties",
 					"progress": 0.1,
 					"comment": "Allows you to add custom properties to items, which could be used by other Hub features"
+				},
+				{
+					"name": "Viewer Trading",
+					"progress": 0,
+					"comment": "Will allow viewers to initiate trades of items from their inventories"
+				},
+				{
+					"name": "Viewer Crafting",
+					"progress": 0,
+					"comment": "Will allow viewers to craft new items by combining items from their inventories"
+				},
+				{
+					"name": "Viewer Wallets",
+					"progress": 0,
+					"comment": "Holds any type of currency for each viewer, separate from the inventory and item systems"
+				},
+				{
+					"name": "Viewer Wagering",
+					"progress": 0,
+					"comment": "Will allow viewers to place bets using currency, SE points, and maybe even items from their inventory"
 				}
 			]
 		},
@@ -217,9 +237,19 @@
 			"desc": "Creatures that you customise will appear and can be caught by chatters.",
 			"goals": [
 				{
-					"name": "Creature Roster Editor",
+					"name": "Creature Roster",
 					"progress": 1.0,
-					"comment": "Create, modify, and remove creatures from the creature roster."
+					"comment": "Create, modify, and remove creatures."
+				},
+				{
+					"name": "Creature Rarity",
+					"progress": 0.5,
+					"comment": "Allows some creatures to appear more frequently than others. Not currently in use!"
+				},
+				{
+					"name": "Creature Images",
+					"progress": 1.0,
+					"comment": "Allows creatures to use images from the web, including transparency"
 				},
 				{
 					"name": "Creature Appearance Settings",
@@ -232,19 +262,14 @@
 					"comment": "Adds an image popup for creature appearances"
 				},
 				{
-					"name": "Creature Images",
-					"progress": 1.0,
-					"comment": "Allows creatures to use images from the web, including transparency"
+					"name": "Creature Appearance Positioning",
+					"progress": 0.0,
+					"comment": "Will allow you to set which sides of the screen that creatures will appear on"
 				},
 				{
 					"name": "Creature Points Rewards",
 					"progress": 1.0,
 					"comment": "Allows StreamElements points to be rewarded when a creature is caught"
-				},
-				{
-					"name": "Creature Rarity",
-					"progress": 0.5,
-					"comment": "Allows some creatures to appear more frequently than others. Not currently in use!"
 				}
 			]
 		}

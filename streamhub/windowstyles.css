@@ -696,11 +696,6 @@
 	text-align: center;
 }
 
-.window-control input[type="button"]:hover
-{
-	scale: 101% 105%;
-	opacity: 100%;
-}
 .window-control input
 {
 	cursor: pointer;
@@ -708,13 +703,13 @@
 	border-radius: 0.25rem;
 	left: 1rem;
 	right: 1rem;
-	top: 0.25rem;
-	bottom: 0.25rem;
+	top: 50%;
 	width: auto;
 	height: auto;
 	margin: 0;
 	padding: 0;
 	opacity: 50%;
+	transform: translate(0%, -50%);
 }
 .window-control input:disabled
 {
@@ -724,6 +719,7 @@
 	opacity: 30% !important;
 	scale: 80% !important;
 }
+
 
 
 .window-control textarea
@@ -782,12 +778,16 @@
 	font-size: 0.75rem;
 	background-color: #8080802c;
 	color: #ffffff50;
+	height: calc(100% - 0.5rem);
+	transform-origin: 50% 0%;
+	scale: 91% 95%;
 }
 .window-control input[type="button"]:hover
 {
 	background-color: #969696ea;
 	color: #fffffff0;
-	scale: 105%;
+	opacity: 100%;
+	scale: 100%;
 }
 
 .window-content input[type="color"]::-webkit-color-swatch-wrapper

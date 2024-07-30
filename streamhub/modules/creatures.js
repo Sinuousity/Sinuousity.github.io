@@ -33,6 +33,44 @@ export class CreatureRoster extends ItemStoreBase
 {
 	static instance = new CreatureRoster();
 	constructor() { super("data_creature_roster"); }
+
+	static GetCount() { return CreatureRoster.instance.items.length; }
+	static GetRaritySum()
+	{
+		var raritySum = 0;
+		var creatureCount = CreatureRoster.GetCount();
+		for (var cid = 0; cid < creatureCount; cid++)
+		{
+			var creature = CreatureRoster.instance.items[cid];
+			if (creature.rarity) raritySum += 1.0 / Math.max(1.0, Number(creature.rarity));
+			else raritySum += 1;
+		}
+		return raritySum;
+	}
+
+	static GetWeightedRandomIndex()
+	{
+		var raritySum = CreatureRoster.GetRaritySum();
+		var creatureCount = CreatureRoster.GetCount();
+		var selectRarity = Math.random() * raritySum;
+
+		var rarityPrev = 0;
+		for (var cid = 0; cid < creatureCount; cid++)
+		{
+			var creature = CreatureRoster.instance.items[cid];
+			var minRarity = rarityPrev;
+			var maxRarity = minRarity + 1.0 / Math.max(1.0, Number(creature.rarity));
+			rarityPrev = maxRarity;
+
+			if (minRarity <= selectRarity && maxRarity >= selectRarity)
+			{
+				return cid;
+			}
+		}
+
+		console.warn("it happened");
+		return -1; // shouldn't happen
+	}
 }
 
 export class CreatureRosterWindow extends ItemStoreWindowBase

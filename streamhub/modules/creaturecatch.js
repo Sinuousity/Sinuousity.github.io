@@ -10,6 +10,8 @@ import { ViewerInventoryManager } from "./viewerinventory.js";
 import { MultiPlatformUser, MultiPlatformUserCache } from "./multiplatformuser.js";
 import { StreamElements } from "./streamelementslistener.js";
 import { Rewards } from "./rewards.js";
+import { TwitchListener } from "./twitchlistener.js";
+import { GlobalTooltip } from "./globaltooltip.js";
 
 console.info("[ +Module ] Creature Catching");
 
@@ -54,7 +56,7 @@ export class CreatureAppearance
 
 	TryEnterFirstTime(username = "")
 	{
-		console.log(username + " entered creature catching");
+		CreatureCatchState.Report(username + " entered creature catching");
 		this.entries.push(new CreatureCatchEntry(username, 1));
 	}
 
@@ -70,7 +72,7 @@ export class CreatureAppearance
 			{
 				var existingId = this.IndexOfEntry(username);
 				this.entries[existingId].count += count;
-				console.log(username + " bought " + count + " extra creature catch attempts for " + totalEntryCost + " points!");
+				CreatureCatchState.Report(username + " bought " + count + " extra creature catch attempts for " + totalEntryCost + " points!");
 				CreatureCatchState.onAppearanceEntry.Invoke();
 			}
 		);
@@ -95,11 +97,15 @@ export class CreatureAppearance
 
 	EvaluateCatch()
 	{
-		if (this.entries.length < 1) return false;
+		if (this.entries.length < 1)
+		{
+			CreatureCatchState.Report(`No one caught the ${this.creature.name}`);
+			return false;
+		}
 
 		if (this.willEvadeAll)
 		{
-			console.log(`${this.creature.name} evades all capture attempts!`);
+			CreatureCatchState.Report(`${this.creature.name} evades all capture attempts!`);
 			return false;
 		}
 
@@ -114,14 +120,12 @@ export class CreatureAppearance
 		let winner = expandedEntries[Math.round(Math.random() * (expandedEntries.length - 1))];
 		if (this.creature.pointValue > 0) 
 		{
-			console.log(`${winner} caught ${this.creature.name}! +${this.creature.pointValue} Loyalty Points!`);
+			CreatureCatchState.Report(`${winner} caught ${this.creature.name}! +${this.creature.pointValue} Loyalty Points!`);
 			Rewards.Give({ username: winner }, "Add SE Points", { points: this.creature.pointValue });
-
-			//StreamElements.AddUserPoints(winner, this.creature.pointValue);
 		}
 		else 
 		{
-			console.log(`${winner} caught ${this.creature.name}!`);
+			CreatureCatchState.Report(`${winner} caught ${this.creature.name}!`);
 		}
 
 		let creatureItem = {
@@ -372,7 +376,7 @@ export class CreatureCatchState
 		if (CreatureRoster.instance.items == null) { console.warn("creatures == null"); return; }
 		if (CreatureRoster.instance.items.length < 1) { console.warn("no creatures"); return; }
 
-		if (CreatureRoster.instance.items.length < 2)
+		if (CreatureRoster.instance.items.length < 2) // only one creature to choose
 		{
 			CreatureCatchState.TryStartAppearance(0);
 			return;
@@ -380,7 +384,7 @@ export class CreatureCatchState
 
 		while (CreatureCatchState.activeAppearance == null)
 		{
-			var targetId = Math.round(Math.random() * (CreatureRoster.instance.items.length - 1));
+			var targetId = CreatureRoster.GetWeightedRandomIndex();
 			CreatureCatchState.TryStartAppearance(targetId);
 			break;
 		}
@@ -406,6 +410,9 @@ export class CreatureCatchState
 		CreatureCatchState.activeAppearance = appearance;
 		CreatureCatchState.timer_currentAppearance = appearance.creature.duration;
 		CreatureCatchState.onAppearanceStarted.Invoke();
+
+		var keyphrase = OptionManager.GetOptionValue(option_key_creature_catching_keyphrase);
+		CreatureCatchState.Report(appearance.creature.name + " just appeared! Type " + keyphrase + " to try and catch it!");
 	}
 
 	static EndAppearance()
@@ -421,6 +428,13 @@ export class CreatureCatchState
 		var opt_min_delay = OptionManager.GetOption(option_key_creature_catching_appearances_delay_min);
 		var opt_max_delay = OptionManager.GetOption(option_key_creature_catching_appearances_delay_max);
 		CreatureCatchState.timer_nextAppearance = Math.random() * (opt_max_delay.value - opt_min_delay.value) + opt_min_delay.value;
+	}
+
+	static Report(message = "Test Message From Creature Catcher")
+	{
+		console.info(message);
+		if (!OptionManager.GetOptionValue(option_key_creature_catching_botchat_enabled)) return;
+		TwitchListener.instance.SendMessageAsBot(message);
 	}
 }
 
@@ -533,6 +547,7 @@ export class CreatureCatchingWindow extends DraggableWindow
 	{
 		const collapsedHeight = "2.2rem";
 		const expandedHeight = "20rem";
+
 		this.CreateControlsColumn(true);
 		this.e_controls_column.style.transitionProperty = "max-height";
 		this.e_controls_column.style.transitionDuration = "0.3s";
@@ -560,6 +575,7 @@ export class CreatureCatchingWindow extends DraggableWindow
 		);
 
 		var opt_enabled = OptionManager.GetOption(option_key_creature_catching_appearances_enabled);
+		var opt_botchat = OptionManager.GetOption(option_key_creature_catching_botchat_enabled);
 		var opt_keyphrase = OptionManager.GetOption(option_key_creature_catching_keyphrase);
 		var opt_delayMin = OptionManager.GetOption(option_key_creature_catching_appearances_delay_min);
 		var opt_delayMax = OptionManager.GetOption(option_key_creature_catching_appearances_delay_max);
@@ -573,28 +589,40 @@ export class CreatureCatchingWindow extends DraggableWindow
 				CreatureCatchingOverlay.UpdateVisibility();
 			}
 		);
+		GlobalTooltip.RegisterReceiver(this.e_tgl_run, "Whether or not creatures will appear over time");
 
-		this.e_rng_delayMin = this.AddSlider(
+		this.e_tgl_botchat = this.AddToggle(
+			opt_botchat.label,
+			opt_botchat.value,
+			x =>
+			{
+				OptionManager.SetOptionValue(option_key_creature_catching_botchat_enabled, x.checked);
+				CreatureCatchingOverlay.UpdateVisibility();
+			}
+		);
+		GlobalTooltip.RegisterReceiver(this.e_tgl_botchat, "Send messages from your bot to chat about creature appearances and results");
+
+		this.e_rng_delayMin = this.AddTextField(
 			opt_delayMin.label,
 			opt_delayMin.value,
-			5,
-			1200,
-			x =>
-			{
-				OptionManager.SetOptionValue(option_key_creature_catching_appearances_delay_min, x.value);
-			}
+			x => { OptionManager.SetOptionValue(option_key_creature_catching_appearances_delay_min, x.value); }
 		);
+		this.e_rng_delayMin.style.height = "2rem";
+		this.e_rng_delayMin.style.lineHeight = "2rem";
+		this.e_rng_delayMin.children[1].children[0].type = "number";
+		this.e_rng_delayMin.children[1].children[0].style.textAlign = "center";
+		GlobalTooltip.RegisterReceiver(this.e_rng_delayMin, "The minimum time (seconds) that will pass between creature appearances");
 
-		this.e_rng_delayMax = this.AddSlider(
+		this.e_rng_delayMax = this.AddTextField(
 			opt_delayMax.label,
 			opt_delayMax.value,
-			5,
-			1200,
-			x =>
-			{
-				OptionManager.SetOptionValue(option_key_creature_catching_appearances_delay_max, x.value);
-			}
+			x => { OptionManager.SetOptionValue(option_key_creature_catching_appearances_delay_max, x.value); }
 		);
+		this.e_rng_delayMax.style.height = "2rem";
+		this.e_rng_delayMax.style.lineHeight = "2rem";
+		this.e_rng_delayMax.children[1].children[0].type = "number";
+		this.e_rng_delayMax.children[1].children[0].style.textAlign = "center";
+		GlobalTooltip.RegisterReceiver(this.e_rng_delayMax, "The maximum time (seconds) that will pass between creature appearances");
 
 		this.e_txt_keyphrase = this.AddTextField(
 			opt_keyphrase.label,
@@ -606,6 +634,7 @@ export class CreatureCatchingWindow extends DraggableWindow
 		);
 		this.e_txt_keyphrase.style.height = "2rem";
 		this.e_txt_keyphrase.style.lineHeight = "2rem";
+		GlobalTooltip.RegisterReceiver(this.e_txt_keyphrase, "The key-phrase which chatters must use to enter the creature catching event");
 	}
 }
 
@@ -623,12 +652,14 @@ export class CreatureCatchingOverlay
 }
 
 
+const option_key_creature_catching_botchat_enabled = "creature.catching.botchat.enabled";
 const option_key_creature_catching_appearances_enabled = "creature.catching.appearances.enabled";
 const option_key_creature_catching_appearances_delay_min = "creature.catching.appearances.delay.min";
 const option_key_creature_catching_appearances_delay_max = "creature.catching.appearances.delay.max";
 const option_key_creature_catching_extraEntryCost = "creature.catching.extra.entry.cost";
 const option_key_creature_catching_keyphrase = "creature.catching.keyphrase";
 const option_key_creature_catching_creature_size = "creature.catching.creature.size";
+OptionManager.AppendOption(option_key_creature_catching_botchat_enabled, false, "Output To Chat");
 OptionManager.AppendOption(option_key_creature_catching_appearances_enabled, false, "Appearances");
 OptionManager.AppendOption(option_key_creature_catching_appearances_delay_min, 30, "Delay Min");
 OptionManager.AppendOption(option_key_creature_catching_appearances_delay_max, 600, "Delay Max");

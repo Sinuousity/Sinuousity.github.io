@@ -302,10 +302,14 @@ export class GlobalSettingsWindow extends DraggableWindow
 		var e_cntrl_creds = this.AddButton("Credentials", "Show", (e) => { WindowManager.instance.GetNewOrExistingWindow("hidden:Credentials") }, false);
 		e_cntrl_creds.style.height = "2rem";
 		e_cntrl_creds.style.lineHeight = "2rem";
+		var e_btn_creds = e_cntrl_creds.children[1].children[0];
+		e_btn_creds.style.backgroundColor = "#f707";
 
-		var e_cntrl_creds = this.AddButton("Log Window", "Show", (e) => { WindowManager.instance.GetNewOrExistingWindow("hidden:Debug") }, false);
-		e_cntrl_creds.style.height = "2rem";
-		e_cntrl_creds.style.lineHeight = "2rem";
+		var e_cntrl_log = this.AddButton("Log Window", "Show", (e) => { WindowManager.instance.GetNewOrExistingWindow("hidden:Debug") }, false);
+		e_cntrl_log.style.height = "2rem";
+		e_cntrl_log.style.lineHeight = "2rem";
+		var e_btn_log = e_cntrl_log.children[1].children[0];
+		e_btn_log.style.backgroundColor = "#5cf4";
 	}
 }
 

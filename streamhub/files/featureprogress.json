@@ -53,17 +53,17 @@
 				{
 					"name": "Service Credentials Window",
 					"progress": 1.0,
-					"comment": "Manage your third-party service credentials. Avoid opening this one while streaming!"
+					"comment": "Manage your third-party service credentials.<br><span style='color:#ff8844'>Avoid opening this one while streaming!</span>"
+				},
+				{
+					"name": "Feature Progress Window",
+					"progress": 1.0,
+					"comment": "You're looking at it!<br>Shows you what is done and what is not done"
 				},
 				{
 					"name": "Service Credentials Tutorials",
 					"progress": 0.0,
 					"comment": "Will be helpful in finding your credentials for each service"
-				},
-				{
-					"name": "Feature Progress Window",
-					"progress": 1.0,
-					"comment": "You're looking at it! Shows you what is done and what is not done"
 				}
 			]
 		},
@@ -78,8 +78,8 @@
 				},
 				{
 					"name": "MultiChat Window",
-					"progress": 0.9,
-					"comment": "One chat to rule them all! Combines messages from all sources. Sending messages as your bot is coming soon!"
+					"progress": 1.0,
+					"comment": "One chat to rule them all! Combines messages from all sources. Send messages as your bot, too!"
 				}
 			]
 		},
@@ -90,12 +90,12 @@
 				{
 					"name": "Chat: Read",
 					"progress": 1.0,
-					"comment": "Read messages coming in from Twitch"
+					"comment": "Read chat messages coming in from Twitch"
 				},
 				{
 					"name": "Chat: Write",
 					"progress": 1.0,
-					"comment": "Write messages back to Twitch"
+					"comment": "Write chat messages back to Twitch"
 				},
 				{
 					"name": "Profile Data",
@@ -111,13 +111,13 @@
 				{
 					"name": "Chat: Read",
 					"progress": 1.0,
-					"comment": "Read messages coming in from Kick"
+					"comment": "Read chat messages coming in from Kick"
 				},
 				{
 					"name": "Chat: Write",
 					"progress": 0.0,
 					"blocked": true,
-					"comment": "The Kick API Doesn't Support This Yet!"
+					"comment": "Write chat messages back to Kick.<br><span style='color:#ff4444;font-weight:bold;'>The Kick API Doesn't Support This Yet!</span>"
 				},
 				{
 					"name": "Profile Data",
@@ -159,6 +159,27 @@
 					"name": "Contests",
 					"progress": 0.0,
 					"comment": "Will trigger events based on when a StreamElements contest begins or ends, based on who won."
+				}
+			]
+		},
+		{
+			"name": "API Integration: Extra Platforms",
+			"desc": "Integrations with additional livestreaming / chat service APIs.",
+			"goals": [
+				{
+					"name": "Facebook",
+					"progress": 0.0,
+					"comment": "Read chat messages coming in from Facebook.<br><span style='color:#ffcc44'>Planned but not any time soon!</span>"
+				},
+				{
+					"name": "YouTube",
+					"progress": 0.0,
+					"comment": "Read chat messages coming in from YouTube.<br><span style='color:#ffcc44'>Planned but not any time soon!</span>"
+				},
+				{
+					"name": "TikTok",
+					"progress": 0.0,
+					"comment": "Read chat messages coming in from TikTok.<br><span style='color:#ffcc44'>This one's a MAYBE</span>"
 				}
 			]
 		},
@@ -210,6 +231,16 @@
 					"name": "Save / Load Profiles As Files",
 					"progress": 1.0,
 					"comment": "Allows you to save and load scene profiles as JSON files"
+				},
+				{
+					"name": "Global Variable List",
+					"progress": 0.0,
+					"comment": "Helpful list of built-in variables you can use in your scene layer CSS"
+				},
+				{
+					"name": "CSS Tools",
+					"progress": 0.0,
+					"comment": "Some tools to avoid the need of writing CSS for the layer types that allow it"
 				}
 			]
 		},
@@ -321,8 +352,8 @@
 				},
 				{
 					"name": "Creature Rarity",
-					"progress": 0.5,
-					"comment": "Allows some creatures to appear more frequently than others. Not currently in use!"
+					"progress": 1.0,
+					"comment": "Allows some creatures to appear more frequently than others."
 				},
 				{
 					"name": "Points Rewards",
@@ -366,8 +397,39 @@
 				},
 				{
 					"name": "Output Event Messages",
-					"progress": 0.7,
-					"comment": "Will send chat messages as your bot, informing about events and outcomes"
+					"progress": 1.0,
+					"comment": "Sends chat messages as your bot, informing about creature events and outcomes"
+				}
+			]
+		},
+		{
+			"name": "Subathon Tools",
+			"desc": "Initiate a subathon and configure community rewards that can be earned through contributions to extend the subathon",
+			"goals": [
+				{
+					"name": "Timer Core",
+					"progress": 0.0,
+					"comment": "The core functionality for managing the timer"
+				},
+				{
+					"name": "Subathon Rewards",
+					"progress": 0.0,
+					"comment": "Rewards the community can earn through contributions, like added time, time multipliers, and minigame plays"
+				},
+				{
+					"name": "Wheel Spins",
+					"progress": 0.0,
+					"comment": "Can spin multiple wheels at once to randomly select rewards for community contributions"
+				},
+				{
+					"name": "Plinko Drops",
+					"progress": 0.0,
+					"comment": "Can drop one or more plinko balls into a plinko board, which selects a reward based on the bins at the bottom"
+				},
+				{
+					"name": ".txt Output Files",
+					"progress": 0.0,
+					"comment": "A number of .txt files created and updated by the Hub for use as text capture in your streaming software"
 				}
 			]
 		},

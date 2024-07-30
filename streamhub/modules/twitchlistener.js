@@ -66,7 +66,8 @@ export class TwitchListener
 					() =>
 					{
 						this.ws.send("CAP REQ :twitch.tv/tags");
-						this.ws.send("JOIN #" + OptionManager.GetOptionValue("twitch.channel", "twitch"));
+						this.UpdateChannel();
+						//this.ws.send("JOIN #" + OptionManager.GetOptionValue("twitch.channel", "twitch"));
 					}, 42
 				);
 
@@ -131,9 +132,9 @@ export class TwitchListener
 	UpdateChannel()
 	{
 		if (!this.connected) return;
-		if (OptionManager.GetOptionValue("twitch.channel", "") == this.joinedChannel) return;
+		if (OptionManager.GetOptionValue("twitch.channel", "") === this.joinedChannel) return;
 
-		if (this.joinedChannel != null && this.joinedChannel.length > 0) this.ws.send("PART #" + this.joinedChannel);
+		if (this.joinedChannel && this.joinedChannel !== "") this.ws.send("PART #" + this.joinedChannel);
 		this.joinedChannel = OptionManager.GetOptionValue("twitch.channel", "");
 		this.ws.send("JOIN #" + this.joinedChannel);
 	}

@@ -74,6 +74,10 @@ function anim_time_loop(timestamp)
 	global_time_seconds += dtSeconds;
 
 	document.documentElement.style.setProperty('--time', global_time_seconds + 's');
+	document.documentElement.style.setProperty('--time-percent-1s', ((global_time_seconds % 1.0) * 100.0) + '%');
+	document.documentElement.style.setProperty('--time-percent-10s', (((global_time_seconds * 0.1) % 1.0) * 100.0) + '%');
+	document.documentElement.style.setProperty('--time-percent-offset-1s', (((global_time_seconds + 0.5) % 1.0) * 100.0) + '%');
+	document.documentElement.style.setProperty('--time-percent-offset-10s', (((global_time_seconds * 0.1 + 0.5) % 1.0) * 100.0) + '%');
 	document.documentElement.style.setProperty('--time-angle', (((global_time_seconds / 60.0) % 1.0) * 360.0) + 'deg');
 	document.documentElement.style.setProperty('--time-angle-45s', (((global_time_seconds / 45.0) % 1.0) * 360.0) + 'deg');
 	document.documentElement.style.setProperty('--time-angle-10s', (((global_time_seconds / 10.0) % 1.0) * 360.0) + 'deg');

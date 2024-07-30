@@ -46,15 +46,48 @@ export class FeatureProgressWindow extends DraggableWindow
 
 		this.SetIcon("assignment_turned_in");
 		this.SetTitle(FeatureProgressWindow.windowKind);
+
 		this.CreateContentContainer();
 		this.e_content.style.display = "flex";
 		this.e_content.style.flexDirection = "column";
 		this.e_content.style.left = "0";
 		this.e_content.style.right = "0";
+
+		this.e_label_version = addElement("div", null, this.e_content);
+		this.e_label_version.style.height = "1.25rem";
+		this.e_label_version.style.lineHeight = "1.25rem";
+		this.e_label_version.style.fontSize = "0.9rem";
+		this.e_label_version.style.textAlign = "center";
+		this.e_label_version.style.letterSpacing = "0.1rem";
+		this.e_label_version.style.textOverflow = "ellipsis";
+		this.e_label_version.innerText = "StreamHub v0.2.2";
+
+		this.e_label_updateDate = addElement("div", null, this.e_content);
+		this.e_label_updateDate.style.height = "1rem";
+		this.e_label_updateDate.style.lineHeight = "1rem";
+		this.e_label_updateDate.style.fontSize = "0.6rem";
+		this.e_label_updateDate.style.textAlign = "center";
+		this.e_label_updateDate.style.letterSpacing = "0.05rem";
+		this.e_label_updateDate.style.textOverflow = "ellipsis";
+		this.e_label_updateDate.style.transitionProperty = "border-bottom";
+		this.e_label_updateDate.style.transitionDelay = "0.1s";
+		this.e_label_updateDate.style.transitionDuration = "0.3s";
+		this.e_label_updateDate.style.transitionTimingFunction = "ease-in-out";
+		this.e_label_updateDate.innerHTML = "<span style='color:#535353'>Last Updated</span> Jul 30 2024";
+
 		this.CreateControlsColumn(true);
 		this.e_controls_column.style.left = "0";
 		this.e_controls_column.style.right = "0";
 		this.e_controls_column.style.scrollBehavior = "smooth";
+		this.e_controls_column.addEventListener(
+			"scroll",
+			e =>
+			{
+				if (this.e_controls_column.scrollTop >= 1) this.e_label_updateDate.style.borderBottom = "solid #575757ff 2px";
+				else this.e_label_updateDate.style.borderBottom = "solid #57575700 2px";
+			}
+		);
+
 
 		window.setTimeout(() => { this.RefreshContent(); }, 55);
 	}
@@ -82,7 +115,7 @@ export class FeatureProgressWindow extends DraggableWindow
 				if (goal.comment) 
 				{
 					if (goal.deprecated === true)
-						GlobalTooltip.RegisterReceiver(e_goal, "[WILL BE REMOVED] " + goal.comment, null);
+						GlobalTooltip.RegisterReceiver(e_goal, "[Feature Removed]<br>" + goal.comment, null);
 					else GlobalTooltip.RegisterReceiver(e_goal, goal.comment, null);
 				}
 
@@ -124,8 +157,14 @@ export class FeatureProgressWindow extends DraggableWindow
 				else if (goal.progress > 0.0)
 				{
 					let progA = Math.round(goal.progress * 100);
-					let progB = progA + 1;
-					e_goal.style.background = `linear-gradient(90deg, #0f02 ${progA}%, transparent ${progB}%)`;
+					e_goal.style.background = `linear-gradient(90deg, #0f02 ${progA}%, transparent ${progA}%)`;
+					if (goal.progress < 1.0)
+					{
+						const svar_timepctA = 'var(--time-percent-1s)';
+						const svar_timepctB = 'var(--time-percent-offset-1s)';
+						e_goal.style.background += `, linear-gradient(90deg, #0f00 calc( ${svar_timepctA} - 15% ), #0f02 ${svar_timepctA}, #0f00 ${svar_timepctA})`;
+						e_goal.style.background += `, linear-gradient(90deg, #0f00 calc( ${svar_timepctB} - 15% ), #0f02 ${svar_timepctB}, #0f00 ${svar_timepctB})`;
+					}
 				}
 
 				e_goal.addEventListener(

@@ -134,7 +134,7 @@ export class GlobalTooltip
 		GlobalTooltip.e_tooltip_root.style.top = "0px";
 		GlobalTooltip.e_tooltip_root.style.left = "0px";
 		GlobalTooltip.e_tooltip_root.style.padding = "0.5rem";
-		GlobalTooltip.e_tooltip_root.style.maxWidth = "15rem";
+		GlobalTooltip.e_tooltip_root.style.maxWidth = "21rem";
 		//GlobalTooltip.e_tooltip_root.style.transform = "translate(-50%,0%)";
 		GlobalTooltip.e_tooltip_root.style.transitionProperty = "opacity";
 		GlobalTooltip.e_tooltip_root.style.transitionDuration = "0.15s";
@@ -186,7 +186,7 @@ export class GlobalTooltip
 			GlobalTooltip.timeoutId_showMoreTimer = window.setTimeout(
 				() =>
 				{
-					GlobalTooltip.e_tooltip_label.innerText = longLabel;
+					GlobalTooltip.e_tooltip_label.innerHTML = longLabel;
 					GlobalTooltip.timeoutId_showMoreTimer = -1;
 				},
 				1500
@@ -211,7 +211,7 @@ export class GlobalTooltip
 
 	static JumpTo(receiver = GlobalTooltipReceiver.Default)
 	{
-		GlobalTooltip.e_tooltip_label.innerText = receiver.label;
+		GlobalTooltip.e_tooltip_label.innerHTML = receiver.label;
 
 		var e_rect = receiver.element.getBoundingClientRect();
 		var e_rect_mid_x = e_rect.x + e_rect.width * 0.5;

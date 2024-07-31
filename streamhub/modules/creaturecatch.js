@@ -100,12 +100,14 @@ export class CreatureAppearance
 		if (this.entries.length < 1)
 		{
 			CreatureCatchState.Report(`No one caught the ${this.creature.name}`);
+			CreatureCatchStateHistory.AddEntry(`${this.creature.name} appeared but got away!`)
 			return false;
 		}
 
 		if (this.willEvadeAll)
 		{
 			CreatureCatchState.Report(`${this.creature.name} evades all capture attempts!`);
+			CreatureCatchStateHistory.AddEntry(`${this.creature.name} appeared but evaded all capture attempts!`)
 			return false;
 		}
 
@@ -118,14 +120,17 @@ export class CreatureAppearance
 		}
 
 		let winner = expandedEntries[Math.round(Math.random() * (expandedEntries.length - 1))];
+		var winStringShort = `${winner} caught ${this.creature.name}!`;
 		if (this.creature.pointValue > 0) 
 		{
 			CreatureCatchState.Report(`${winner} caught ${this.creature.name}! +${this.creature.pointValue} Loyalty Points!`);
 			Rewards.Give({ username: winner }, "Add SE Points", { points: this.creature.pointValue });
+			CreatureCatchStateHistory.AddEntry(winStringShort)
 		}
 		else 
 		{
-			CreatureCatchState.Report(`${winner} caught ${this.creature.name}!`);
+			CreatureCatchState.Report(winStringShort);
+			CreatureCatchStateHistory.AddEntry(winStringShort)
 		}
 
 		let creatureItem = {
@@ -296,6 +301,20 @@ export class CreatureAppearance
 	}
 }
 
+export class CreatureCatchStateHistory
+{
+	static entries = [];
+	static onRefresh = new EventSource();
+
+	static AddEntry(message)
+	{
+		var dateStr = new Date().toLocaleTimeString();
+		var prefix = `<span style='color:#fff5; font-size:0.7rem;'>${dateStr}:</span> `;
+		CreatureCatchStateHistory.entries.push(prefix + message);
+		CreatureCatchStateHistory.onRefresh.Invoke();
+	}
+}
+
 export class CreatureCatchState
 {
 	static activeAppearance = null;
@@ -463,34 +482,19 @@ export class CreatureCatchingWindow extends DraggableWindow
 		this.e_content.style.display = "flex";
 		this.e_content.style.flexDirection = "column";
 
-		this.CreateSettingsPage();
-
-		this.e_entryList = addElement("div", null, this.e_content);
-		this.e_entryList.style.height = "1rem";
-		this.e_entryList.style.flexGrow = "1.0";
-
-		this.CreateAppeareanceInfoRoot();
-
-		this.RefreshAppearanceInfo();
+		this.activeTabIndex = -1;
+		this.CreateTabs();
+		this.e_tab_content = addElement("div", null, this.e_content);
+		this.e_tab_content.style.display = "flex";
+		this.e_tab_content.style.flexDirection = "column";
+		this.e_tab_content.style.flexGrow = "1.0";
+		this.SetTab(0);
 
 		this.sub_AppearStart = CreatureCatchState.onAppearanceStarted.RequestSubscription(() => { this.RefreshAppearanceInfo(); this.RefreshEntryList(); });
 		this.sub_AppearEnd = CreatureCatchState.onAppearanceEnded.RequestSubscription(() => { this.RefreshAppearanceInfo(); this.RefreshEntryList(); });
 		this.sub_AppearEntry = CreatureCatchState.onAppearanceEntry.RequestSubscription(() => { this.RefreshEntryList(); });
-	}
 
-	RefreshEntryList()
-	{
-		this.e_entryList.innerHTML = "";
-
-		if (CreatureCatchState.activeAppearance == null) return;
-		if (CreatureCatchState.activeAppearance.entries.length < 1) return;
-
-		for (var entryId = 0; entryId < CreatureCatchState.activeAppearance.entries.length; entryId++)
-		{
-			var entry = CreatureCatchState.activeAppearance.entries[entryId];
-			var e_entry = addElement("div", null, this.e_entryList);
-			e_entry.innerText = entry.username + " " + entry.count;
-		}
+		this.sub_History = CreatureCatchStateHistory.onRefresh.RequestSubscription(() => { this.RefreshHistoryList(); });
 	}
 
 	onWindowClose()
@@ -498,11 +502,265 @@ export class CreatureCatchingWindow extends DraggableWindow
 		CreatureCatchState.onAppearanceStarted.RemoveSubscription(this.sub_AppearStart);
 		CreatureCatchState.onAppearanceEnded.RemoveSubscription(this.sub_AppearEnd);
 		CreatureCatchState.onAppearanceEntry.RemoveSubscription(this.sub_AppearEntry);
+
+		CreatureCatchStateHistory.onRefresh.RemoveSubscription(this.sub_History);
 	}
 
-	CreateAppeareanceInfoRoot()
+	SetTab(newTabIndex = 0)
 	{
-		this.e_appearanceInfoRoot = addElement("div", null, this.e_content);
+		if (this.activeTabIndex === newTabIndex) return;
+
+		GlobalTooltip.ReleaseAllReceivers(this.e_tab_content);
+		this.e_tab_content.innerHTML = "";
+		this.activeTabIndex = newTabIndex;
+		switch (this.activeTabIndex)
+		{
+			case 0:
+				this.CreateEntryList();
+				this.CreateAppearanceInfoRoot();
+				this.RefreshEntryList();
+				this.RefreshAppearanceInfo();
+				this.SetTabSelectorPosition(this.e_tab_btn_appearance);
+				this.e_tab_btn_appearance.style.borderBottom = "solid white 2px";
+				this.e_tab_btn_settings.style.borderBottom = "solid #fff0 2px";
+				this.e_tab_btn_history.style.borderBottom = "solid #fff0 2px";
+				break;
+			case 1:
+				this.CreateSettingsPage();
+				this.SetTabSelectorPosition(this.e_tab_btn_settings);
+				this.e_tab_btn_appearance.style.borderBottom = "solid #fff0 2px";
+				this.e_tab_btn_settings.style.borderBottom = "solid white 2px";
+				this.e_tab_btn_history.style.borderBottom = "solid #fff0 2px";
+				break;
+			case 2:
+				this.CreateHistoryList();
+				this.RefreshHistoryList();
+				this.SetTabSelectorPosition(this.e_tab_btn_history);
+				this.e_tab_btn_appearance.style.borderBottom = "solid #fff0 2px";
+				this.e_tab_btn_settings.style.borderBottom = "solid #fff0 2px";
+				this.e_tab_btn_history.style.borderBottom = "solid white 2px";
+				break;
+		}
+	}
+
+	GetActiveTabButton()
+	{
+		switch (this.activeTabIndex)
+		{
+			case 0: return this.e_tab_btn_appearance;
+			case 1: return this.e_tab_btn_settings;
+			case 2: return this.e_tab_btn_history;
+		}
+		return null;
+	}
+
+	SetTabSelectorPosition(target)
+	{
+		if (!target) return;
+		let containerRect = target.parentElement.getBoundingClientRect();
+		let targetRect = target.getBoundingClientRect();
+		this.e_tab_selector.style.left = `${(targetRect.x - containerRect.x)}px`;
+		this.e_tab_selector.style.width = `${targetRect.width}px`;
+	}
+
+	CreateTabs()
+	{
+		this.e_tab_list = addElement("div", null, this.e_content);
+		this.e_tab_list.style.display = "flex";
+		this.e_tab_list.style.flexDirection = "horizontal";
+		this.e_tab_list.style.position = "relative";
+		this.e_tab_list.style.width = "100%";
+		this.e_tab_list.style.height = "2rem";
+		this.e_tab_list.style.lineHeight = "2rem";
+		this.e_tab_list.style.zIndex = "15";
+		this.e_tab_list.style.overflow = "hidden";
+
+		this.e_tab_selector = addElement("div", null, this.e_tab_list);
+		this.e_tab_selector.style.position = "absolute";
+		this.e_tab_selector.style.backgroundColor = "#0cf5";
+		this.e_tab_selector.style.left = "0";
+		this.e_tab_selector.style.top = "0";
+		this.e_tab_selector.style.width = "100%";
+		this.e_tab_selector.style.height = "2rem";
+		this.e_tab_selector.style.opacity = "0.0";
+		this.e_tab_selector.style.transitionProperty = "left, width, opacity";
+		this.e_tab_selector.style.transitionDuration = "0.2s";
+		this.e_tab_selector.style.transitionTimingFunction = "ease-in-out";
+
+		this.e_tab_btn_appearance = this.AddTab("Appearance", "See info about the current creature appearance");
+		this.e_tab_btn_appearance.addEventListener("click", e => { this.SetTab(0); });
+		this.e_tab_btn_settings = this.AddTab("Settings", "Change general settings for creature catching");
+		this.e_tab_btn_settings.addEventListener("click", e => { this.SetTab(1); });
+		this.e_tab_btn_history = this.AddTab("History", "See a list of previous creature appearances and outcomes");
+		this.e_tab_btn_history.addEventListener("click", e => { this.SetTab(2); });
+
+		window.setTimeout(() => { this.SetTabSelectorPosition(this.e_tab_btn_appearance); }, 25);
+	}
+
+	AddTab(tabName = "Tab", tooltip = "")
+	{
+		let ebtn = addElement("div", null, this.e_tab_list);
+		ebtn.style.position = "relative";
+		ebtn.style.flexGrow = "1.0";
+		ebtn.style.textAlign = "center";
+		ebtn.style.cursor = "pointer";
+		ebtn.style.transitionProperty = "color, border";
+		ebtn.style.transitionDuration = "0.25s";
+		ebtn.style.transitionTimingFunction = "ease-in-out";
+		ebtn.innerHTML = tabName;
+		ebtn.addEventListener(
+			"mouseleave",
+			e =>
+			{
+				e.target.style.color = "#fff8";
+				this.e_tab_selector.style.opacity = '0';
+				this.SetTabSelectorPosition(this.GetActiveTabButton());
+			}
+		);
+		ebtn.addEventListener(
+			"mouseenter",
+			e =>
+			{
+				e.target.style.color = "#fff";
+				this.SetTabSelectorPosition(e.target);
+				this.e_tab_selector.style.opacity = '1.0';
+			}
+		);
+
+		if (tooltip !== "") GlobalTooltip.RegisterReceiver(ebtn, tooltip);
+		return ebtn;
+	}
+
+	CreateSettingsPage()
+	{
+		this.CreateControlsColumn(true);
+		var prevParent = this.e_controls_column.parentElement;
+		if (prevParent) prevParent.removeChild(this.e_controls_column);
+		this.e_tab_content.appendChild(this.e_controls_column);
+		this.e_controls_column.style.borderTop = "solid #575757 2px";
+		this.e_controls_column.style.borderBottom = "solid #575757 2px";
+
+		var opt_enabled = OptionManager.GetOption(option_key_creature_catching_appearances_enabled);
+		var opt_botchat = OptionManager.GetOption(option_key_creature_catching_botchat_enabled);
+		var opt_keyphrase = OptionManager.GetOption(option_key_creature_catching_keyphrase);
+		var opt_delayMin = OptionManager.GetOption(option_key_creature_catching_appearances_delay_min);
+		var opt_delayMax = OptionManager.GetOption(option_key_creature_catching_appearances_delay_max);
+
+		var e_spacer = addElement("div", null, this.e_controls_column);
+		e_spacer.style.height = "1rem";
+
+		this.e_tgl_run = this.AddToggle(
+			opt_enabled.label,
+			opt_enabled.value,
+			x =>
+			{
+				OptionManager.SetOptionValue(option_key_creature_catching_appearances_enabled, x.checked);
+				CreatureCatchingOverlay.UpdateVisibility();
+			}
+		);
+		this.e_tgl_run.style.height = "2rem";
+		this.e_tgl_run.style.lineHeight = "2rem";
+		GlobalTooltip.RegisterReceiver(
+			this.e_tgl_run,
+			"Toggle Appearances",
+			"Whether or not creatures will appear over time"
+		);
+
+		this.e_tgl_botchat = this.AddToggle(
+			opt_botchat.label,
+			opt_botchat.value,
+			x =>
+			{
+				OptionManager.SetOptionValue(option_key_creature_catching_botchat_enabled, x.checked);
+				CreatureCatchingOverlay.UpdateVisibility();
+			}
+		);
+		this.e_tgl_botchat.style.height = "2rem";
+		this.e_tgl_botchat.style.lineHeight = "2rem";
+		GlobalTooltip.RegisterReceiver(
+			this.e_tgl_botchat,
+			"Send bot messages",
+			"Send messages from your bot to chat about creature appearances and results"
+		);
+
+		this.e_rng_delayMin = this.AddTextField(
+			opt_delayMin.label,
+			opt_delayMin.value,
+			x => { OptionManager.SetOptionValue(option_key_creature_catching_appearances_delay_min, x.value); }
+		);
+		this.e_rng_delayMin.style.height = "2rem";
+		this.e_rng_delayMin.style.lineHeight = "2rem";
+		this.e_rng_delayMin.children[1].children[0].type = "number";
+		this.e_rng_delayMin.children[1].children[0].style.textAlign = "center";
+		GlobalTooltip.RegisterReceiver(
+			this.e_rng_delayMin,
+			"Min time between appearances",
+			"The minimum time (seconds) that will pass between creature appearances"
+		);
+
+		this.e_rng_delayMax = this.AddTextField(
+			opt_delayMax.label,
+			opt_delayMax.value,
+			x => { OptionManager.SetOptionValue(option_key_creature_catching_appearances_delay_max, x.value); }
+		);
+		this.e_rng_delayMax.style.height = "2rem";
+		this.e_rng_delayMax.style.lineHeight = "2rem";
+		this.e_rng_delayMax.children[1].children[0].type = "number";
+		this.e_rng_delayMax.children[1].children[0].style.textAlign = "center";
+		GlobalTooltip.RegisterReceiver(
+			this.e_rng_delayMax,
+			"Max time between appearances",
+			"The maximum time (seconds) that will pass between creature appearances"
+		);
+
+		this.e_txt_keyphrase = this.AddTextField(
+			opt_keyphrase.label,
+			opt_keyphrase.value,
+			x =>
+			{
+				OptionManager.SetOptionValue(option_key_creature_catching_keyphrase, x.value);
+			}
+		);
+		this.e_txt_keyphrase.style.height = "2rem";
+		this.e_txt_keyphrase.style.lineHeight = "2rem";
+		GlobalTooltip.RegisterReceiver(
+			this.e_txt_keyphrase,
+			"Set the catching key-phrase",
+			"The key-phrase which chatters must use to enter the creature catching event"
+		);
+	}
+
+	CreateHistoryList()
+	{
+		this.e_historyList = addElement("div", null, this.e_tab_content);
+		this.e_historyList.style.height = "1rem";
+		this.e_historyList.style.flexGrow = "1.0";
+		this.e_historyList.style.borderTop = "solid #575757 2px";
+		this.e_historyList.style.borderBottom = "solid #575757 2px";
+	}
+
+	CreateEntryList()
+	{
+		this.e_entryList = addElement("div", null, this.e_tab_content);
+		this.e_entryList.style.height = "1rem";
+		this.e_entryList.style.flexGrow = "1.0";
+		this.e_entryList.style.borderTop = "solid #575757 2px";
+		this.e_entryList.style.borderBottom = "solid #575757 2px";
+	}
+
+	static GetStateProgressText()
+	{
+		if (!CreatureCatchState.activeAppearance)
+		{
+			return Math.round(Number(CreatureCatchState.timer_nextAppearance)) + "s";
+		}
+
+		return CreatureCatchState.activeAppearance.creature.name;
+	}
+
+	CreateAppearanceInfoRoot()
+	{
+		this.e_appearanceInfoRoot = addElement("div", null, this.e_tab_content);
 		this.e_appearanceInfoRoot.style.position = "relative";
 		this.e_appearanceInfoRoot.style.flexGrow = "1.0";
 		this.e_appearanceInfoRoot.style.height = "1rem";
@@ -533,108 +791,69 @@ export class CreatureCatchingWindow extends DraggableWindow
 		this.e_appearanceInfoImage.style.transitionProperty = "opacity, transform";
 		this.e_appearanceInfoImage.style.transitionDuration = "0.2s";
 		this.e_appearanceInfoImage.src = "";
+
+		this.e_lbl_progress = addElement("div", null, this.e_appearanceInfoContainer);
+		this.e_lbl_progress.style.position = "absolute";
+		this.e_lbl_progress.style.overflow = "hidden";
+		this.e_lbl_progress.style.opacity = "1.0";
+		this.e_lbl_progress.style.top = "50%";
+		this.e_lbl_progress.style.left = "0";
+		this.e_lbl_progress.style.right = "0";
+		this.e_lbl_progress.style.height = "1rem";
+		this.e_lbl_progress.style.lineHeight = "1rem";
+		this.e_lbl_progress.style.textAlign = "center";
+		this.e_lbl_progress.style.color = "white";
+		this.e_lbl_progress.style.transform = "translate(0%,-50%)";
+		this.e_lbl_progress.style.transitionProperty = "opacity";
+		this.e_lbl_progress.style.transitionDuration = "0.15s";
+		this.e_lbl_progress.innerText = "PROGRESS : ";
+
+		this.e_lbl_progress_tooltip = GlobalTooltip.RegisterReceiver(this.e_appearanceInfoContainer, CreatureCatchingWindow.GetStateProgressText);
 	}
 
 	RefreshAppearanceInfo()
 	{
+		if (!this.e_appearanceInfoImage) return;
 		if (CreatureCatchState.activeAppearance)
+		{
 			this.e_appearanceInfoImage.src = CreatureCatchState.activeAppearance.creature.imageSrc;
+			this.e_lbl_progress.innerHTML = "A " + CreatureCatchState.activeAppearance.creature.name + " is here!";
+		}
+		else
+		{
+			this.e_lbl_progress.innerHTML = "LOADING CREATURE";
+		}
 		this.e_appearanceInfoImage.style.opacity = CreatureCatchState.activeAppearance ? "1.0" : "0.0";
 		this.e_appearanceInfoImage.style.transform = CreatureCatchState.activeAppearance ? "translateY(0%)" : "translateY(20%)";
 	}
 
-	CreateSettingsPage()
+	RefreshHistoryList()
 	{
-		const collapsedHeight = "2.2rem";
-		const expandedHeight = "20rem";
+		if (!this.e_historyList) return;
+		this.e_historyList.innerHTML = "";
 
-		this.CreateControlsColumn(true);
-		this.e_controls_column.style.transitionProperty = "max-height";
-		this.e_controls_column.style.transitionDuration = "0.3s";
-		this.e_controls_column.style.transitionTimingFunction = "ease-in-out";
-		this.e_controls_column.style.maxHeight = expandedHeight;
+		if (CreatureCatchStateHistory.entries.length < 1) return;
 
-		const e_settings_title = this.AddSectionTitle("Settings");
-		e_settings_title.style.cursor = "pointer";
-		e_settings_title.addEventListener(
-			"click",
-			e =>
-			{
-				if (this.e_controls_column.style.maxHeight == collapsedHeight)
-				{
-					this.e_controls_column.style.maxHeight = expandedHeight;
-					e_settings_title.style.color = "#ffffff80";
-				}
-				else
-				{
-					this.e_controls_column.style.maxHeight = collapsedHeight;
-					this.e_controls_column.style.overflowY = "hidden";
-					e_settings_title.style.color = "#ffffff20";
-				}
-			}
-		);
+		for (var entryId = CreatureCatchStateHistory.entries.length - 1; entryId > -1; entryId--)
+		{
+			addElement("div", null, this.e_historyList, null, x => { x.innerHTML = CreatureCatchStateHistory.entries[entryId]; });
+		}
+	}
 
-		var opt_enabled = OptionManager.GetOption(option_key_creature_catching_appearances_enabled);
-		var opt_botchat = OptionManager.GetOption(option_key_creature_catching_botchat_enabled);
-		var opt_keyphrase = OptionManager.GetOption(option_key_creature_catching_keyphrase);
-		var opt_delayMin = OptionManager.GetOption(option_key_creature_catching_appearances_delay_min);
-		var opt_delayMax = OptionManager.GetOption(option_key_creature_catching_appearances_delay_max);
+	RefreshEntryList()
+	{
+		if (!this.e_entryList) return;
+		this.e_entryList.innerHTML = "";
 
-		this.e_tgl_run = this.AddToggle(
-			opt_enabled.label,
-			opt_enabled.value,
-			x =>
-			{
-				OptionManager.SetOptionValue(option_key_creature_catching_appearances_enabled, x.checked);
-				CreatureCatchingOverlay.UpdateVisibility();
-			}
-		);
-		GlobalTooltip.RegisterReceiver(this.e_tgl_run, "Whether or not creatures will appear over time");
+		if (CreatureCatchState.activeAppearance == null) return;
+		if (CreatureCatchState.activeAppearance.entries.length < 1) return;
 
-		this.e_tgl_botchat = this.AddToggle(
-			opt_botchat.label,
-			opt_botchat.value,
-			x =>
-			{
-				OptionManager.SetOptionValue(option_key_creature_catching_botchat_enabled, x.checked);
-				CreatureCatchingOverlay.UpdateVisibility();
-			}
-		);
-		GlobalTooltip.RegisterReceiver(this.e_tgl_botchat, "Send messages from your bot to chat about creature appearances and results");
-
-		this.e_rng_delayMin = this.AddTextField(
-			opt_delayMin.label,
-			opt_delayMin.value,
-			x => { OptionManager.SetOptionValue(option_key_creature_catching_appearances_delay_min, x.value); }
-		);
-		this.e_rng_delayMin.style.height = "2rem";
-		this.e_rng_delayMin.style.lineHeight = "2rem";
-		this.e_rng_delayMin.children[1].children[0].type = "number";
-		this.e_rng_delayMin.children[1].children[0].style.textAlign = "center";
-		GlobalTooltip.RegisterReceiver(this.e_rng_delayMin, "The minimum time (seconds) that will pass between creature appearances");
-
-		this.e_rng_delayMax = this.AddTextField(
-			opt_delayMax.label,
-			opt_delayMax.value,
-			x => { OptionManager.SetOptionValue(option_key_creature_catching_appearances_delay_max, x.value); }
-		);
-		this.e_rng_delayMax.style.height = "2rem";
-		this.e_rng_delayMax.style.lineHeight = "2rem";
-		this.e_rng_delayMax.children[1].children[0].type = "number";
-		this.e_rng_delayMax.children[1].children[0].style.textAlign = "center";
-		GlobalTooltip.RegisterReceiver(this.e_rng_delayMax, "The maximum time (seconds) that will pass between creature appearances");
-
-		this.e_txt_keyphrase = this.AddTextField(
-			opt_keyphrase.label,
-			opt_keyphrase.value,
-			x =>
-			{
-				OptionManager.SetOptionValue(option_key_creature_catching_keyphrase, x.value);
-			}
-		);
-		this.e_txt_keyphrase.style.height = "2rem";
-		this.e_txt_keyphrase.style.lineHeight = "2rem";
-		GlobalTooltip.RegisterReceiver(this.e_txt_keyphrase, "The key-phrase which chatters must use to enter the creature catching event");
+		for (var entryId = 0; entryId < CreatureCatchState.activeAppearance.entries.length; entryId++)
+		{
+			var entry = CreatureCatchState.activeAppearance.entries[entryId];
+			var e_entry = addElement("div", null, this.e_entryList);
+			e_entry.innerText = entry.username + " " + entry.count;
+		}
 	}
 }
 

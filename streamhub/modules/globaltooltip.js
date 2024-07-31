@@ -180,7 +180,8 @@ export class GlobalTooltip
 			GlobalTooltip.timeoutId_showMoreTimer = -1;
 		}
 
-		const longLabel = GlobalTooltip.hovered[GlobalTooltip.hovered.length - 1].longLabel;
+		const hoveredTop = GlobalTooltip.hovered[GlobalTooltip.hovered.length - 1];
+		const longLabel = hoveredTop.longLabel;
 		if (typeof longLabel == 'string' && longLabel != "")
 		{
 			GlobalTooltip.timeoutId_showMoreTimer = window.setTimeout(
@@ -211,7 +212,10 @@ export class GlobalTooltip
 
 	static JumpTo(receiver = GlobalTooltipReceiver.Default)
 	{
-		GlobalTooltip.e_tooltip_label.innerHTML = receiver.label;
+		if (typeof receiver.label === 'string')
+			GlobalTooltip.e_tooltip_label.innerHTML = receiver.label;
+		else
+			GlobalTooltip.e_tooltip_label.innerHTML = receiver.label();
 
 		var e_rect = receiver.element.getBoundingClientRect();
 		var e_rect_mid_x = e_rect.x + e_rect.width * 0.5;

@@ -180,7 +180,6 @@ WindowManager.instance.windowTypes.push(
 		icon: "bug_report",
 		desc: "Create, modify, or remove creatures from the Creature Roster!",
 		model: (x, y) => { return new CreatureRosterWindow(x, y); },
-		wip: true,
 		shortcutKey: 'm'
 	}
 );

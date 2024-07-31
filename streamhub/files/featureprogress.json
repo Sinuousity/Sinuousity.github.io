@@ -399,6 +399,11 @@
 					"name": "Output Event Messages",
 					"progress": 1.0,
 					"comment": "Sends chat messages as your bot, informing about creature events and outcomes"
+				},
+				{
+					"name": "Improved Settings Window",
+					"progress": 0.8,
+					"comment": "View and manage various aspects of creature catching"
 				}
 			]
 		},

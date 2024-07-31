@@ -69,6 +69,13 @@ function anim_time_loop(timestamp)
 		return;
 	}
 	var dtMs = timestamp - ts_time_prev;
+
+	if (dtMs < 12) 
+	{
+		requestAnimationFrame(t => { anim_time_loop(t); });
+		return;
+	}
+
 	var dtSeconds = dtMs * 0.001;
 	ts_time_prev = timestamp;
 	global_time_seconds += dtSeconds;

@@ -24,6 +24,7 @@ export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExist
 
 
 window.hub_version = "v0.2.3";
+window.last_update_date = "September 3 2024";
 const resetStoredState = false;
 var e_menu_windows = {};
 var e_site_tag = {};

@@ -73,7 +73,7 @@ export class FeatureProgressWindow extends DraggableWindow
 		this.e_label_updateDate.style.transitionDelay = "0.1s";
 		this.e_label_updateDate.style.transitionDuration = "0.3s";
 		this.e_label_updateDate.style.transitionTimingFunction = "ease-in-out";
-		this.e_label_updateDate.innerHTML = "<span style='color:#fff4'>Last Updated</span> July 30 2024";
+		this.e_label_updateDate.innerHTML = "<span style='color:#fff4'>Last Updated</span> September 3 2024";
 
 		this.CreateControlsColumn(true);
 		this.e_controls_column.style.left = "0";

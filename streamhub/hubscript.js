@@ -23,7 +23,7 @@ import { UserInput } from "./modules/userinput.js";
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
 
-const hub_version = "v0.2.1";
+window.hub_version = "v0.2.3";
 const resetStoredState = false;
 var e_menu_windows = {};
 var e_site_tag = {};

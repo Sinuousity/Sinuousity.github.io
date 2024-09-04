@@ -60,7 +60,7 @@ export class FeatureProgressWindow extends DraggableWindow
 		this.e_label_version.style.textAlign = "center";
 		this.e_label_version.style.letterSpacing = "0.1rem";
 		this.e_label_version.style.textOverflow = "ellipsis";
-		this.e_label_version.innerText = "StreamHub v0.2.2";
+		this.e_label_version.innerText = "StreamHub " + hub_version;
 
 		this.e_label_updateDate = addElement("div", null, this.e_content);
 		this.e_label_updateDate.style.height = "1rem";

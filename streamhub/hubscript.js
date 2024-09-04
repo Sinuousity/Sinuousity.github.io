@@ -1,5 +1,6 @@
 ﻿import { GlobalSettings, OptionManager } from "./modules/globalsettings.js";
 import { DebugWindow } from "./modules/debugwindow.js";
+import { AboutWindow } from "./modules/aboutwindow.js";
 import { WindowManager } from "./modules/windowmanager.js";
 import "./modules/featureprogress.js";
 import { BackgroundSceneSettingsWindow } from "./modules/backgroundscene.js";
@@ -7,6 +8,7 @@ import { StreamElements, StreamElementsWindow } from "./modules/streamelementsli
 import { TwitchListener } from "./modules/twitchlistener.js";
 import { KickState } from "./modules/kicklistener.js";
 import { RaffleState } from "./modules/raffle.js";
+import { SubathonWindow } from "./modules/subathon.js";
 import { MultiPlatformUserExplorer } from "./modules/multiplatformuser.js";
 import { ViewerInventoryManager } from "./modules/viewerinventory.js";
 import { ItemLibrary } from "./modules/itemlibrary.js";

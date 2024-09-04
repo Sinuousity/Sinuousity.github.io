@@ -61,9 +61,9 @@
 					"comment": "You're looking at it!<br>Shows you what is done and what is not done"
 				},
 				{
-					"name": "Service Credentials Tutorials",
+					"name": "First Time Tutorial",
 					"progress": 0.0,
-					"comment": "Will be helpful in finding your credentials for each service"
+					"comment": "Will be useful getting account connections and settings configured how you need"
 				}
 			]
 		},
@@ -413,12 +413,12 @@
 			"goals": [
 				{
 					"name": "Timer Core",
-					"progress": 0.0,
+					"progress": 0.15,
 					"comment": "The core functionality for managing the timer"
 				},
 				{
 					"name": "Subathon Rewards",
-					"progress": 0.0,
+					"progress": 0.1,
 					"comment": "Rewards the community can earn through contributions, like added time, time multipliers, and minigame plays"
 				},
 				{

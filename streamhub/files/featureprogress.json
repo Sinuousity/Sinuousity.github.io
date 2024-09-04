@@ -61,6 +61,11 @@
 					"comment": "You're looking at it!<br>Shows you what is done and what is not done"
 				},
 				{
+					"name": "About Window",
+					"progress": 1.0,
+					"comment": "See information about this site and its creator!"
+				},
+				{
 					"name": "First Time Tutorial",
 					"progress": 0.0,
 					"comment": "Will be useful getting account connections and settings configured how you need"

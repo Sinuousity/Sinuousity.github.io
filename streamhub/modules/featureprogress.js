@@ -69,11 +69,21 @@ export class FeatureProgressWindow extends DraggableWindow
 		this.e_label_updateDate.style.textAlign = "center";
 		this.e_label_updateDate.style.letterSpacing = "0.05rem";
 		this.e_label_updateDate.style.textOverflow = "ellipsis";
-		this.e_label_updateDate.style.transitionProperty = "border-bottom";
-		this.e_label_updateDate.style.transitionDelay = "0.1s";
-		this.e_label_updateDate.style.transitionDuration = "0.3s";
-		this.e_label_updateDate.style.transitionTimingFunction = "ease-in-out";
 		this.e_label_updateDate.innerHTML = "<span style='color:#fff4'>Last Updated</span> " + last_update_date;
+
+		this.e_label_updateLog = addElement("div", null, this.e_content);
+		this.e_label_updateLog.style.height = "1rem";
+		this.e_label_updateLog.style.lineHeight = "1rem";
+		this.e_label_updateLog.style.fontSize = "0.6rem";
+		this.e_label_updateLog.style.textAlign = "center";
+		this.e_label_updateLog.style.letterSpacing = "0.05rem";
+		this.e_label_updateLog.style.textOverflow = "ellipsis";
+		this.e_label_updateLog.style.transitionProperty = "border-bottom";
+		this.e_label_updateLog.style.transitionDelay = "0.1s";
+		this.e_label_updateLog.style.transitionDuration = "0.3s";
+		this.e_label_updateLog.style.transitionTimingFunction = "ease-in-out";
+		this.e_label_updateLog.innerHTML = "<a target='_blank' href='https://github.com/Sinuousity/Sinuousity.github.io/activity'>GitHub Changelog</a>";
+		this.e_label_updateLog_tip = GlobalTooltip.RegisterReceiver(this.e_label_updateLog, "Click to view the change log directly in GitHub");
 
 		this.CreateControlsColumn(true);
 		this.e_controls_column.style.left = "0";
@@ -83,8 +93,8 @@ export class FeatureProgressWindow extends DraggableWindow
 			"scroll",
 			e =>
 			{
-				if (this.e_controls_column.scrollTop >= 1) this.e_label_updateDate.style.borderBottom = "solid #575757ff 2px";
-				else this.e_label_updateDate.style.borderBottom = "solid #57575700 2px";
+				if (this.e_controls_column.scrollTop >= 1) this.e_label_updateLog.style.borderBottom = "solid #575757ff 2px";
+				else this.e_label_updateLog.style.borderBottom = "solid #57575700 2px";
 			}
 		);
 

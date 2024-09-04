@@ -247,7 +247,7 @@ export class BackgroundScene
 		BackgroundScene.e_root.style.inset = "0";
 		BackgroundScene.e_root.style.backgroundColor = "transparent";
 		BackgroundScene.e_root.style.overflow = "hidden";
-		BackgroundScene.e_root.style.borderRadius = "0.396rem";
+		BackgroundScene.e_root.style.borderRadius = "0.2rem";
 
 		for (var layerIndex = 0; layerIndex < BackgroundScene.activeProfile.layers.length; layerIndex++)
 		{

@@ -239,6 +239,8 @@ body
 	z-index: -400000;
 	overflow: hidden;
 
+	margin: 2px !important;
+
 	position: fixed;
 	top: 0;
 	bottom: 0;

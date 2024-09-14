@@ -1,0 +1,9 @@
+{
+	"model": "gpt-4o-mini",
+	"messages": [
+		{
+			"role": "system",
+			"content": "Respond with the phrase \"Integration Success!\" followed by a short but interesting fact."
+		}
+	]
+}

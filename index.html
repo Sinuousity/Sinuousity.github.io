@@ -16,16 +16,17 @@
 	<div id="title-bar-title" class="title-bar-title" title="THOMAS RASOR">THOMAS RASOR</div>
 	<div id="title-bar-subtitle" class="title-bar-subtitle" title="PORTFOLIO">TECH ART PORTFOLIO</div>
 	<div class="title-bar-link-container">
-		<div class="title-bar-link" onclick="showOverlay('ABOUT')" title="ABOUT">ABOUT</div>
-		<div class="title-bar-link" onclick="showOverlay('LINKS')" title="LINKS">LINKS</div>
+		<div class="title-bar-link" onclick="showOverlay('ABOUT')" title="ABOUT">About</div>
+		<div class="title-bar-link" onclick="showOverlay('RESUME')" title="RESUME">Résumé</div>
+		<div class="title-bar-link" onclick="showOverlay('LINKS')" title="LINKS">Links</div>
 	</div>
 </div>
 <div id="gallery-root" class="gallery-root"></div>
 <div id="gallery-back" class="gallery-back" style="transform:scale(-1,1)" onclick="onGalleryBack()">➜</div>
 <div id="debug-label" class="debug-label"></div>
 
-<div id="overlay-container" class="overlay-container">
-	<div id="overlay-root" class="overlay-root">
+<div id="overlay-container" class="overlay-container" onclick="closeOverlay()">
+	<div id="overlay-root" class="overlay-root" onclick="event.stopPropagation();">
 		<div id="overlay-title" class="overlay-title">ABOUT</div>
 		<img id="overlay-close" class="overlay-close" title="GO BACK" onclick="closeOverlay()" src="icons/close.png"></img>
 	</div>

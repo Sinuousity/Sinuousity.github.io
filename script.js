@@ -270,6 +270,8 @@ function on_body_load()
 {
 	e_debug = document.getElementById("debug-label");
 
+	LoadAboutMe();
+
 	e_overlay_container = document.getElementById("overlay-container");
 	e_overlay_root = document.getElementById("overlay-root");
 	e_overlay_title = document.getElementById("overlay-title");
@@ -279,7 +281,8 @@ function on_body_load()
 	e_gallery_back.style.display = "none";
 	create_gallery_projects();
 
-	setInterval(update_gallery, 20);
+	requestAnimationFrame(update_gallery);
+	//setInterval(update_gallery, 20);
 
 	closeOverlay();
 	document.addEventListener('mousemove', onMouseMove);
@@ -593,14 +596,31 @@ function clamp(x, min, max)
 	return Math.min(max, Math.max(min, x));
 }
 
-function update_gallery()
+var timestamp_last = -10000;
+function update_gallery(timestamp)
 {
+	if (timestamp_last < 0) 
+	{
+		timestamp_last = timestamp;
+		requestAnimationFrame(update_gallery);
+		return;
+	}
+
+	var timestamp_delta = timestamp - timestamp_last;
+	if (timestamp_delta < 17)
+	{
+		requestAnimationFrame(update_gallery);
+		return;
+	}
+
 	gallery_width = e_gallery_root.offsetWidth;
 	gallery_height = e_gallery_root.offsetHeight;
 	var invlen = 1.0 / e_gallery_items.length;
 	gallery_item_size = invlen * gallery_height;
 
 	for (var i = 0; i < e_gallery_items.length; i++) update_gallery_item(i);
+
+	requestAnimationFrame(update_gallery);
 }
 
 function update_gallery_item(i)
@@ -669,7 +689,6 @@ function update_gallery_item(i)
 	setRect(e, e_gallery_item_rects[i]);
 }
 
-
 function on_gallery_item_entered(event)
 {
 	if (gallery_id_selected < 0)//no content selected
@@ -685,6 +704,7 @@ function on_gallery_item_entered(event)
 		event.target.style.borderBottom = "transparent solid 2px";
 	}
 }
+
 function on_gallery_item_exited(event)
 {
 	if (gallery_id_selected < 0)//no content selected
@@ -706,6 +726,7 @@ function on_mute_toggle_entered(event)
 {
 	is_mute_toggle_hovered = true;
 }
+
 function on_mute_toggle_exited(event)
 {
 	is_mute_toggle_hovered = false;
@@ -740,6 +761,34 @@ function showOverlay(title)
 
 	switch (title)
 	{
+		case "RESUME":
+			/*
+			<object data=[URL] type="application/pdf" width="100%" height="500px">
+				<p>Unable to display PDF file. <a href=[URL]>Download</a> instead.</p>
+			</object>
+			*/
+			e_overlay_content = document.createElement("div");
+			e_overlay_content.className = "overlay-body";
+			e_overlay_content.style.height = "95%";
+			e_overlay_root.appendChild(e_overlay_content);
+
+			let e_resume_obj = document.createElement("object");
+			e_resume_obj.data = str_url_resume;
+			e_resume_obj.type = "application/pdf";
+			e_resume_obj.style.position = "absolute";
+			e_resume_obj.style.transform = "translate(-50%,0%)";
+			e_resume_obj.style.left = "50%";
+			e_resume_obj.style.width = "min(95%, 800px)";
+			e_resume_obj.style.height = "78%";
+			e_resume_obj.style.top = "2%";
+			e_resume_obj.style.bottom = "20%";
+			e_overlay_content.appendChild(e_resume_obj);
+
+
+			let e_resume_obj_placeholder = document.createElement("p");
+			e_resume_obj_placeholder.innerHTML = 'Unable to display PDF file. <a href="' + str_url_resume + '">Download</a> instead.';
+			e_resume_obj.appendChild(e_resume_obj_placeholder);
+			break;
 		case "ABOUT":
 			e_overlay_content = document.createElement("div");
 			e_overlay_content.className = "overlay-body";
@@ -751,10 +800,15 @@ function showOverlay(title)
 			e_overlay_content.className = "overlay-links-root";
 			e_overlay_root.appendChild(e_overlay_content);
 
-			var e_link_resume = document.createElement("div");
-			e_link_resume.className = "overlay-links-link";
-			e_link_resume.title = "Résumé";
-			e_link_resume.innerText = "Résumé";
+			//var e_link_resume = document.createElement("div");
+			//e_link_resume.className = "overlay-links-link";
+			//e_link_resume.title = "Résumé";
+			//e_link_resume.innerText = "Résumé";
+
+			var e_link_streamhub = document.createElement("div");
+			e_link_streamhub.className = "overlay-links-link";
+			e_link_streamhub.title = "StreamHub";
+			e_link_streamhub.innerText = "StreamHub";
 
 			var e_link_linkedin = document.createElement("div");
 			e_link_linkedin.className = "overlay-links-link";
@@ -783,34 +837,39 @@ function showOverlay(title)
 			e_img_fiverr.style.filter = "brightness(200%)";
 			e_link_fiverr.appendChild(e_img_fiverr);
 
-			e_overlay_content.appendChild(e_link_assetstore);
 			e_overlay_content.appendChild(e_link_linkedin);
-			e_overlay_content.appendChild(e_link_fiverr);
-			e_overlay_content.appendChild(e_link_resume);
+			e_overlay_content.appendChild(e_link_assetstore);
+			e_overlay_content.appendChild(e_link_streamhub);
+			//e_overlay_content.appendChild(e_link_fiverr);
+			//e_overlay_content.appendChild(e_link_resume);
 
 			e_link_assetstore.addEventListener("click", nav_to_assetstore);
-			e_link_fiverr.addEventListener("click", nav_to_fiverr);
 			e_link_linkedin.addEventListener("click", nav_to_linkedin);
-			e_link_resume.addEventListener("click", nav_to_resume);
+			e_link_streamhub.addEventListener("click", nav_to_streamhub);
+			//e_link_fiverr.addEventListener("click", nav_to_fiverr);
+			//e_link_resume.addEventListener("click", nav_to_resume);
 
 			break;
 	}
 }
 
+var str_url_streamhub = "/streamhub";
 var str_url_assetstore = "https://assetstore.unity.com/publishers/10375";
 var str_url_linkedin = "https://www.linkedin.com/in/thomas-rasor/";
 var str_url_fiverr = "https://www.fiverr.com/thomasrasor";
+var str_url_soundcloud = "https://soundcloud.com/sinuousity-1/tracks";
 var str_url_resume = "files/resume_ThomasRasor.pdf";
 var str_url_mailto = "mailto:thomas.ir.rasor@gmail.com";
 
-function nav_to_assetstore() { nav_to("https://assetstore.unity.com/publishers/10375") };
-function nav_to_fiverr() { nav_to("https://www.fiverr.com/thomasrasor") };
-function nav_to_linkedin() { nav_to("https://www.linkedin.com/in/thomas-rasor/") };
-function nav_to_resume() { nav_to("files/resume_ThomasRasor.pdf") };
+function nav_to_streamhub() { nav_to(str_url_streamhub, '_self') };
+function nav_to_assetstore() { nav_to(str_url_assetstore) };
+function nav_to_fiverr() { nav_to(str_url_fiverr) };
+function nav_to_linkedin() { nav_to(str_url_linkedin) };
+function nav_to_resume() { nav_to(str_url_resume) };
 
-function nav_to(url)
+function nav_to(url, target = '_blank')
 {
-	open(url, '_blank');
+	open(url, target);
 }
 
 function closeOverlay()
@@ -827,4 +886,28 @@ var str_src_logo_fiverr = "https://assets-global.website-files.com/606a802fcaa89
 var str_src_logo_assetstore = "https://unity-assetstorev2-prd.storage.googleapis.com/cdn-origin/assets/as/views/common/components/Logo/src/unity-assetstore-logo-new.50ac708aeae28b8b6bf369ece5875fa5.svg";
 var str_src_logo_linkedin = "https://static.licdn.com/aero-v1/sc/h/an86sbagr48vf1s7k8llw6h6b";
 
-var about_me_str = "Although my specialty is GPU programming, I have worked on every aspect of game design. I have experience with complex visual effects, gameplay scripting, multiplayer networking, sound design, 3D modelling, animation, graphic design, UI/UX, and more.<br><br>I have spent over a decade working in the Unity game engine, and I have experience with a number of other engines and tools. I have some experience with VR applications. I have minor experience with machine learning.<br><br>During my time working with game engines, I have become adept at using Blender to create placeholder 3D models for protoypes I've made. I also utilized Photoshop and other image editing software for both texture work and graphic design such as the signs included with my <a class='overlay-link' href='" + str_url_assetstore + "' target='_blank'>SciFi Signs Unity asset</a>.<br><br>I have recently also spent time with Godot and GDScript.<br><br>And I made the website you are looking at.<br><br>You can reach me at <a class='overlay-link' href='" + str_url_mailto + "' target='_blank'>thomas.ir.rasor@gmail.com</a> or via my <a class='overlay-link' href='" + str_url_linkedin + "' target='_blank'>LinkedIn</a> or <a class='overlay-link' href='" + str_url_fiverr + "' target='_blank'>Fiverr</a> for professional inquiries.";
+var about_me_str = "";
+
+
+function LoadAboutMe()
+{
+	fetch(
+		"./files/aboutme.txt",
+		{
+			method: "GET",
+			cache: "default",
+		}
+	).then(
+		async x => { about_me_str = await x.text(); }
+	).then(
+		() =>
+		{
+			about_me_str = about_me_str.replace('{{LINK:ASSETSTORE}}', str_url_assetstore);
+			about_me_str = about_me_str.replace('{{LINK:MAILTO}}', str_url_mailto);
+			about_me_str = about_me_str.replace('{{LINK:LINKEDIN}}', str_url_linkedin);
+			about_me_str = about_me_str.replace('{{LINK:SOUNDCLOUD}}', str_url_soundcloud);
+			about_me_str = about_me_str.replace('{{LINK:FIVERR}}', str_url_fiverr);
+			about_me_str = about_me_str.replace('{{LINK:STREAMHUB}}', str_url_streamhub);
+		}
+	);
+}

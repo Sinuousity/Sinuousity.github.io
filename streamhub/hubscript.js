@@ -16,6 +16,7 @@ import { CreatureRoster } from "./modules/creatures.js";
 import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
 import { SaveIndicator } from "./modules/saveindicator.js";
+import { OpenAIWindow } from "./modules/openaiwindow.js";
 import "./modules/globaltooltip.js";
 import { GlobalTooltip } from "./modules/globaltooltip.js";
 import { UserInput } from "./modules/userinput.js";
@@ -25,6 +26,7 @@ export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExist
 
 window.hub_version = "v0.2.3";
 window.last_update_date = "September 3 2024";
+
 const resetStoredState = false;
 var e_menu_windows = {};
 var e_site_tag = {};

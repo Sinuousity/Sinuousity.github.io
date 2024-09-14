@@ -300,12 +300,13 @@ body
 {
 	overflow-y: auto;
 	position: relative;
-	text-align: left;
+	text-align: center;
 	color: white;
 	text-shadow: #000000C0 0.1rem 0.1rem 0.3rem;
 	letter-spacing: 0.1rem;
-	font-size: 1rem;
-	padding: 2rem;
+	font-size: 0.9rem;
+	line-height: 1.1rem;
+	padding: 1rem;
 	z-index: 1002;
 }
 
@@ -314,7 +315,7 @@ body
 	color: var(--col-highlight);
 	text-shadow: #000000C0 0.1rem 0.1rem 0.3rem;
 	letter-spacing: 0.1rem;
-	font-size: 1rem;
+	font-size: 0.8rem;
 	font-weight: bold;
 	z-index: 1003;
 }

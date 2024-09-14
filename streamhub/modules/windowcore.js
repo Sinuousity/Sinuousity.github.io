@@ -648,6 +648,8 @@ export class WindowBase
 
 		var e_input = document.createElement("div");
 		e_input.className = "window-control-text-readonly hover-obscured";
+		e_input.style.overflowX = "hidden";
+		e_input.style.overflowY = "auto";
 		e_input.innerText = readonlyValue;
 		e_input.title = "Read Only";
 

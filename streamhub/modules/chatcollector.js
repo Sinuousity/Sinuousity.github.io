@@ -154,6 +154,7 @@ export class MultiChatWindow extends ChatWindow
 		this.e_chat_root.appendChild(e_msg);
 
 		if (this.e_chat_root.children.length > 50) this.e_chat_root.children[0].remove();
+		this.SetTitle("MultiChat ( " + ChatCollector.messages.length + " )");
 	}
 }
 

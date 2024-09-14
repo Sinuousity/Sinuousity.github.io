@@ -1,0 +1,42 @@
+Hi there!
+<br>
+I am Thomas, a human being currently residing in Austin, Texas.
+I have been playing videogames most of my life and have been developing them as a hobby for the last decade or so.
+<br>
+<br>
+Primarily self taught, I am a programmer with experience across low and high level applications.
+Although my specialty is GPU programming, I have worked on every aspect of game design and many aspects of software in general.
+I have experience with complex visual effects, gameplay scripting, networking, sound design, 3D modeling, animation, graphic design, UI/UX, and more.
+<br>
+<br>
+I have spent over a decade working in the Unity game engine.
+I have experience with both desktop and standalone VR/XR applications as well as with mobile deployment.
+I have a thorough understanding of machine learning with some implementation / working experience.
+<br>
+<br>
+I have also spent time learning Godot and GDScript (although I very much prefer C#).
+<br>
+<br>
+Outside of game development, I worked for several years using Excel, Microsoft365, SharePoint, AWS, and other business data tools and platforms as a Reporting Analyst for Meta.
+In my role as Meta, I maintained the project's databases, designed and developed internal tools, and handled various data requests including employee forecasting.
+<br>
+<br>
+Of course, please check out my resume if you're interested in a more complete list of my skills and experience.
+<br>
+<br>
+During my time working with game engines, I have become adept at using a variety of creative tools to breathe life into my projects.
+This includes Blender for 3D models (and video editing), Photoshop / GIMP for texture and graphic design work, and FL Studio to create music and sound effects.
+You can find some examples of my graphic design work on the page for my <a class='overlay-link' href='{{LINK:ASSETSTORE}}' target='_blank'>SciFi Signs Unity asset</a>.
+I've also made a variety of music over the years, despite being bad at it, which you can find on my <a class='overlay-link' href='{{LINK:SOUNDCLOUD}}' target='_blank'>SoundCloud</a>.
+<br>
+<br>
+Finally, I made the website you are looking at, including the <a class='overlay-link' href='{{LINK:STREAMHUB}}' target='_blank'>StreamHub</a>,
+a tool for live-stream creators to add several different interactive elements for their communities.
+If you're interested in a real example of what I can do with Javascript (NO 3rd party frameworks!), HTML, and CSS, the StreamHub is where you want to look!
+It will give you a good idea of my experience designing and developing user interfaces, particularly for the web.
+The StreamHub tool is served via GitHub Pages (static content only) and runs entirely client-side in the browser.
+When you visit the StreamHub, you can find the menu at the bottom left to start looking around.
+<br>
+<br>
+You can reach me at <a class='overlay-link' href='{{LINK:MAILTO}}' target='_blank'>thomas.ir.rasor@gmail.com</a>
+or via <a class='overlay-link' href='{{LINK:LINKEDIN}}' target='_blank'>LinkedIn</a> for professional inquiries.

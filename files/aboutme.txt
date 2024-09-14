@@ -27,7 +27,7 @@ Of course, please check out my resume if you're interested in a more complete li
 During my time working with game engines, I have become adept at using a variety of creative tools to breathe life into my projects.
 This includes Blender for 3D models (and video editing), Photoshop / GIMP for texture and graphic design work, and FL Studio to create music and sound effects.
 You can find some examples of my graphic design work on the page for my <a class='overlay-link' href='{{LINK:ASSETSTORE}}' target='_blank'>SciFi Signs Unity asset</a>.
-I've also made a variety of music over the years, despite being bad at it, which you can find on my <a class='overlay-link' href='{{LINK:SOUNDCLOUD}}' target='_blank'>SoundCloud</a>.
+I have also produced a variety of instrumental music over the years (despite not being particularly skilled at it) which you can find on my <a class='overlay-link' href='{{LINK:SOUNDCLOUD}}' target='_blank'>SoundCloud</a>.
 <br>
 <br>
 Finally, I made the website you are looking at, including the <a class='overlay-link' href='{{LINK:STREAMHUB}}' target='_blank'>StreamHub</a>,

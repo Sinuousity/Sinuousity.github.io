@@ -4,21 +4,21 @@ I am Thomas, a human being currently residing in Austin, Texas.
 I have been playing videogames most of my life and have been developing them as a hobby for the last decade or so.
 <br>
 <br>
-Primarily self taught, I am a programmer with experience across low and high level applications.
+Primarily self-taught, I am a programmer with experience across low and high level applications.
 Although my specialty is GPU programming, I have worked on every aspect of game design and many aspects of software in general.
 I have experience with complex visual effects, gameplay scripting, networking, sound design, 3D modeling, animation, graphic design, UI/UX, and more.
 <br>
 <br>
 I have spent over a decade working in the Unity game engine.
 I have experience with both desktop and standalone VR/XR applications as well as with mobile deployment.
-I have a thorough understanding of machine learning with some implementation / working experience.
+I have a thorough understanding of machine learning with some implementation/working experience.
 <br>
 <br>
 I have also spent time learning Godot and GDScript (although I very much prefer C#).
 <br>
 <br>
 Outside of game development, I worked for several years using Excel, Microsoft365, SharePoint, AWS, and other business data tools and platforms as a Reporting Analyst for Meta.
-In my role as Meta, I maintained the project's databases, designed and developed internal tools, and handled various data requests including employee forecasting.
+In my role at Meta, I maintained the project's databases, designed and developed internal tools, and handled various data requests including employee forecasting.
 <br>
 <br>
 Of course, please check out my resume if you're interested in a more complete list of my skills and experience.

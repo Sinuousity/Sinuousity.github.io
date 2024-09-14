@@ -762,11 +762,6 @@ function showOverlay(title)
 	switch (title)
 	{
 		case "RESUME":
-			/*
-			<object data=[URL] type="application/pdf" width="100%" height="500px">
-				<p>Unable to display PDF file. <a href=[URL]>Download</a> instead.</p>
-			</object>
-			*/
 			e_overlay_content = document.createElement("div");
 			e_overlay_content.className = "overlay-body";
 			e_overlay_content.style.height = "95%";

@@ -168,6 +168,47 @@
 			]
 		},
 		{
+			"name": "API Integration: OpenAI",
+			"desc": "Integrations with OpenAI APIs.",
+			"goals": [
+				{
+					"name": "Chat Summarization",
+					"progress": 1.0,
+					"comment": "Sends a specified number of messages to ChatGPT (o4-mini) to summarize."
+				},
+				{
+					"name": "Summary Response",
+					"progress": 1.0,
+					"comment": "The generated summary is used to generate a chat message."
+				},
+				{
+					"name": "Cost Estimation",
+					"progress": 1.0,
+					"comment": "Estimates the cost (very accurately) in USD according to the number of input and output tokens. This estimate uses values provided by OpenAI in their pricing information for the o4-mini model."
+				},
+				{
+					"name": "Mimic Chat Style",
+					"progress": 1.0,
+					"comment": "Asks ChatGPT to generate its response in a way that mimics the writing style of your chat."
+				},
+				{
+					"name": "Custom System Prompt",
+					"progress": 1.0,
+					"comment": "Enables you to customize how ChatGPT responds. Use this to avoid or focus on certain topics, give ChatGPT a personality, or provide more info about your stream and community."
+				},
+				{
+					"name": "Current Broadcast Info",
+					"progress": 0.0,
+					"comment": "Fetches the current livestream info for your broadcast from Twitch, to give ChatGPT more context and keep it from guessing / assuming those details."
+				},
+				{
+					"name": "Chat Output",
+					"progress": 0.0,
+					"comment": "Actually sends the generated chat message to the chat. ( On hold while testing )"
+				}
+			]
+		},
+		{
 			"name": "API Integration: Extra Platforms",
 			"desc": "Integrations with additional livestreaming / chat service APIs.",
 			"goals": [

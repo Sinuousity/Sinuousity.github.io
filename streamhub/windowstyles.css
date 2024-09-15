@@ -507,12 +507,8 @@
 	transform: translate(0%, -50%);
 }
 
-.hover-obscure:hover
-{
-	filter: none;
-	transition-duration: 0.1s;
-	transition-delay: 0.05s;
-}
+
+
 .hover-obscure
 {
 	filter: blur(0.25rem) contrast(90%) brightness(20%) opacity(70%);
@@ -522,6 +518,20 @@
 	transition-duration: 0.3s;
 	transition-delay: 0.3s;
 }
+.hover-obscure:hover
+{
+	filter: blur(0.15rem) contrast(90%) opacity(70%);
+	transition-duration: 0.1s;
+	transition-delay: 0.05s;
+}
+.hover-obscure:focus-within
+{
+	filter: none;
+	transition-duration: 0.05s;
+	transition-delay: 0s;
+}
+
+
 
 .window-content-dropzone:hover
 {

@@ -1,8 +1,9 @@
 import { addElement } from "../hubscript.js";
-import { ChatCollector } from "./chatcollector.js";
+import { ChatCollector, MultiChatMessage } from "./chatcollector.js";
 import { EventSource } from "./eventsource.js";
 import { OptionManager } from "./globalsettings.js";
 import { GlobalTooltip } from "./globaltooltip.js";
+import { TwitchListener } from "./twitchlistener.js";
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 
@@ -11,10 +12,16 @@ console.info("[ +Module ] OpenAI Integration Window");
 const optkey_openAiKey = 'openai.api.key';
 const optkey_useSummary = 'openai.summarize';
 const optkey_chatAfterSummary = 'openai.summarize.then.chat';
+const optkey_sendGeneratedResponses = 'openai.summarize.send.messages';
+const optkey_chatMessageCount = 'openai.reply.to.count';
+const optkey_replyToMentions = 'openai.reply.to.mentions';
 const optkey_summaryMessageCount = 'openai.summarize.message.count';
+const optkey_summaryThreshold = 'openai.summarize.message.threshold';
 const optkey_mimicChatStyle = 'openai.mimic.chat';
 const optkey_chatPrefix = 'openai.prefix';
 const optkey_promptPrefix = 'openai.prompt.prefix';
+const optkey_botUserName = "twitch.bot.username";
+
 
 const url_completions = 'https://api.openai.com/v1/chat/completions';
 const header_content_type = 'application/json';
@@ -68,6 +75,7 @@ export class OpenAIConnection
 {
 	static instance = null;
 	static latestChatMessages = [];
+	static latestResponses = [];
 	static latestResponse = '';
 	static latestSummary = '';
 
@@ -78,66 +86,110 @@ export class OpenAIConnection
 	static costPerTokenOutput = 0.60 / 1_000_000.0;
 
 	static listening = false;
-	static messagesUntilSummary = 10;
+	static messagesUntilSummary = 1;
+
+	static opt_botUsername = OptionManager.GetOption(optkey_botUserName);
+	static opt_summaryThreshold = OptionManager.GetOption(optkey_summaryThreshold);
+	static opt_summaryMessageCount = OptionManager.GetOption(optkey_summaryMessageCount);
 
 	static StartListening()
 	{
 		if (OpenAIConnection.listening) return;
-		console.log("ChatGPT Listening To Chat...");
+		console.log('ChatGPT Listening To Chat...');
 		ChatCollector.onMessageReceived.RequestSubscription(OpenAIConnection.OnNewMessage);
 		OpenAIConnection.listening = true;
+
+		//let minMessageCount = Math.max(opt_summaryThreshold.value, opt_summaryMessageCount.value);
+		OpenAIConnection.messagesUntilSummary = Math.max(1, OptionManager.GetOptionValue(optkey_summaryThreshold, 30));
+		if (OpenAIWindow.instance) OpenAIWindow.instance.UpdateProgressLabel();
 	}
 
 	static StopListening()
 	{
 		if (!OpenAIConnection.listening) return;
-		console.log("ChatGPT Stopped Listening To Chat");
+		console.log('ChatGPT Stopped Listening To Chat');
 		ChatCollector.onMessageReceived.RemoveSubscription(OpenAIConnection.OnNewMessage);
 		OpenAIConnection.listening = false;
 	}
 
 	static OnNewMessage(msg)
 	{
-		OpenAIConnection.latestChatMessages.push(new ChatGPTMessage('user', msg.username + ": " + msg.message));
+		const opt_useSummary = OptionManager.GetOption(optkey_useSummary);
+		const opt_botUserName = OptionManager.GetOption(optkey_botUserName);
+
+		//let minMessageCount = Math.max(opt_summaryThreshold.value, opt_summaryMessageCount.value);
+
+		OpenAIConnection.RegisterSummaryMessage(msg);
 		OpenAIConnection.messagesUntilSummary--;
 
-		if (OpenAIConnection.messagesUntilSummary < 1)
+		if (OpenAIConnection.messagesUntilSummary < 1) // ready to generate summary
 		{
-			const opt_summarize = OptionManager.GetOption(optkey_useSummary);
-			const opt_summaryMessageCount = OptionManager.GetOption(optkey_summaryMessageCount);
-			OpenAIConnection.messagesUntilSummary = Number(opt_summaryMessageCount.value) ?? 30;
-			if (opt_summarize.value === true) OpenAIConnection.RequestSummary();
-			OpenAIConnection.latestChatMessages = [];
+			if (opt_useSummary.value === true) OpenAIConnection.RequestSummary();
+			OpenAIConnection.messagesUntilSummary = Math.max(1, OptionManager.GetOptionValue(optkey_summaryThreshold, 30));
+		}
+
+		if (OptionManager.GetOptionValue(optkey_replyToMentions, false) === true) // check for mentions
+		{
+			if (typeof opt_botUserName.value === 'string' && opt_botUserName.value.length > 0)
+			{
+				var mentionKey = '@' + opt_botUserName.value.toLowerCase();
+				if (msg.message.toLowerCase().includes(mentionKey))
+				{
+					OpenAIConnection.RequestSummary(true);
+				}
+			}
+		}
+
+		if (OpenAIWindow.instance) OpenAIWindow.instance.UpdateProgressLabel();
+	}
+
+	static RegisterSummaryMessage(msg)
+	{
+		var msgCount = OpenAIConnection.latestChatMessages.push(new ChatGPTMessage('user', msg.username + ': ' + msg.message));
+		if (msgCount > OptionManager.GetOptionValue(optkey_summaryMessageCount, 30)) OpenAIConnection.latestChatMessages.splice(0, 1);
+	}
+
+	static RegisterGPTResponse(msg = MultiChatMessage.default)
+	{
+		OpenAIConnection.latestResponse = msg.message;
+		OpenAIConnection.RegisterSummaryMessage(msg);
+
+		var validBotUsername = typeof OpenAIConnection.opt_botUsername.value === 'string' && OpenAIConnection.opt_botUsername.value.length > 0;
+		var sendChatMessage = OptionManager.GetOptionValue(optkey_sendGeneratedResponses, false);
+
+		if (validBotUsername)
+		{
+			let botPrefix = OptionManager.GetOptionValue(optkey_chatPrefix, "[GPT] ");
+			if (sendChatMessage === true) 
+			{
+				console.log("Sent GPT Generated Chat Message!");
+				TwitchListener.instance.SendMessageAsBot(botPrefix + OpenAIConnection.latestResponse);
+			}
+			ChatCollector.Append(OpenAIConnection.opt_botUsername.value, OpenAIConnection.latestResponse, 'Hub', "white", false);
 		}
 	}
 
-	static async RequestCompletionResult(request = ChatGPTRequest.default)
+	static async RequestCompletionResult(request = ChatGPTRequest.default, sendPrePrompt = true, sendSummary = true)
 	{
 		const openAiKeyOption = OptionManager.GetOption(optkey_openAiKey);
 		var validKey = typeof openAiKeyOption.value === 'string' && openAiKeyOption.value.length > 0;
 		if (!validKey) return;
 
-		var validSummary = typeof OpenAIConnection.latestSummary === 'string' && OpenAIConnection.latestSummary.length > 0;
-		if (validSummary)
-		{
-			request.InsertMessage('system', "Latest Chat Summary:\n" + OpenAIConnection.latestSummary, 0);
-		}
+		const optval_promptPrefix = OptionManager.GetOptionValue(optkey_promptPrefix, '');
+		var validPromptPrefix = sendPrePrompt && typeof optval_promptPrefix === 'string' && optval_promptPrefix.length > 0;
+		if (validPromptPrefix) request.InsertMessage('system', optval_promptPrefix, 0);
 
-		const opt_promptPrefix = OptionManager.GetOption(optkey_promptPrefix);
-		const optval_promptPrefix = opt_promptPrefix.value;
-		var validPromptPrefix = typeof optval_promptPrefix === 'string' && optval_promptPrefix.length > 0;
-		if (validPromptPrefix)
-		{
-			request.InsertMessage('system', optval_promptPrefix, 0);
-		}
+		var validSummary = sendSummary && typeof OpenAIConnection.latestSummary === 'string' && OpenAIConnection.latestSummary.length > 0;
+		if (validSummary) request.InsertMessage('system', 'Latest Chat Summary:\n' + OpenAIConnection.latestSummary, 0);
 
 		var reqBodyJson = JSON.stringify(request);
+		//console.log('openai chat req:\n\n' + reqBodyJson);
 
 		await fetch(
 			url_completions,
 			{
-				method: "POST",
-				cache: "default",
+				method: 'POST',
+				cache: 'default',
 				headers: {
 					'Authorization': header_authorization_prefix + openAiKeyOption.value,
 					'Content-Type': header_content_type
@@ -155,20 +207,21 @@ export class OpenAIConnection
 					return;
 				}
 
-				OpenAIConnection.latestResponse = x.choices[0].message.content;
-
 				if (x.usage)
 				{
-					OpenAIConnection.sessionTokensInput += x.usage.prompt_tokens;
-					OpenAIConnection.sessionTokensOutput += x.usage.completion_tokens;
+					if (x.usage.prompt_tokens) OpenAIConnection.sessionTokensInput += x.usage.prompt_tokens;
+					if (x.usage.completion_tokens) OpenAIConnection.sessionTokensOutput += x.usage.completion_tokens;
 				}
 
+				var respMessage = x.choices[0].message.content;
+
+				OpenAIConnection.RegisterGPTResponse(new MultiChatMessage(OptionManager.GetOptionValue(optkey_botUserName, '[BOT]'), respMessage));
 				OpenAIWindow.onRefreshStatistics.Invoke();
 			}
 		);
 	}
 
-	static async RequestSummary()
+	static async RequestSummary(forceResponse = false)
 	{
 		var request = new ChatGPTRequest('gpt-4o-mini', OpenAIConnection.latestChatMessages);
 
@@ -182,16 +235,19 @@ export class OpenAIConnection
 		const opt_mimicChat = OptionManager.GetOption(optkey_mimicChatStyle);
 
 		var promptPrefix =
-			'Produce a *brief* summary of the following chat messages. '
-			+ 'If there is a previous summary, try to retain important information from it. '
-			+ 'Avoid summarizing ambiguous reactions. Ignore intentionally offensive remarks. '
+			'Produce a brief summary of the provided chat messages. '
+			+ 'If there is a previous summary, retain important information in the new summary. '
+			+ 'Avoid summarizing reactions. Ignore intentionally offensive remarks. '
+			+ 'Your username is ' + OptionManager.GetOptionValue(optkey_botUserName, 'ChatGPT') + '. Dont summarize your own messages'
 			+ 'If a user says something particularly profound and unique (not sarcastic or just funny), you can include their username and sentiments. '
 			+ 'Optionally include a topic or idea mentioned that would be good to respond to. '
+			+ 'Include chat messages that mention you verbatim so you can respond. '
 			+ 'Abbreviate whenever possible, theres a per-token cost per summary. Summary doesnt need to sound natural, its for an LLM. ';
 		if (opt_mimicChat.value === true) promptPrefix += 'Include one short chat message that best represents the writing style of chat.';
 		request.InsertMessage('system', promptPrefix, 0);
 
 		var reqBodyJson = JSON.stringify(request);
+		//console.log('openai summary req:\n\n' + reqBodyJson);
 
 		await fetch(
 			url_completions,
@@ -226,16 +282,10 @@ export class OpenAIConnection
 				OpenAIWindow.onRefreshStatistics.Invoke();
 
 				var opt_chatAfterSummary = OptionManager.GetOption(optkey_chatAfterSummary);
-				if (opt_chatAfterSummary.value === true)
-				{
-					OpenAIConnection.RequestChatComment();
-				}
+				if (forceResponse || opt_chatAfterSummary.value === true) OpenAIConnection.RequestChatComment();
 			}
 		);
 	}
-
-
-
 
 	static RequestChatComment()
 	{
@@ -245,11 +295,14 @@ export class OpenAIConnection
 			[
 				new ChatGPTMessage(
 					'system',
-					'Respond with a very short relevant chat message. '
+					'You are a Twitch chatbot using ChatGPT. Your username is ' + OptionManager.GetOptionValue(optkey_botUserName, 'ChatGPT')
+					+ ', dont add your username to the message, and you are in the Twitch chat of streamer ' + TwitchListener.instance.joinedChannel + '. '
+					+ 'You cannot see the video, only read chat messages. '
+					+ 'Respond only with a short chat message. '
 					+ (mimicChatOption.value === true ? 'Mimic the writing style of chat. ' : '')
-					+ 'Avoid calls to action, telling chat what to do, asking questions, or making unsubstantiated claims. '
-					+ 'Avoid personifying yourself, they know youre an LLM! Focus on the chat and their ideas. '
-					+ 'This was your latest comment, avoid repeating yourself: ' + OpenAIConnection.latestResponse
+					+ 'Avoid calls to action, telling chat what to do, asking questions, or making hard to substantiate claims. '
+					+ 'Avoid personifying yourself, we know you are an LLM! '
+					+ 'Avoid repeating yourself.'
 				)
 			];
 		var req = new ChatGPTRequest('gpt-4o-mini', reqmessages);
@@ -282,20 +335,37 @@ export class OpenAIWindow extends DraggableWindow
 		this.CreateControlsColumn();
 
 		this.CreateWindowContent();
+
+		this.UpdateProgressLabel();
 	}
 
 	onWindowShow() { OpenAIWindow.instance = this; }
-	onWindowClose() { OpenAIWindow.instance = null; }
+	onWindowClose() { OpenAIWindow.onRefreshStatistics.RemoveSubscription(this.sub_RefreshStats); OpenAIWindow.instance = null; }
+
+	UpdateProgressLabel()
+	{
+		if (!this.lbl_summarize_progress) return;
+
+		const opt_summaryThreshold = OptionManager.GetOption(optkey_summaryThreshold);
+		//const opt_summaryMessageCount = OptionManager.GetOption(optkey_summaryMessageCount);
+		//let minMessageCount = Math.max(opt_summaryThreshold.value, opt_summaryMessageCount.value);
+
+		OpenAIWindow.instance.lbl_summarize_progress.children[1].children[0].innerText =
+			(opt_summaryThreshold.value - OpenAIConnection.messagesUntilSummary).toString() + "/" + opt_summaryThreshold.value.toString();
+	}
 
 	CreateWindowContent()
 	{
 		const openAiKeyOption = OptionManager.GetOption(optkey_openAiKey);
 		const useSummaryOption = OptionManager.GetOption(optkey_useSummary);
+		const sendChatOption = OptionManager.GetOption(optkey_sendGeneratedResponses);
 		const summaryChatOption = OptionManager.GetOption(optkey_chatAfterSummary);
 		const summaryCountOption = OptionManager.GetOption(optkey_summaryMessageCount);
+		const summaryThresholdOption = OptionManager.GetOption(optkey_summaryThreshold);
 		const mimicChatOption = OptionManager.GetOption(optkey_mimicChatStyle);
 		const chatPrefixOption = OptionManager.GetOption(optkey_chatPrefix);
 		const promptPrefixOption = OptionManager.GetOption(optkey_promptPrefix);
+		const replyToMentionsOption = OptionManager.GetOption(optkey_replyToMentions);
 
 		this.AddSectionTitle("Settings");
 		var txt_apiKey = this.AddTextField("API Key", openAiKeyOption.value ?? '', (e) => { OptionManager.SetOptionValue(optkey_openAiKey, e.value); });
@@ -304,8 +374,7 @@ export class OpenAIWindow extends DraggableWindow
 		GlobalTooltip.RegisterReceiver(
 			txt_apiKey,
 			"Your very own OpenAI API key. "
-			+ "Each call to the API has an associated cost, though it is tiny. "
-			+ "You can get an API key by creating an account at <span style='color:cyan'>openai.com/api/</span>"
+			+ "You can get an API key by creating an account at <span style='color:cyan'>openai.com/api</span>"
 		);
 
 		var tgl_summarize = this.AddToggle("Summarize Chat", useSummaryOption.value ?? true, (e) => { OptionManager.SetOptionValue(optkey_useSummary, e.checked); });
@@ -316,18 +385,45 @@ export class OpenAIWindow extends DraggableWindow
 			"<span style='color:orange'>Without this, ChatGPT won't know the context of the chat, and will likely respond poorly.</span>"
 		);
 
-		var tgl_summary_msg = this.AddToggle("and Respond", summaryChatOption.value ?? false, (e) => { OptionManager.SetOptionValue(optkey_chatAfterSummary, e.checked); });
+		var tgl_summary_msg = this.AddToggle("Generate Chat", summaryChatOption.value ?? false, (e) => { OptionManager.SetOptionValue(optkey_chatAfterSummary, e.checked); });
 		tgl_summary_msg.style.height = "2rem";
-		GlobalTooltip.RegisterReceiver(tgl_summary_msg, "When enabled, generates a chat message after each summary.");
+		GlobalTooltip.RegisterReceiver(tgl_summary_msg, "When enabled, generates a chat message after a new summary.");
+
+		var tgl_summary_msg = this.AddToggle("and Send", sendChatOption.value ?? false, (e) => { OptionManager.SetOptionValue(optkey_sendGeneratedResponses, e.checked); });
+		tgl_summary_msg.style.height = "2rem";
+		GlobalTooltip.RegisterReceiver(tgl_summary_msg, "When enabled, actually sends generated chat messages to Twitch.");
 
 		var tgl_mimic_chat = this.AddToggle("Mimic Chat", mimicChatOption.value ?? false, (e) => { OptionManager.SetOptionValue(optkey_mimicChatStyle, e.checked); });
 		tgl_mimic_chat.style.height = "2rem";
 		GlobalTooltip.RegisterReceiver(tgl_mimic_chat, "When enabled, ChatGPT will attempt to write in the style of your chat.");
 
-		var num_summaryCount = this.AddTextField("Summarize After", summaryCountOption.value ?? 30, (e) => { OptionManager.SetOptionValue(optkey_summaryMessageCount, e.value); });
+		var tgl_reply_mentions = this.AddToggle("Reply to Mentions", replyToMentionsOption.value ?? false, (e) => { OptionManager.SetOptionValue(optkey_replyToMentions, e.checked); });
+		tgl_reply_mentions.style.height = "2rem";
+		GlobalTooltip.RegisterReceiver(tgl_reply_mentions, "When enabled, generates a chat message when a chatter mentions your bot with @");
+
+		var num_summaryThreshold = this.AddTextField("Summarize After", summaryThresholdOption.value ?? 30, (e) => { OptionManager.SetOptionValue(optkey_summaryThreshold, e.value); });
+		num_summaryThreshold.style.height = "2rem";
+		num_summaryThreshold.children[1].children[0].type = 'number';
+		GlobalTooltip.RegisterReceiver(
+			num_summaryThreshold,
+			"The number of messages to receive before asking ChatGPT for a new summary.<br>" +
+			"<span style='color:orange'>The first summary will be generated after this many messages are received.</span>"
+		);
+
+		var num_summaryCount = this.AddTextField("Summarize Count", summaryCountOption.value ?? 30, (e) => { OptionManager.SetOptionValue(optkey_summaryMessageCount, e.value); });
 		num_summaryCount.style.height = "2rem";
 		num_summaryCount.children[1].children[0].type = 'number';
-		GlobalTooltip.RegisterReceiver(num_summaryCount, "The number of messages to receive before asking ChatGPT for a new summary.");
+		GlobalTooltip.RegisterReceiver(
+			num_summaryCount,
+			"The number of messages to include when asking ChatGPT for a new summary.<br>"
+		);
+
+		this.lbl_summarize_progress = this.AddTextReadonly("Progress", "0%");
+		this.lbl_summarize_progress.style.height = "2rem";
+		GlobalTooltip.RegisterReceiver(
+			this.lbl_summarize_progress,
+			"The number of messages counted towards the next summary."
+		);
 
 
 		var txt_prefix = this.AddTextField("Message Prefix", chatPrefixOption.value ?? '', (e) => { OptionManager.SetOptionValue(optkey_chatPrefix, e.value); });
@@ -335,7 +431,7 @@ export class OpenAIWindow extends DraggableWindow
 		GlobalTooltip.RegisterReceiver(txt_prefix, "When not blank, adds this prefix to bot chat messages to show they were generated with ChatGPT.");
 
 		var txt_prompt_prefix = this.AddTextArea("Prompt Prefix", promptPrefixOption.value ?? '', (e) => { OptionManager.SetOptionValue(optkey_promptPrefix, e.value); });
-		txt_prompt_prefix.style.height = "8rem";
+		txt_prompt_prefix.style.height = "6rem";
 		GlobalTooltip.RegisterReceiver(
 			txt_prompt_prefix,
 			"Adds this system prompt before each ChatGPT request. "
@@ -350,7 +446,8 @@ export class OpenAIWindow extends DraggableWindow
 		GlobalTooltip.RegisterReceiver(
 			e_lbl_tokens_in,
 			"How many input tokens have been used this session, with estimated cost in USD.<br>"
-			+ "<span style='color:yellow'>$" + (OpenAIConnection.costPerTokenInput * 1000.0).toFixed(6) + " per 1000.</span>"
+			+ "<span style='color:yellow'>$" + (OpenAIConnection.costPerTokenInput * 1000.0).toFixed(6) + " per 1000.</span><br>"
+			+ "See more pricing info at <span style='color:cyan'>openai.com/api/pricing</span>"
 		);
 		var e_lbl_tokens_in_txt = e_lbl_tokens_in.children[1].children[0];
 
@@ -359,12 +456,13 @@ export class OpenAIWindow extends DraggableWindow
 		GlobalTooltip.RegisterReceiver(
 			e_lbl_tokens_out,
 			"How many output tokens have been used this session, with estimated cost in USD.<br>"
-			+ "<span style='color:yellow'>$" + (OpenAIConnection.costPerTokenOutput * 1000.0).toFixed(6) + " per 1000.</span>"
+			+ "<span style='color:yellow'>$" + (OpenAIConnection.costPerTokenOutput * 1000.0).toFixed(6) + " per 1000.</span><br>"
+			+ "See more pricing info at <span style='color:cyan'>openai.com/api/pricing</span>"
 		);
 		var e_lbl_tokens_out_txt = e_lbl_tokens_out.children[1].children[0];
 
 		var e_lbl_last_summ = this.AddTextReadonly("Last Summary", OpenAIConnection.latestSummary);
-		e_lbl_last_summ.style.height = '10rem';
+		e_lbl_last_summ.style.height = '8rem';
 		var e_lbl_last_summ_txt = e_lbl_last_summ.children[1].children[0];
 		e_lbl_last_summ_txt.style.lineHeight = '0.9rem';
 		e_lbl_last_summ_txt.style.textAlign = 'left';
@@ -375,7 +473,7 @@ export class OpenAIWindow extends DraggableWindow
 		e_lbl_last_resp_txt.style.lineHeight = '0.9rem';
 		e_lbl_last_resp_txt.style.textAlign = 'left';
 
-		OpenAIWindow.onRefreshStatistics.RequestSubscription(
+		this.sub_RefreshStats = OpenAIWindow.onRefreshStatistics.RequestSubscription(
 			(x) =>
 			{
 				e_lbl_last_resp_txt.innerHTML = OpenAIConnection.latestResponse;
@@ -397,6 +495,7 @@ export class OpenAIWindow extends DraggableWindow
 		e_btn_send_test.style.height = '2rem';
 		GlobalTooltip.RegisterReceiver(e_btn_send_test, "Sends a test request to the API to ensure things are working.");
 
+		/*
 		var e_btn_send_test_comment = this.AddButton(
 			'Test Comment',
 			'Send',
@@ -405,6 +504,7 @@ export class OpenAIWindow extends DraggableWindow
 		);
 		e_btn_send_test_comment.style.height = '2rem';
 		GlobalTooltip.RegisterReceiver(e_btn_send_test_comment, "Sends a test request to the API, using the latest summary and prompt prefix.");
+		*/
 	}
 }
 
@@ -423,11 +523,17 @@ WindowManager.instance.windowTypes.push(
 
 
 OptionManager.AppendOption(optkey_openAiKey, '', 'API Key');
-OptionManager.AppendOption(optkey_mimicChatStyle, true, 'Mimic Chat Style');
-OptionManager.AppendOption(optkey_useSummary, true, 'Summarize Chat');
-OptionManager.AppendOption(optkey_chatAfterSummary, false, 'Chat After Summary');
-OptionManager.AppendOption(optkey_summaryMessageCount, 30, 'Summary After');
-OptionManager.AppendOption(optkey_chatPrefix, '[GPT] ', 'Prefix');
-OptionManager.AppendOption(optkey_promptPrefix, 'Adopt the persona of a wholesome and respectful Twitch viewer.', 'Prefix Prompt');
+OptionManager.AppendOption(optkey_promptPrefix, 'No emojis.', 'Prefix Prompt');
 
-OpenAIConnection.StartListening();
+OptionManager.AppendOption(optkey_useSummary, true, 'Summarize Chat');
+OptionManager.AppendOption(optkey_summaryMessageCount, 30, 'Summarize Count');
+OptionManager.AppendOption(optkey_summaryThreshold, 30, 'Summarize After');
+
+OptionManager.AppendOption(optkey_chatMessageCount, false, 'Reply to Last');
+OptionManager.AppendOption(optkey_chatAfterSummary, false, 'Chat After Summary');
+OptionManager.AppendOption(optkey_replyToMentions, false, 'Reply to Mentions');
+OptionManager.AppendOption(optkey_sendGeneratedResponses, false, 'Send Generated Messages');
+OptionManager.AppendOption(optkey_chatPrefix, '[GPT] ', 'Prefix');
+OptionManager.AppendOption(optkey_mimicChatStyle, true, 'Mimic Chat Style');
+
+window.setTimeout(() => { OpenAIConnection.StartListening(); }, 50);

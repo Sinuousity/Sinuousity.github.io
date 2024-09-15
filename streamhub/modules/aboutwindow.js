@@ -44,7 +44,7 @@ export class AboutWindow extends DraggableWindow
 			"A software engineer with a propensity for technical art and visual effects work.<br>" +
 			"I have recently been exploring web development <b>extensively</b> and this is one result of that. " +
 			"If you're interested to know more, this site is actually hosted alongside my portfolio! It may be rudimentary but it is mine.<br>" +
-			"To see some of my other work, visit my <a href='" + url_portfolio + "'>Portfolio</a> or <a href='" + url_patreon + "'>Patreon</a>!<br><br>"
+			"To see my other work or to contact me, visit my <a href='" + url_portfolio + "'>Portfolio</a> or <a href='" + url_patreon + "'>Patreon</a>!<br><br>"
 		);
 
 		const url_donate = "https://www.paypal.com/donate/?business=7V2RLS5ZJHJS2&no_recurring=0&item_name=Building+publicly+available+software+to+solve+niche+problems+for+the+online+community%21&currency_code=USD";

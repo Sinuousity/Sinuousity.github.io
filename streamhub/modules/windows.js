@@ -47,7 +47,7 @@ export class ServiceCredentialWindow extends DraggableWindow
 		this.SetIcon("link");
 		this.SetTitle("Credentials");
 
-		this.CreateContentContainer(true);
+		this.CreateContentContainer(false);
 		this.CreateControlsColumn();
 
 		this.AddTwitchSettings();

@@ -11,6 +11,8 @@ console.info("[ +Module ] Chat Collector");
 
 export class MultiChatMessage
 {
+	static default = new MultiChatMessage('nobody', 'nothing', 'nowhere', 'white');
+
 	constructor(username, message, source = "unknown", color = "white")
 	{
 		this.source = source;
@@ -26,12 +28,13 @@ export class ChatCollector
 	static messages = [];
 	static onMessageReceived = new EventSource();
 
-	static Append(username, message, source = "unknown", color = "white")
+	static Append(username, message, source = "unknown", color = "white", broadcastEvents = true)
 	{
 		MultiPlatformUserCache.GetUser(username, source, true);
 		var m = new MultiChatMessage(username, message, source, color);
 		ChatCollector.messages.push(m);
-		ChatCollector.onMessageReceived.Invoke(m);
+
+		if (broadcastEvents === true) ChatCollector.onMessageReceived.Invoke(m);
 	}
 }
 
@@ -112,10 +115,10 @@ export class MultiChatWindow extends ChatWindow
 			e =>
 			{
 				let message = this.e_send_input.value;
-				let username = OptionManager.GetOptionValue("twitch.bot.username", "");
-				let botDisplayName = (username === "") ? "[BOT]" : username;
+				let botUsername = OptionManager.GetOptionValue("twitch.bot.username", "");
+				if (botUsername === "") return;
 				TwitchListener.instance.SendMessageAsBot(message);
-				this.AppendMessageElement({ source: 'Hub', username: botDisplayName, message: message });
+				this.AppendMessageElement({ source: 'Hub', username: botUsername, message: message });
 				this.e_send_input.value = '';
 			}
 		);

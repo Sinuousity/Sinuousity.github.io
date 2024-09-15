@@ -52,4 +52,10 @@ export class DebugWindow extends DraggableWindow
 	}
 }
 
-WindowManager.instance.windowTypes.push({ key: DebugWindow.window_kind, icon: "assignment_late", model: (x, y) => { return new DebugWindow(x, y); } });
+WindowManager.instance.windowTypes.push(
+	{
+		key: DebugWindow.window_kind,
+		icon: "assignment_late",
+		model: (x, y) => { return new DebugWindow(x, y); }
+	}
+);

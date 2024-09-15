@@ -786,6 +786,7 @@ function showOverlay(title)
 			break;
 		case "ABOUT":
 			e_overlay_content = document.createElement("div");
+			e_overlay_content.setAttribute("translate", "no");
 			e_overlay_content.className = "overlay-body";
 			e_overlay_content.innerHTML = about_me_str;
 			e_overlay_root.appendChild(e_overlay_content);

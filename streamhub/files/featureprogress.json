@@ -184,7 +184,7 @@
 				{
 					"name": "Cost Estimation",
 					"progress": 1.0,
-					"comment": "Estimates the cost (very accurately) in USD according to the number of input and output tokens. This estimate uses values provided by OpenAI in their pricing information for the o4-mini model."
+					"comment": "Estimates the cost (very accurately) in USD according to the number of input and output tokens. This estimate uses values provided by OpenAI in their pricing information for the gpt-4o-mini model."
 				},
 				{
 					"name": "Custom System Prompt",

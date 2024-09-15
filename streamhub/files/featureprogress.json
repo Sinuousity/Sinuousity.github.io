@@ -174,7 +174,7 @@
 				{
 					"name": "Chat Summarization",
 					"progress": 1.0,
-					"comment": "Sends a specified number of messages to ChatGPT (o4-mini) to summarize."
+					"comment": "Sends a specified number of messages to ChatGPT ( gpt-4o-mini ) to summarize."
 				},
 				{
 					"name": "Summary Response",

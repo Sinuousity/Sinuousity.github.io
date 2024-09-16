@@ -781,7 +781,7 @@ function showOverlay(title)
 
 
 			let e_resume_obj_placeholder = document.createElement("p");
-			e_resume_obj_placeholder.innerHTML = 'Unable to display PDF file. <a href="' + str_url_resume + '">Download</a> instead.';
+			e_resume_obj_placeholder.innerHTML = 'Your browser is unable to display embedded PDF files.<br>You must <a href="' + str_url_resume + '">download</a> my resume to view it, or visit this site with a supported browser.';
 			e_resume_obj.appendChild(e_resume_obj_placeholder);
 			break;
 		case "ABOUT":

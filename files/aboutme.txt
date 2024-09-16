@@ -4,6 +4,9 @@ I am Thomas, a human being currently residing in Austin, Texas.
 I have been playing videogames most of my life and have been developing them as a hobby for the last decade or so.
 <br>
 <br>
+What you see here are <i>just a few</i> of the projects and visual effects I have created.
+<br>
+<br>
 Primarily self-taught, I am a programmer with experience across low and high level applications.
 Although my specialty is GPU programming, I have worked on every aspect of game design and many aspects of software in general.
 I have experience with complex visual effects, gameplay scripting, networking, sound design, 3D modeling, animation, graphic design, UI/UX, and more.
@@ -24,9 +27,9 @@ Of course, check out my <a class='overlay-link' style='cursor:pointer;text-decor
 <br>
 <br>
 During my time working with game engines, I have become adept at using a variety of creative tools to breathe life into my projects.
-This includes Blender for 3D models (and video editing), Photoshop / GIMP for texture and graphic design work, and FL Studio to create music and sound effects.
+This includes Blender for 3D models (and video editing), Photoshop & GIMP for texture and graphic design, and FL Studio to create music and sound effects.
 You can find some examples of my graphic design work on the page for my <a class='overlay-link' href='{{LINK:ASSETSTORE}}' target='_blank'>SciFi Signs Unity asset</a>.
-I have also produced a variety of instrumental music over the years (despite not being particularly skilled at it) which you can find on my <a class='overlay-link' href='{{LINK:SOUNDCLOUD}}' target='_blank'>SoundCloud</a>.
+I have also produced a variety of instrumental music over the years which you can find on my <a class='overlay-link' href='{{LINK:SOUNDCLOUD}}' target='_blank'>SoundCloud</a>, though this is not my focus.
 <br>
 <br>
 Finally, I made the website you are looking at, including the <a class='overlay-link' href='{{LINK:STREAMHUB}}' target='_blank'>StreamHub</a>,

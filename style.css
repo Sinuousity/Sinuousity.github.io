@@ -34,7 +34,6 @@ body
 	border: var(--col-highlight-dark) solid 1px;
 }
 
-
 .title-bar-title
 {
 	font-size: 2rem;
@@ -44,6 +43,19 @@ body
 	font-weight: bold;
 	padding-top: 1rem;
 	user-select: none;
+}
+@media (hover:none)
+{
+	.title-bar-title
+	{
+		font-size: 1rem;
+		color: white;
+		text-align: center;
+		letter-spacing: 1rem;
+		font-weight: bold;
+		padding-top: 1rem;
+		user-select: none;
+	}
 }
 
 .title-bar-subtitle
@@ -180,6 +192,15 @@ body
 	transition-timing-function: ease-in-out;
 }
 
+@media (hover:none)
+{
+	.gallery-item-label
+	{
+		font-size: 1rem;
+		letter-spacing: 0.1rem;
+	}
+}
+
 .gallery-item-image
 {
 	object-fit: inherit;
@@ -281,6 +302,7 @@ body
 	border-right: var(--col-highlight-faded) solid 2px;
 }
 
+
 .overlay-title
 {
 	position: relative;
@@ -295,6 +317,23 @@ body
 
 	border-bottom: solid 2px white;
 }
+@media (hover:none)
+{
+	.overlay-title
+	{
+		position: relative;
+		text-align: center;
+		color: white;
+		text-shadow: #000000C0 0.1rem 0.1rem 0.3rem;
+		font-weight: bold;
+		letter-spacing: 0.5rem;
+		font-size: 1rem;
+		padding: 0.5rem;
+		z-index: 1002;
+
+		border-bottom: solid 2px white;
+	}
+}
 
 .overlay-body
 {
@@ -308,6 +347,22 @@ body
 	line-height: 1.1rem;
 	padding: 1rem;
 	z-index: 1002;
+}
+@media (hover:none)
+{
+	.overlay-body
+	{
+		overflow-y: auto;
+		position: relative;
+		text-align: center;
+		color: white;
+		text-shadow: #000000C0 0.1rem 0.1rem 0.3rem;
+		letter-spacing: 0.05rem;
+		font-size: 0.8rem;
+		line-height: 1.1rem;
+		padding: 1rem;
+		z-index: 1002;
+	}
 }
 
 .overlay-link
@@ -375,7 +430,7 @@ body
 	filter: none;
 	transition-property: transform, opacity, filter;
 	transition-duration: 0.1s;
-	z-index: 1003;
+	z-index: 2003;
 }
 .overlay-close:hover
 {

@@ -95,7 +95,7 @@ export class OpenAIConnection
 	static StartListening()
 	{
 		if (OpenAIConnection.listening) return;
-		console.log('ChatGPT Listening To Chat...');
+		console.log('OpenAI Connector Listening To Chat...');
 		ChatCollector.onMessageReceived.RequestSubscription(OpenAIConnection.OnNewMessage);
 		OpenAIConnection.listening = true;
 
@@ -107,7 +107,7 @@ export class OpenAIConnection
 	static StopListening()
 	{
 		if (!OpenAIConnection.listening) return;
-		console.log('ChatGPT Stopped Listening To Chat');
+		console.log('OpenAI Connector Stopped Listening To Chat');
 		ChatCollector.onMessageReceived.RemoveSubscription(OpenAIConnection.OnNewMessage);
 		OpenAIConnection.listening = false;
 	}

@@ -20,11 +20,21 @@ const url_twitch_kraken = url_twitch_api + "/kraken";
 const url_twitch_helix = url_twitch_api + "/helix";
 
 const url_twitch_users = url_twitch_helix + "/users";
+const url_twitch_channels = url_twitch_helix + '/channels';
+
+const url_twitch_get_channelinfo = url_twitch_channels + '?broadcaster_id=';
 
 const rgx_twitch_access_token = /\#access\_token\=([\w]+)/;
 const rgx_twitch_privmsg = /\:(.+)\!\1\@\1\.tmi\.twitch\.tv PRIVMSG \#([^\s]+) \:(.+)/;
 const rgx_twitch_usercolor = /color\=(\#\w{6})\;/;
 const rgx_twitch_displayName = /display\-name\=(\w+)\;/;
+
+const optkey_twitch_token = 'twitch.bot.accessToken';
+const optkey_twitch_clientId = 'twitch.bot.clientId';
+const optkey_twitch_username = 'twitch.bot.username';
+const optkey_twitch_channel = 'twitch.channel';
+const optkey_twitch_listen = 'twitch.listen';
+
 
 export class TwitchListener
 {
@@ -55,13 +65,15 @@ export class TwitchListener
 		this.ws = new WebSocket(url_twitch_ws);
 		this.connected = false;
 		this.joinedChannel = "";
+		this.joinedChannelData = {};
+		this.joinedChannelUserData = {};
 
 		try
 		{
 			this.ws.onopen = () =>
 			{
-				this.ws.send("PASS oauth:" + OptionManager.GetOptionValue("twitch.bot.accessToken", ""));
-				this.ws.send("NICK " + OptionManager.GetOptionValue("twitch.bot.username", "nobody"));
+				this.ws.send("PASS oauth:" + OptionManager.GetOptionValue(optkey_twitch_token, ""));
+				this.ws.send("NICK " + OptionManager.GetOptionValue(optkey_twitch_username, "nobody"));
 				window.setTimeout(
 					() =>
 					{
@@ -96,7 +108,7 @@ export class TwitchListener
 			var privmsg_check = event.data.match(rgx_twitch_privmsg);
 			if (privmsg_check)
 			{
-				if (OptionManager.GetOptionValue("twitch.listen", false))
+				if (OptionManager.GetOptionValue(optkey_twitch_listen, false))
 				{
 					var color_check = event.data.match(rgx_twitch_usercolor);
 					var displayName_check = event.data.match(rgx_twitch_displayName);
@@ -129,14 +141,38 @@ export class TwitchListener
 		};
 	}
 
-	UpdateChannel()
+	async UpdateChannel()
 	{
 		if (!this.connected) return;
-		if (OptionManager.GetOptionValue("twitch.channel", "") === this.joinedChannel) return;
-
+		var newChannelValue = OptionManager.GetOptionValue(optkey_twitch_channel, "");
+		if (newChannelValue === this.joinedChannel) return;
 		if (this.joinedChannel && this.joinedChannel !== "") this.ws.send("PART #" + this.joinedChannel);
-		this.joinedChannel = OptionManager.GetOptionValue("twitch.channel", "");
-		this.ws.send("JOIN #" + this.joinedChannel);
+
+		this.joinedChannel = newChannelValue;
+		if (newChannelValue !== '')
+		{
+			this.ws.send("JOIN #" + newChannelValue);
+			console.log("JOINED TWITCH CHANNEL NAME : " + newChannelValue);
+
+			this.joinedChannelUserData = await TwitchResources.SingleUserDataRequest(newChannelValue);
+			if (this.joinedChannelUserData == null)
+			{
+				console.log('this.joinedChannelUserData==null');
+
+			}
+			else
+			{
+				var channelId = this.joinedChannelUserData.id;
+				console.log("JOINED TWITCH CHANNEL ID : " + channelId);
+
+				this.joinedChannelData = await TwitchResources.SingleChannelDataRequest(channelId);
+				console.log(this.joinedChannelData);
+			}
+		}
+		else
+		{
+			this.joinedChannelData = {};
+		}
 	}
 
 	SendMessageAsBot(message = "I am a robot. Beep. Boop.")
@@ -149,9 +185,7 @@ export class TwitchListener
 		var got_access_token = window.location.hash.match(rgx_twitch_access_token);
 		if (got_access_token != null)
 		{
-			OptionManager.SetOptionValue("twitch.bot.accessToken", got_access_token[1]);
-
-			//fetch("accesstoken" + got_access_token[1], { method: "POST" });
+			OptionManager.SetOptionValue(optkey_twitch_token, got_access_token[1]);
 			window.location.hash = "";
 		}
 	}
@@ -237,15 +271,17 @@ export class TwitchResources
 
 	static async UserDataRequest(url)
 	{
+		var authValue = OptionManager.GetOptionValue(optkey_twitch_token, '');
+		var clientIdValue = OptionManager.GetOptionValue(optkey_twitch_clientId, '');
+
+		if (authValue === '' || clientIdValue === '') return null;
+
 		await fetch(
 			url,
 			{
 				method: "GET",
 				cache: "default",
-				headers: {
-					'Authorization': "Bearer " + OptionManager.GetOptionValue("twitch.bot.accessToken", "oops"),
-					'Client-Id': OptionManager.GetOptionValue("twitch.bot.clientId", "oops")
-				}
+				headers: { 'Authorization': "Bearer " + authValue, 'Client-Id': clientIdValue }
 			}
 		).then(x => x.json()).then(
 			x =>
@@ -264,13 +300,72 @@ export class TwitchResources
 			}
 		);
 	}
+
+	static async SingleUserDataRequest(username)
+	{
+		username = username.trim().toLowerCase();
+		var authValue = OptionManager.GetOptionValue(optkey_twitch_token, '');
+		var clientIdValue = OptionManager.GetOptionValue(optkey_twitch_clientId, '');
+
+		if (authValue === '' || clientIdValue === '') return null;
+
+		return await fetch(
+			url_twitch_users + '?login=' + username,
+			{
+				method: "GET",
+				cache: "default",
+				headers: { 'Authorization': "Bearer " + authValue, 'Client-Id': clientIdValue }
+			}
+		).then(
+			x => x.json()
+		).then(
+			x =>
+			{
+				if (!x || !x.data)
+				{
+					console.warn(x);
+					return;
+				}
+				return x.data[0];
+			}
+		);
+	}
+
+	static async SingleChannelDataRequest(channelId)
+	{
+		channelId = channelId.trim().toLowerCase();
+		var authValue = OptionManager.GetOptionValue(optkey_twitch_token, '');
+		var clientIdValue = OptionManager.GetOptionValue(optkey_twitch_clientId, '');
+
+		if (authValue === '' || clientIdValue === '') return null;
+		return await fetch(
+			url_twitch_get_channelinfo + channelId,
+			{
+				method: "GET",
+				cache: "default",
+				headers: { 'Authorization': "Bearer " + authValue, 'Client-Id': clientIdValue }
+			}
+		).then(
+			x => x.json()
+		).then(
+			x =>
+			{
+				if (!x || !x.data)
+				{
+					console.warn(x);
+					return null;
+				}
+				return x.data[0];
+			}
+		);
+	}
 }
 
 
 TwitchResources.Initialize();
 
-OptionManager.AppendOption("twitch.listen", false, "Listen To Twitch");
-OptionManager.AppendOption("twitch.channel", "", "Join Channel");
-OptionManager.AppendOption("twitch.bot.username", "", "Bot Username");
-OptionManager.AppendOption("twitch.bot.clientId", "", "Bot Client ID");
-OptionManager.AppendOption("twitch.bot.accessToken", "", "Access Token");
+OptionManager.AppendOption(optkey_twitch_listen, false, "Listen To Twitch");
+OptionManager.AppendOption(optkey_twitch_channel, "", "Join Channel");
+OptionManager.AppendOption(optkey_twitch_username, "", "Bot Username");
+OptionManager.AppendOption(optkey_twitch_clientId, "", "Bot Client ID");
+OptionManager.AppendOption(optkey_twitch_token, "", "Access Token");

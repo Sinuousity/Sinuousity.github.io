@@ -3,7 +3,7 @@ import { ChatCollector, MultiChatMessage } from "./chatcollector.js";
 import { EventSource } from "./eventsource.js";
 import { OptionManager } from "./globalsettings.js";
 import { GlobalTooltip } from "./globaltooltip.js";
-import { TwitchListener } from "./twitchlistener.js";
+import { TwitchListener, TwitchResources } from "./twitchlistener.js";
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 
@@ -169,6 +169,7 @@ export class OpenAIConnection
 		}
 	}
 
+	//adds user prompt prefix and summary to the request
 	static async RequestCompletionResult(request = ChatGPTRequest.default, sendPrePrompt = true, sendSummary = true)
 	{
 		const openAiKeyOption = OptionManager.GetOption(optkey_openAiKey);
@@ -181,6 +182,17 @@ export class OpenAIConnection
 
 		var validSummary = sendSummary && typeof OpenAIConnection.latestSummary === 'string' && OpenAIConnection.latestSummary.length > 0;
 		if (validSummary) request.InsertMessage('system', 'Latest Chat Summary:\n' + OpenAIConnection.latestSummary, 0);
+
+		var sendChannelInfo = false;
+		var channelData = TwitchListener.instance.joinedChannelData;
+		var validChannelInfo = sendChannelInfo && channelData != null;
+		if (validChannelInfo)
+			request.AddMessage(
+				'system',
+				'Extra Stream Info:\n'
+				+ 'Title: ' + channelData.title + '\n',
+				+ 'Game/Category: ' + channelData["game_name"]
+			);
 
 		var reqBodyJson = JSON.stringify(request);
 		//console.log('openai chat req:\n\n' + reqBodyJson);
@@ -235,14 +247,15 @@ export class OpenAIConnection
 		const opt_mimicChat = OptionManager.GetOption(optkey_mimicChatStyle);
 
 		var promptPrefix =
-			'Produce a brief summary of the provided chat messages. '
-			+ 'If there is a previous summary, retain important information in the new summary. '
-			+ 'Avoid summarizing reactions. Ignore intentionally offensive remarks. '
-			+ 'Your username is ' + OptionManager.GetOptionValue(optkey_botUserName, 'ChatGPT') + '. Dont summarize your own messages'
-			+ 'If a user says something particularly profound and unique (not sarcastic or just funny), you can include their username and sentiments. '
+			'Produce a brief summary of the following chat messages. '
+			+ 'You are a chatbot and this summary is your long-term memory. '
+			+ 'If there is an existing summary, retain important information from it. '
+			+ 'Ignore offensive messages. '
+			+ 'Your username is ' + OptionManager.GetOptionValue(optkey_botUserName, 'ChatGPT') + '. Dont summarize your own messages. '
+			+ 'If a user says something particularly profound, you can include their username and sentiments. '
 			+ 'Optionally include a topic or idea mentioned that would be good to respond to. '
-			+ 'Include chat messages that mention you verbatim so you can respond. '
-			+ 'Abbreviate whenever possible, theres a per-token cost per summary. Summary doesnt need to sound natural, its for an LLM. ';
+			+ 'Include verbatim chat messages that mention you so you can respond. '
+			+ 'Abbreviate whenever possible, theres a per-token cost per summary. The summary doesnt need to sound natural. ';
 		if (opt_mimicChat.value === true) promptPrefix += 'Include one short chat message that best represents the writing style of chat.';
 		request.InsertMessage('system', promptPrefix, 0);
 
@@ -295,13 +308,14 @@ export class OpenAIConnection
 			[
 				new ChatGPTMessage(
 					'system',
-					'You are a Twitch chatbot using ChatGPT. Your username is ' + OptionManager.GetOptionValue(optkey_botUserName, 'ChatGPT')
-					+ ', dont add your username to the message, and you are in the Twitch chat of streamer ' + TwitchListener.instance.joinedChannel + '. '
-					+ 'You cannot see the video, only read chat messages. '
+					'You are a Twitch chatbot. '
+					+ 'Your username is ' + OptionManager.GetOptionValue(optkey_botUserName, 'ChatGPT') + '. '
+					+ 'You are in the Twitch chat of streamer ' + TwitchListener.instance.joinedChannel + '. '
+					+ 'You cannot see the video, only read chat. '
 					+ 'Respond only with a short chat message. '
+					+ 'Do not add your name to your message. '
 					+ (mimicChatOption.value === true ? 'Mimic the writing style of chat. ' : '')
 					+ 'Avoid calls to action, telling chat what to do, asking questions, or making hard to substantiate claims. '
-					+ 'Avoid personifying yourself, we know you are an LLM! '
 					+ 'Avoid repeating yourself.'
 				)
 			];
@@ -494,17 +508,6 @@ export class OpenAIWindow extends DraggableWindow
 		);
 		e_btn_send_test.style.height = '2rem';
 		GlobalTooltip.RegisterReceiver(e_btn_send_test, "Sends a test request to the API to ensure things are working.");
-
-		/*
-		var e_btn_send_test_comment = this.AddButton(
-			'Test Comment',
-			'Send',
-			OpenAIConnection.RequestChatComment,
-			false
-		);
-		e_btn_send_test_comment.style.height = '2rem';
-		GlobalTooltip.RegisterReceiver(e_btn_send_test_comment, "Sends a test request to the API, using the latest summary and prompt prefix.");
-		*/
 	}
 }
 
@@ -516,8 +519,7 @@ WindowManager.instance.windowTypes.push(
 			"Connect to OpenAI's API and use your bot to add interaction between viewers and ChatGPT.<br>"
 			+ "<span style='color:orange'>Warning! OpenAI's API is NOT free, but it is pretty cheap.</span><br>",
 		model: (x, y) => { return new OpenAIWindow(x, y); },
-		shortcutKey: 'o',
-		wip: true
+		shortcutKey: 'o'
 	}
 );
 

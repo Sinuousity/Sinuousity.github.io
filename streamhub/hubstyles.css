@@ -6,6 +6,10 @@
 	--col-warn: #e49c155b;
 	--col-info: #2592d15b;
 	--col-success: #98d40b5b;
+	--col-error-bright: #f71010ff;
+	--col-warn-bright: #e49c15ff;
+	--col-info-bright: #2592d1ff;
+	--col-success-bright: #98d40bff;
 	--chat-width: 240px;
 	--chat-offset: 100%;
 	--chat-tab-position: 0px;
@@ -667,4 +671,86 @@ a:hover
 	color: #ffbe73 !important;
 	background-color: #0000007e !important;
 	transform: scale(100%, 100%) !important;
+}
+
+
+
+
+@keyframes new-user-popup-anim
+{
+	0%
+	{
+		outline-color: rgb(59, 59, 59);
+		outline-offset: 0rem;
+	}
+	50%
+	{
+		outline-color: var(--col-warn-bright);
+		outline-offset: 0.15rem;
+	}
+	100%
+	{
+		outline-color: rgb(59, 59, 59);
+		outline-offset: 0rem;
+	}
+}
+
+.new-user-popup
+{
+	position: absolute;
+	transform: translate(-50%, -50%);
+	left: 50%;
+	top: 50%;
+	height: min(100vh - 1rem, 14rem);
+	width: min(100vw - 1rem, 24rem);
+	border-radius: 0.6rem;
+	background-color: #111111;
+	outline: solid white 0.15rem;
+	color: white;
+	font-weight: bold;
+	font-size: 1rem;
+	line-height: 1rem;
+	letter-spacing: 0.1rem;
+
+	animation-duration: 1s;
+	animation-name: new-user-popup-anim;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+
+.new-user-popup-lbl
+{
+	position: absolute;
+	transform: translate(-50%, -50%);
+	width: 90%;
+	left: 50%;
+	top: 42%;
+	color: var(--col-warn-bright);
+	font-weight: bold;
+	font-size: 1rem;
+	line-height: 1rem;
+	letter-spacing: 0.1rem;
+}
+
+.new-user-popup-btn
+{
+	cursor: pointer;
+	position: absolute;
+	transform: translate(-50%, 0%);
+	width: 90%;
+	height: 2rem;
+	left: 50%;
+	bottom: 1rem;
+	color: rgb(148, 148, 148);
+	background-color: rgb(56, 56, 56);
+	font-weight: bold;
+	font-size: 0.9rem;
+	line-height: 0.9rem;
+	letter-spacing: 0.1rem;
+	border-radius: 0.5rem;
+}
+.new-user-popup-btn:hover
+{
+	color: var(--col-warn-bright);
+	background-color: rgb(31, 31, 31);
 }

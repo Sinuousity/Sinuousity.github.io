@@ -24,8 +24,8 @@ import { UserInput } from "./modules/userinput.js";
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
 
-window.hub_version = "v0.2.5";
-window.last_update_date = "September 16 2024";
+window.hub_version = "v0.2.6";
+window.last_update_date = "September 18 2024";
 
 const resetStoredState = false;
 var e_menu_windows = {};
@@ -61,6 +61,39 @@ function OnBodyLoad()
 			document.documentElement.style.setProperty('--mouse-y-neg', (document.documentElement.clientHeight - UserInput.instance.mousePositionY) + 'px');
 		}
 	);
+
+	CheckFirstTimeVisit();
+}
+
+function CheckFirstTimeVisit()
+{
+	const key_hasVisited = 'not.new.visitor';
+	//localStorage.setItem(key_hasVisited, 'false');
+	var hasVisited = localStorage.getItem(key_hasVisited);
+	if (hasVisited == null || hasVisited === 'false')
+	{
+		const e_new_visitor_popup = addElement('div', 'new-user-popup', document.body);
+		e_new_visitor_popup.id = 'new-visitor-popup';
+
+		var e_new_visitor_message = addElement('div', 'new-user-popup-lbl', e_new_visitor_popup);
+		e_new_visitor_message.id = 'new-visitor-message';
+
+		e_new_visitor_message.innerHTML =
+			"<span style='font-size:1.5rem;'>Hey there!</span><br><br>"
+			+ "Is this your first time here?<br><br>"
+			+ "You can use the menu at the bottom left to start exploring!";
+
+		var e_new_visitor_button = addElement('input', 'new-user-popup-btn', e_new_visitor_popup);
+		e_new_visitor_button.id = 'new-visitor-button';
+		e_new_visitor_button.type = 'button';
+		e_new_visitor_button.title = 'Got it!';
+		e_new_visitor_button.value = 'Got it!';
+		e_new_visitor_button.addEventListener('click', () =>
+		{
+			console.log('closing popup'); e_new_visitor_popup.remove();
+			localStorage.setItem(key_hasVisited, 'true');
+		});
+	}
 }
 
 var ts_time_prev = -1;
@@ -130,6 +163,7 @@ function RestoreLocalStorageContent()
 
 	if (GlobalSettings.instance.bool_resetAllData)
 	{
+		localStorage.clear();
 		RaffleState.instance.TryStore();
 		ItemLibrary.builtIn.Store();
 		ViewerInventoryManager.instance.Store();

@@ -806,6 +806,15 @@ function showOverlay(title)
 			e_link_streamhub.title = "StreamHub";
 			e_link_streamhub.innerText = "StreamHub";
 
+			var e_link_soundcloud = document.createElement("div");
+			e_link_soundcloud.className = "overlay-links-link";
+			e_link_soundcloud.title = "SoundCloud";
+			var e_img_soundcloud = document.createElement("img");
+			e_img_soundcloud.className = "overlay-links-link-img";
+			e_img_soundcloud.style.filter = "saturate(0%) brightness(200%)";
+			e_img_soundcloud.src = str_src_logo_soundcloud;
+			e_link_soundcloud.appendChild(e_img_soundcloud);
+
 			var e_link_linkedin = document.createElement("div");
 			e_link_linkedin.className = "overlay-links-link";
 			e_link_linkedin.title = "LinkedIn";
@@ -835,6 +844,7 @@ function showOverlay(title)
 
 			e_overlay_content.appendChild(e_link_linkedin);
 			e_overlay_content.appendChild(e_link_assetstore);
+			e_overlay_content.appendChild(e_link_soundcloud);
 			e_overlay_content.appendChild(e_link_streamhub);
 			//e_overlay_content.appendChild(e_link_fiverr);
 			//e_overlay_content.appendChild(e_link_resume);
@@ -842,6 +852,7 @@ function showOverlay(title)
 			e_link_assetstore.addEventListener("click", nav_to_assetstore);
 			e_link_linkedin.addEventListener("click", nav_to_linkedin);
 			e_link_streamhub.addEventListener("click", nav_to_streamhub);
+			e_link_soundcloud.addEventListener("click", nav_to_soundcloud);
 			//e_link_fiverr.addEventListener("click", nav_to_fiverr);
 			//e_link_resume.addEventListener("click", nav_to_resume);
 
@@ -861,6 +872,7 @@ function nav_to_streamhub() { nav_to(str_url_streamhub, '_self') };
 function nav_to_assetstore() { nav_to(str_url_assetstore) };
 function nav_to_fiverr() { nav_to(str_url_fiverr) };
 function nav_to_linkedin() { nav_to(str_url_linkedin) };
+function nav_to_soundcloud() { nav_to(str_url_soundcloud) };
 function nav_to_resume() { nav_to(str_url_resume) };
 
 function nav_to(url, target = '_blank')
@@ -881,6 +893,7 @@ function closeOverlay()
 var str_src_logo_fiverr = "https://assets-global.website-files.com/606a802fcaa89ba7b0508c95/606a802fcaa89b2b03508cd4_Fiverr%20Logo.svg";
 var str_src_logo_assetstore = "https://unity-assetstorev2-prd.storage.googleapis.com/cdn-origin/assets/as/views/common/components/Logo/src/unity-assetstore-logo-new.50ac708aeae28b8b6bf369ece5875fa5.svg";
 var str_src_logo_linkedin = "https://static.licdn.com/aero-v1/sc/h/an86sbagr48vf1s7k8llw6h6b";
+var str_src_logo_soundcloud = "https://a-v2.sndcdn.com/assets/images/brand-1b72dd82.svg";
 
 var about_me_str = "";
 

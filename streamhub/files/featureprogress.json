@@ -207,9 +207,9 @@
 					"comment": "Responds when other users use @ to mention your bot by username."
 				},
 				{
-					"name": "Current Broadcast Info",
-					"progress": 0.0,
-					"comment": "Fetches the current livestream info for your broadcast from Twitch, to give ChatGPT more context and keep it from guessing / assuming those details."
+					"name": "Use Channel Stream Info",
+					"progress": 1.0,
+					"comment": "Fetches the current livestream info for your broadcast from Twitch, to give ChatGPT more context."
 				}
 			]
 		},

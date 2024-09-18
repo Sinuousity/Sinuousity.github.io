@@ -23,7 +23,7 @@ I have also spent time learning Godot and GDScript (although I very much prefer 
 Outside of game development, I worked for several years using Excel, Microsoft365, SharePoint, AWS, and other business data tools and platforms as a Reporting Analyst for Meta.
 In my role at Meta, I maintained the project's databases, designed and developed internal tools, and handled various data requests including employee forecasting.
 <br>
-Of course, check out my <a class='overlay-link' style='cursor:pointer;text-decoration:underline;' onclick='closeOverlay(); showOverlay("RESUME");'>résumé</a> if you're interested in a more complete list of my skills and experience.
+Of course, check out my <a class='overlay-link' style='cursor:pointer;text-decoration:underline;' onclick='closeOverlay(); showOverlay("RESUME");' translate='no'>résumé</a> if you're interested in a more complete list of my skills and experience.
 <br>
 <br>
 During my time working with game engines, I have become adept at using a variety of creative tools to breathe life into my projects.

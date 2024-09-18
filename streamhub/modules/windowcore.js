@@ -642,6 +642,8 @@ export class WindowBase
 	AddTextReadonly(label, readonlyValue)
 	{
 		var e_control = this.AddControl(label);
+		var e_label_lbl = e_control.children[0];
+		e_label_lbl.style.color = '#555';
 
 		var e_root = document.createElement("div");
 		e_root.className = "window-control";
@@ -651,7 +653,7 @@ export class WindowBase
 		e_input.style.overflowX = "hidden";
 		e_input.style.overflowY = "auto";
 		e_input.innerText = readonlyValue;
-		e_input.title = "Read Only";
+		//e_input.title = "Read Only";
 
 		e_root.appendChild(e_input);
 		e_control.appendChild(e_root);
@@ -828,7 +830,7 @@ export class DraggableWindow extends WindowBase
 		this.e_window_root.style.rotate = (20.0 * screenx * xdeltasign) + "deg";
 		//this.e_window_root.style.scale = "101%";
 		this.e_window_root.style.outlineOffset = "4px";
-		this.e_window_root.style.outline = "2px solid #FFbb00ff";
+		this.e_window_root.style.outline = "2px solid var(--col-warn-bright)";
 		this.e_window_root.style.backgroundColor = "#ffffff15";
 		this.ApplyPosition();
 	}

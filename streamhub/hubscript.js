@@ -24,8 +24,8 @@ import { UserInput } from "./modules/userinput.js";
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
 
-window.hub_version = "v0.2.6";
-window.last_update_date = "September 18 2024";
+window.hub_version = "v0.2.7";
+window.last_update_date = "October 15 2024";
 
 const resetStoredState = false;
 var e_menu_windows = {};

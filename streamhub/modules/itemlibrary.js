@@ -70,6 +70,18 @@ export class ItemStoreBase extends StoredObject
 	MarkDirty() { this.ExtendTimer(); }
 	GetState() { return { items: this.items }; }
 	ApplyState(x) { this.items = x.items ?? []; }
+
+	GetFilteredItems(searchString = '', searchDescription = false)
+	{
+		if (searchString === '') return false;
+		return this.items.filter(x => x.name.toLowerCase().includes(searchString) || (searchDescription && x.description.toLowerCase().includes(searchString)));
+	}
+
+	GetFilteredItemFirst(searchString = '', searchDescription = false)
+	{
+		if (searchString === '') return false;
+		return this.items.find(x => x.name.toLowerCase().includes(searchString) || (searchDescription && x.description.toLowerCase().includes(searchString)));
+	}
 }
 
 export class ItemStoreWindowBase extends DraggableWindow

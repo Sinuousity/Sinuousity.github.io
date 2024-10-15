@@ -1,4 +1,6 @@
+import { addElement } from "../hubscript.js";
 import { GlobalTooltip } from "./globaltooltip.js";
+import { ItemLibrary } from "./itemlibrary.js";
 import { StoredObject } from "./storedobject.js";
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
@@ -12,6 +14,52 @@ export class ViewerInventorySlot
 	{
 		this.item = item;
 		this.count = count;
+	}
+
+	static GetItemWeight(itemSlot = {})
+	{
+		if (itemSlot.item.weight) return itemSlot.item.weight;
+		return 0.0;
+	}
+
+	static GetItemValue(itemSlot = {})
+	{
+		if (itemSlot.item.tradeValue) return itemSlot.item.tradeValue;
+		return 0.0;
+	}
+
+	static GetTotalWeight(itemSlot = {})
+	{
+		if (itemSlot.item.weight) return itemSlot.count * itemSlot.item.weight;
+		return 0.0;
+	}
+
+	static GetTotalValue(itemSlot = {})
+	{
+		if (itemSlot.item.tradeValue) return itemSlot.count * itemSlot.item.tradeValue;
+		return 0.0;
+	}
+
+	static CompareName(a = {}, b = {}) { return b.item.name.localeCompare(a.item.name); }
+
+	static CompareWeight(a = {}, b = {})
+	{
+		return ViewerInventorySlot.GetItemWeight(b) - ViewerInventorySlot.GetItemWeight(a);
+	}
+
+	static CompareValue(a = {}, b = {})
+	{
+		return ViewerInventorySlot.GetItemValue(b) - ViewerInventorySlot.GetItemValue(a);
+	}
+
+	static CompareTotalWeight(a = {}, b = {})
+	{
+		return ViewerInventorySlot.GetTotalWeight(b) - ViewerInventorySlot.GetTotalWeight(a);
+	}
+
+	static CompareTotalValue(a = {}, b = {})
+	{
+		return ViewerInventorySlot.GetTotalValue(b) - ViewerInventorySlot.GetTotalValue(a);
 	}
 }
 
@@ -198,6 +246,11 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_window_root.style.minWidth = "360px";
 		this.e_window_root.style.minHeight = "250px";
 
+		this.sortBy = "";
+		this.sortArrow = "↧";
+		this.sortDescending = false;
+		this.useImperialWeight = false;
+
 		this.CreateContentContainer();
 
 		this.SetTitle("Inventories");
@@ -208,6 +261,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.targetViewer = {};
 
 		this.e_viewer_info = {};
+		this.e_viewer_info_scrollview = {};
 
 		this.e_viewer_list_container = document.createElement("div");
 		this.e_viewer_list_container.className = "inventory-window-content";
@@ -224,6 +278,51 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_viewer_list.className = "inventory-list-item";
 		this.e_viewer_list_container.appendChild(this.e_viewer_list);
 		this.RefreshViewerList();
+	}
+
+	PrettyNum(value = 0)
+	{
+		var valueRounded = Math.round(value * 100);
+		return valueRounded / 100;
+	}
+
+	GetWeightStr(weight = 0.0)
+	{
+		if (this.useImperialWeight === true) return this.GetWeightStrImperial(weight);
+		return this.GetWeightStrMetric(weight);
+	}
+
+	GetWeightStrMetric(weight = 0.0)
+	{
+		const kilogram = 1.0;
+		const gram = 0.001;
+		const milligram = gram * gram;
+		const megagram = 1000;
+		const gigagram = megagram * megagram;
+
+		if (weight <= 0.0) return '0 mg';
+		if (weight < milligram * 0.01) return `< 0.01 mg`;
+		if (weight < milligram) return `${this.PrettyNum(weight * gigagram)} mg`;
+		if (weight < gram) return `${this.PrettyNum(weight * gigagram).toLocaleString()} mg`;
+		if (weight < kilogram) return `${this.PrettyNum(weight * megagram).toLocaleString()} g`;
+		if (weight < megagram) return `${this.PrettyNum(weight).toLocaleString()} kg`;
+		if (weight < gigagram) return `${this.PrettyNum(weight * gram).toLocaleString()} Mg`;
+		return `${this.PrettyNum(weight * milligram).toLocaleString()} Gg`;
+	}
+
+	GetWeightStrImperial(weight = 0.0)
+	{
+		const pound = 1.0;
+		const ounce = 1.0 / 16.0;
+		const ton = 2240;
+		const invton = 1.0 / ton;
+
+		if (weight <= 0.0) return '0 oz';
+		if (weight < ounce * 0.01) return `< 0.01 oz`;
+		if (weight <= ounce) return `${this.PrettyNum(weight)} oz`;
+		if (weight < pound) return `${this.PrettyNum(weight * ounce).toLocaleString()} oz`;
+		if (weight < ton) return `${this.PrettyNum(weight).toLocaleString()} lb`;
+		return `${this.PrettyNum(weight * invton).toLocaleString()} t`;
 	}
 
 	CreateAddViewerButton()
@@ -299,12 +398,6 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_viewer_list_container.appendChild(this.e_btn_add);
 	}
 
-	PrettyNum(value = 0)
-	{
-		var valueRounded = Math.round(value * 8);
-		return valueRounded / 8;
-	}
-
 	RefreshViewerList()
 	{
 		this.ClearViewerList();
@@ -363,8 +456,10 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 		this.e_viewer_info = document.createElement("div");
 		this.e_viewer_info.className = "viewer-info-overlay";
+		this.e_viewer_info.style.display = "flex";
+		this.e_viewer_info.style.flexDirection = "column";
 		this.e_viewer_info.style.overflowX = "hidden";
-		this.e_viewer_info.style.overflowY = "auto";
+		this.e_viewer_info.style.overflowY = "hidden";
 
 		this.RecreateViewerInfoContent();
 
@@ -391,13 +486,225 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 		var e_section_title = document.createElement("div");
 		e_section_title.className = "window-section-title";
+		e_section_title.style.borderBottom = "unset";
+		e_section_title.style.marginBottom = "0";
+		e_section_title.style.marginTop = "0";
 		e_section_title.innerHTML = "Inventory of " + this.targetViewer.username + "<span>( " + this.targetViewer.viewerSource + " )</span>";
 		this.e_viewer_info.appendChild(e_section_title);
 
-		for (var ii = 0; ii < this.targetViewer.itemSlots.length; ii++)
+		this.CreateItemListColumns();
+		this.CreateItemListView();
+		this.CreateItemListTotals();
+
+		this.CreateItemAddUI();
+	}
+
+	GetItemListColumnText(columnName = 'Column')
+	{
+		let colText = columnName;
+		if (this.sortBy == columnName)
+		{
+			colText = this.sortArrow + ' ' + colText + ' ' + this.sortArrow;
+		}
+		return colText;
+	}
+
+	CreateItemListTotal(e_columns = {}, columnName = 'Column', justifyContent = 'center', width = '5rem')
+	{
+		return addElement("div", "", e_columns, columnName, e =>
+		{
+			e.style.display = "flex";
+			e.style.justifyContent = justifyContent;
+			e.style.flexGrow = '1.0';
+			e.style.width = width;
+		});
+	}
+
+	CreateItemListColumn(e_columns = {}, columnName = 'Column', justifyContent = 'center', width = '5rem', defaultDescending = false)
+	{
+		return addElement("div", "viewer-item-row-item", e_columns, this.GetItemListColumnText(columnName), e =>
+		{
+			e.style.display = "flex";
+			e.style.justifyContent = justifyContent;
+			e.style.flexGrow = '1.0';
+			e.style.width = width;
+			e.style.cursor = "pointer";
+			e.addEventListener('click', e => this.SetSortBy(columnName, defaultDescending));
+		});
+	}
+
+	UpdateItemListColumnText(e_col = {}, text = '')
+	{
+		if (e_col)
+		{
+			e_col.innerText = this.GetItemListColumnText(text);
+			if (text == this.sortBy) e_col.style.color = this.sortDescending ? 'orange' : 'cyan';
+			else e_col.style.color = 'unset';
+		}
+	}
+
+	UpdateItemListColumns()
+	{
+		this.UpdateItemListColumnText(this.e_list_column_name, 'Item Name');
+		this.UpdateItemListColumnText(this.e_list_column_totalweight, 'Weight');
+		this.UpdateItemListColumnText(this.e_list_column_totalvalue, 'Value');
+	}
+
+	CreateItemListColumns()
+	{
+		let e_columns = addElement("div", "viewer-item-row window-section-title", this.e_viewer_info, null);
+		addElement("div", "viewer-item-row-item", e_columns, "", e =>
+		{
+			e.style.display = "flex";
+			e.style.width = "2rem";
+			e.style.flexGrow = "0.0";
+		});
+		this.e_list_column_name = this.CreateItemListColumn(e_columns, 'Item Name', 'left', '10rem', true);
+		this.e_list_column_totalweight = this.CreateItemListColumn(e_columns, 'Weight');
+		this.e_list_column_totalvalue = this.CreateItemListColumn(e_columns, 'Value');
+
+		addElement("div", "viewer-item-row-item", e_columns, "", e =>
+		{
+			e.style.display = "flex";
+			e.style.width = "1.7rem";
+			e.style.flexGrow = "0.0";
+		});
+
+		this.UpdateItemListColumns();
+	}
+
+	CreateItemListTotals()
+	{
+		const totals_borderStyle = 'solid';
+		const totals_borderColor = '#575757';
+		const totals_borderWidth_top = '2px 2px 0px 2px';
+		const totals_borderWidth_bottom = '0px 2px 2px 2px';
+
+		let e_totals = addElement("div", "viewer-item-row", this.e_viewer_info, null, e => e.style.marginTop = '0.5rem');
+		e_totals.style.borderStyle = totals_borderStyle;
+		e_totals.style.borderWidth = totals_borderWidth_top;
+		e_totals.style.borderColor = totals_borderColor;
+
+		this.e_list_totalweight = this.CreateItemListTotal(e_totals, 'Total Weight');
+		this.e_list_totalvalue = this.CreateItemListTotal(e_totals, 'Total Value');
+
+		let e_total_values = addElement("div", "viewer-item-row ", this.e_viewer_info, null);
+		this.e_list_totalweight_val = this.CreateItemListTotal(e_total_values, this.GetWeightStr(ViewerInventory.GetTotalWeight(this.targetViewer)));
+		this.e_list_totalvalue_val = this.CreateItemListTotal(e_total_values, ViewerInventory.GetTotalTradeValue(this.targetViewer));
+		e_total_values.style.borderStyle = totals_borderStyle;
+		e_total_values.style.borderWidth = totals_borderWidth_bottom;
+		e_total_values.style.borderColor = totals_borderColor;
+	}
+
+	CreateItemAddUI()
+	{
+		let e_add_item = addElement("div", "viewer-item-row", this.e_viewer_info, null, e => { e.style.margin = '0.5rem'; e.style.height = '2rem'; e.style.lineHeight = '2rem'; });
+
+		this.e_add_item_input = addElement('input', null, e_add_item, null, e => { e.type = 'text'; e.placeholder = 'Search by name...'; e.style.width = '3rem'; e.style.flexGrow = '1.0'; });
+		this.e_add_item_input.style.textAlign = 'center';
+
+		this.e_add_item_match_name = addElement('div', null, e_add_item, null, e => { e.innerText = '---'; e.style.textAlign = 'center'; e.style.width = '5rem'; e.style.flexGrow = '1.0'; });
+
+		this.e_add_item_btn = addElement('button', 'window-content-button', e_add_item, null, e => e.innerText = 'Add Item');
+		this.e_add_item_btn.style.pointerEvents = 'none';
+		this.e_add_item_btn.style.opacity = '50%';
+
+		this.e_add_item_input.addEventListener(
+			'change',
+			x =>
+			{
+				let searchString = this.e_add_item_input.value.toLowerCase().trim();
+				let matchingItem = ItemLibrary.builtIn.GetFilteredItemFirst(searchString);
+				if (matchingItem)
+				{
+					this.e_add_item_match_name.innerText = matchingItem.name;
+					this.e_add_item_match_name.style.color = "lightgreen";
+					this.e_add_item_btn.style.pointerEvents = 'all';
+					this.e_add_item_btn.style.opacity = '100%';
+				}
+				else
+				{
+					this.e_add_item_match_name.style.color = "grey";
+					this.e_add_item_match_name.innerText = '---';
+					this.e_add_item_btn.style.pointerEvents = 'none';
+					this.e_add_item_btn.style.opacity = '50%';
+				}
+			}
+		);
+
+		this.e_add_item_btn.addEventListener(
+			'click',
+			x =>
+			{
+				let searchString = this.e_add_item_input.value.toLowerCase().trim();
+				let matchingItem = ItemLibrary.builtIn.GetFilteredItemFirst(searchString);
+				if (matchingItem) 
+				{
+					ViewerInventoryManager.AddItemCount(this.targetViewer.viewerSource, this.targetViewer.username, matchingItem, 1);
+					this.PopulateItemList();
+				}
+			}
+		);
+	}
+
+	SetSortBy(sortBy = '', defaultDescending = false)
+	{
+		if (sortBy == this.sortBy)
+		{
+			this.sortDescending = !this.sortDescending;
+		}
+		else
+		{
+			this.sortBy = sortBy;
+			this.sortDescending = defaultDescending;
+		}
+
+		this.sortArrow = this.sortDescending ? '↧' : '↥';
+		this.PopulateItemList();
+		this.UpdateItemListColumns();
+	}
+
+	CreateItemListView()
+	{
+		this.e_viewer_info_scrollview = addElement(
+			"div", null, this.e_viewer_info, null,
+			e =>
+			{
+				e.style.overflowX = "hidden";
+				e.style.overflowY = "scroll";
+				e.style.flexGrow = "1.0";
+				e.style.flexShrink = "1.0";
+			}
+		);
+
+		this.PopulateItemList();
+	}
+
+	PopulateItemList()
+	{
+		this.e_viewer_info_scrollview.innerText = '';
+
+		let targetItemSlots = this.targetViewer.itemSlots;
+		switch (this.sortBy)
+		{
+			case 'Item Name':
+				targetItemSlots.sort(ViewerInventorySlot.CompareName);
+				if (this.sortDescending) targetItemSlots.reverse();
+				break;
+			case 'Weight':
+				targetItemSlots.sort(ViewerInventorySlot.CompareTotalWeight);
+				if (this.sortDescending) targetItemSlots.reverse();
+				break;
+			case 'Value':
+				targetItemSlots.sort(ViewerInventorySlot.CompareTotalValue);
+				if (this.sortDescending) targetItemSlots.reverse();
+				break;
+		}
+
+		for (let ii = 0; ii < targetItemSlots.length; ii++)
 		{
 			const item_id = ii;
-			this.CreateItemRow(item_id, this.targetViewer.itemSlots[item_id]);
+			this.CreateItemRow(item_id, targetItemSlots[item_id]);
 		}
 	}
 
@@ -416,54 +723,92 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.RefreshViewerList();
 	}
 
+	GetItemSlotString(itemSlot = {})
+	{
+		let slotStr = itemSlot.item.name;
+
+		if (itemSlot.count > 1)
+		{
+			if (slotStr.endsWith("y"))
+			{
+				slotStr = slotStr.substring(0, slotStr.length - 1) + "ies";
+			}
+			else if (slotStr.endsWith("o"))
+			{
+				slotStr += "es";
+			}
+			else if (slotStr.endsWith("s"))
+			{
+			}
+			else
+			{
+				if (slotStr.endsWith("x") || slotStr.endsWith("z"))
+					slotStr += "e";
+				slotStr += "s";
+			}
+		}
+
+		return slotStr;
+	}
+
+	AddItemRowLabel(e_parent, text = '')
+	{
+		return addElement(
+			"div", "viewer-item-row-item", e_parent, '',
+			e =>
+			{
+				e.innerHTML = text;
+				e.style.justifyContent = "right";
+				e.style.width = '5rem';
+				e.style.flexGrow = "1.0";
+			}
+		);
+	}
+
 	CreateItemRow(item_id = 0, itemSlot = {})
 	{
-		var e_item_info = document.createElement("div");
+		let e_item_info = document.createElement("div");
 		e_item_info.className = "viewer-item-row";
 		if (itemSlot.item)
 		{
+			let e_slot_count = this.AddItemRowLabel(e_item_info, itemSlot.count);
+			e_slot_count.style.width = '2rem';
+			e_slot_count.style.flexGrow = '0.0';
 
-			e_item_info.innerText = itemSlot.count + " " + itemSlot.item.name;
+			addElement(
+				"div", "viewer-item-row-item", e_item_info, this.GetItemSlotString(itemSlot),
+				e =>
+				{
+					e.style.justifyContent = "left";
+					e.style.width = "8rem";
+				}
+			);
+
+			let item_weight_ind = this.GetWeightStr(ViewerInventorySlot.GetItemWeight(itemSlot));
 			if (itemSlot.count > 1)
 			{
-				if (e_item_info.innerText.endsWith("y"))
-				{
-					e_item_info.innerText = e_item_info.innerText.substring(0, e_item_info.innerText.length - 1) + "ies";
-				}
-				else if (e_item_info.innerText.endsWith("o"))
-				{
-					e_item_info.innerText += "es";
-				}
-				else if (e_item_info.innerText.endsWith("s"))
-				{
-				}
-				else
-				{
-					if (e_item_info.innerText.endsWith("x") || e_item_info.innerText.endsWith("z"))
-						e_item_info.innerText += "e";
-					e_item_info.innerText += "s";
-				}
+				let item_weight_tot = this.GetWeightStr(ViewerInventorySlot.GetTotalWeight(itemSlot));
+				this.AddItemRowLabel(e_item_info, `<span style="font-size: 0.7rem;padding-right:0.5rem;opacity:75%">${item_weight_ind} /</span>${item_weight_tot}`);
 			}
-			if (itemSlot.item.weight) e_item_info.innerText += ` | ${itemSlot.item.weight} kg`;
-			if (itemSlot.item.tradeValue) e_item_info.innerText += ` | ${itemSlot.item.tradeValue} gp`;
+			else
+				this.AddItemRowLabel(e_item_info, item_weight_ind);
+			this.AddItemRowLabel(e_item_info, `${this.PrettyNum(ViewerInventorySlot.GetTotalValue(itemSlot)).toLocaleString()} gp`);
 		}
 		else
 			e_item_info.innerText = "NULL ITEM :?";
 
 
-		var e_btn_delete = document.createElement("div");
-		e_btn_delete.className = "window-content-button viewer-item-button";
+		let e_btn_delete = addElement("div", "window-content-button viewer-item-button", e_item_info, "-1");
 		e_btn_delete.style.backgroundColor = "#ff000030";
-		e_btn_delete.style.outlineColor = "#ff0000";
-		e_btn_delete.innerText = "-1";
+		e_btn_delete.style.outlineColor = "#f00";
+		e_btn_delete.style.color = "#f55";
 		e_btn_delete.addEventListener("click", () =>
 		{
 			ViewerInventoryManager.TryRemoveItem(this.targetViewerIndex, item_id);
 			this.RecreateViewerInfoContent();
 		});
-		e_item_info.appendChild(e_btn_delete);
 
-		this.e_viewer_info.appendChild(e_item_info);
+		this.e_viewer_info_scrollview.appendChild(e_item_info);
 
 		if (itemSlot.item) GlobalTooltip.RegisterReceiver(e_item_info, itemSlot.item.name, itemSlot.item.description);
 	}

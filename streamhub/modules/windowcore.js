@@ -513,13 +513,17 @@ export class WindowBase
 					e.style.position = 'absolute';
 					e.style.top = '50%';
 					e.style.left = '50%';
-					e.style.width = '2rem';
-					e.style.height = '1rem';
+					e.style.width = '1.6rem';
+					e.style.height = '0.8rem';
 					e.style.backgroundColor = '#575757';
 					e.style.borderRadius = '0.19rem';
 					e.style.opacity = checked ? '100%' : '50%';
 					e.style.transformOrigin = '0% 0%';
 					e.style.transform = 'translate(-50%,-50%)';
+
+					e.style.borderStyle = 'solid';
+					e.style.borderWidth = '1px';
+					e.style.borderColor = '#666';
 
 					e.style.transitionProperty = 'scale';
 					e.style.transitionDuration = '0.15s';
@@ -529,20 +533,21 @@ export class WindowBase
 					e.style.position = 'absolute';
 					e.style.top = '50%';
 					e.style.left = '50%';
-					e.style.height = '1rem';
-					e.style.width = '1rem';
+					e.style.height = checked ? '0.9rem' : '0.5rem';
+					e.style.width = checked ? '0.9rem' : '0.5rem';
 					e.style.backgroundColor = checked ? 'cyan' : '#222';
 					e.style.borderRadius = '0.2rem';
 					e.style.opacity = checked ? '100%' : '50%';
 					e.style.transformOrigin = '0% 0%';
 					e.style.transform = 'translate(' + (checked ? '0%' : '-100%') + ',-50%)';
 
-					e.style.transitionProperty = 'scale, transform, background-color, box-shadow';
+					e.style.transitionProperty = 'scale, transform, background-color, box-shadow, width, height';
+					e.style.transitionTimingFunction = 'ease-in-out';
 					e.style.transitionDuration = '0.15s';
 
 					e.style.borderStyle = 'solid';
 					e.style.borderWidth = '1px';
-					e.style.borderColor = checked ? 'white' : '#666';
+					e.style.borderColor = checked ? '#4ff' : '#666';
 					e.style.boxShadow = checked ? '#fffa 0px 0px 9px' : '#000a -1px 1px 2px';
 				};
 
@@ -579,8 +584,10 @@ export class WindowBase
 				e_tgl_back.style.opacity = e_input.checked ? '100%' : '50%';
 				e_tgl_thumb.style.opacity = e_input.checked ? '100%' : '50%';
 				e_tgl_thumb.style.boxShadow = e_input.checked ? '#fffa 0px 0px 9px' : '#000a -1px 1px 2px';
+				e_tgl_thumb.style.height = e_input.checked ? '0.9rem' : '0.5rem';
+				e_tgl_thumb.style.width = e_input.checked ? '0.9rem' : '0.5rem';
 
-				e_tgl_thumb.style.borderColor = e_input.checked ? 'white' : '#666';
+				e_tgl_thumb.style.borderColor = e_input.checked ? '#4ff' : '#666';
 				e_tgl_thumb.style.backgroundColor = e_input.checked ? 'cyan' : '#222';
 				e_tgl_thumb.style.transform = 'translate(' + (e_input.checked ? '0%' : '-100%') + ',-50%)';
 				if (dirtiesSettings)

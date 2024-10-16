@@ -495,29 +495,102 @@ export class WindowBase
 
 	AddToggle(label, checked, changeAction, dirtiesSettings = true)
 	{
-		var e_control = this.AddControl(label);
-
-		var e_root = document.createElement("label");
-		e_root.className = "window-control";
-
-		var e_input = document.createElement("input");
-		e_input.type = "checkbox";
-		e_input.checked = checked;
-
-		const willDirtySettings = dirtiesSettings;
-		var onToggle = () =>
-		{
-			changeAction(e_input);
-			if (willDirtySettings)
+		let e_control = this.AddControl(label);
+		let e_root = addElement('label', 'window-control', e_control);
+		let e_tgl_back = {};
+		let e_tgl_thumb = {};
+		//let e_input = addElement('input', null, e_root, null, x => { x.type = 'checkbox'; x.checked = checked; });
+		let e_input = addElement(
+			'div', null, e_root, null,
+			x => 
 			{
-				GlobalSettings.instance.ApplyState();
-				GlobalSettings.instance.MarkDirty();
-			}
-		};
-		e_input.addEventListener("change", onToggle);
+				x.style.height = '100%';
+				x.style.cursor = 'pointer';
+				x.checked = checked;
 
-		e_root.appendChild(e_input);
-		e_control.appendChild(e_root);
+				let style_back = e =>
+				{
+					e.style.position = 'absolute';
+					e.style.top = '50%';
+					e.style.left = '50%';
+					e.style.width = '2rem';
+					e.style.height = '1rem';
+					e.style.backgroundColor = '#575757';
+					e.style.borderRadius = '0.19rem';
+					e.style.opacity = checked ? '100%' : '50%';
+					e.style.transformOrigin = '0% 0%';
+					e.style.transform = 'translate(-50%,-50%)';
+
+					e.style.transitionProperty = 'scale';
+					e.style.transitionDuration = '0.15s';
+				};
+				let style_thumb = e =>
+				{
+					e.style.position = 'absolute';
+					e.style.top = '50%';
+					e.style.left = '50%';
+					e.style.height = '1rem';
+					e.style.width = '1rem';
+					e.style.backgroundColor = checked ? 'cyan' : '#222';
+					e.style.borderRadius = '0.2rem';
+					e.style.opacity = checked ? '100%' : '50%';
+					e.style.transformOrigin = '0% 0%';
+					e.style.transform = 'translate(' + (checked ? '0%' : '-100%') + ',-50%)';
+
+					e.style.transitionProperty = 'scale, transform, background-color, box-shadow';
+					e.style.transitionDuration = '0.15s';
+
+					e.style.borderStyle = 'solid';
+					e.style.borderWidth = '1px';
+					e.style.borderColor = checked ? 'white' : '#666';
+					e.style.boxShadow = checked ? '#fffa 0px 0px 9px' : '#000a -1px 1px 2px';
+				};
+
+				e_tgl_back = addElement('div', null, x, null, style_back);
+				e_tgl_thumb = addElement('div', null, x, null, style_thumb);
+
+				x.addEventListener(
+					'mouseenter',
+					() =>
+					{
+						e_tgl_back.style.scale = '125%';
+						e_tgl_thumb.style.scale = '125%';
+					}
+				);
+
+				x.addEventListener(
+					'mouseleave',
+					() =>
+					{
+						e_tgl_back.style.scale = '100%';
+						e_tgl_thumb.style.scale = '100%';
+					}
+				);
+			}
+		);
+
+		e_input.addEventListener(
+			"click",
+			e =>
+			{
+				e_input.checked = !e_input.checked;
+				changeAction(e_input);
+
+				e_tgl_back.style.opacity = e_input.checked ? '100%' : '50%';
+				e_tgl_thumb.style.opacity = e_input.checked ? '100%' : '50%';
+				e_tgl_thumb.style.boxShadow = e_input.checked ? '#fffa 0px 0px 9px' : '#000a -1px 1px 2px';
+
+				e_tgl_thumb.style.borderColor = e_input.checked ? 'white' : '#666';
+				e_tgl_thumb.style.backgroundColor = e_input.checked ? 'cyan' : '#222';
+				e_tgl_thumb.style.transform = 'translate(' + (e_input.checked ? '0%' : '-100%') + ',-50%)';
+				if (dirtiesSettings)
+				{
+					GlobalSettings.instance.ApplyState();
+					GlobalSettings.instance.MarkDirty();
+				}
+			}
+		);
+
 
 		return e_control;
 	}

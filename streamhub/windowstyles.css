@@ -531,6 +531,22 @@
 	transition-delay: 0s;
 }
 
+.hover-obscure-nofocus
+{
+	filter: blur(0.25rem) contrast(90%) brightness(20%) opacity(70%);
+	transform: translateZ(0);
+
+	transition-property: filter;
+	transition-duration: 0.3s;
+	transition-delay: 0.3s;
+}
+.hover-obscure-nofocus:hover
+{
+	filter: none;
+	transition-duration: 0.05s;
+	transition-delay: 0s;
+}
+
 
 
 .window-content-dropzone:hover

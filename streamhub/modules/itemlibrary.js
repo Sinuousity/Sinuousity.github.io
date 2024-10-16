@@ -581,8 +581,6 @@ export class ItemStoreWindowBase extends DraggableWindow
 		e_field.style.flexGrow = "1.0";
 		e_field.style.flexShrink = "1.0";
 		e_field.style.minWidth = "1rem";
-		//e_field.style.paddingLeft = "0.5rem";
-		//e_field.style.paddingRight = "0.5rem";
 	}
 
 	AppendEditOverlayToggle(fieldName = "NULL", fieldValue = false)
@@ -624,78 +622,6 @@ export class ItemLibraryWindow extends ItemStoreWindowBase
 }
 
 
-/// to be deprecated
-export class ItemGiverWindow extends DraggableWindow
-{
-	static window_kind = "Item Giver";
-
-	constructor(pos_x, pos_y)
-	{
-		super("Item Giver", pos_x, pos_y);
-		this.e_window_root.style.minHeight = "180px";
-		this.e_window_root.style.maxHeight = "180px";
-		this.e_window_root.style.minWidth = "420px";
-		this.e_window_root.style.maxWidth = "420px";
-		this.e_window_root.style.resize = "none";
-		this.SetTitle("Item Giver");
-		this.SetIcon("card_giftcard");
-		this.window_kind = ItemGiverWindow.window_kind;
-		this.CreateContentContainer();
-
-		this.CreateControlsColumn();
-		this.e_username = this.AddTextField("Username", "",
-			() =>
-			{
-				var can_add = this.e_username.children[1].children[0].value.length > 0;
-				this.e_btn_give.style.filter = can_add ? "none" : "opacity(20%)";
-				this.e_btn_give.style.pointerEvents = can_add ? "all" : "none";
-			}
-		);
-		this.e_username.children[1].children[0].placeholder = "";
-		this.e_username.style.height = "2rem";
-		this.e_username.style.lineHeight = "2rem";
-
-		this.e_source_selection = this.AddDropDown("Viewer Source", () => { });
-		this.AppendSelectOption(this.e_source_selection.children[1].children[0], "Twitch");
-		this.AppendSelectOption(this.e_source_selection.children[1].children[0], "Kick");
-		this.e_source_selection.style.height = "2rem";
-		this.e_source_selection.style.lineHeight = "2rem";
-
-		this.e_item_selection = this.AddDropDown("Item", () => { });
-		for (var ii = 0; ii < ItemLibrary.builtIn.items.length; ii++)
-		{
-			const i = ItemLibrary.builtIn.items[ii];
-			this.AppendSelectOption(this.e_item_selection.children[1].children[0], i.name);
-		}
-		this.e_item_selection.style.height = "2rem";
-		this.e_item_selection.style.lineHeight = "2rem";
-
-		this.e_btn_give = this.AddButton("Give Item", "Give Item",
-			() =>
-			{
-				const source = this.e_source_selection.children[1].children[0].value.toLowerCase();
-				const username = this.e_username.children[1].children[0].value.trim().toLowerCase();
-				const itemName = this.e_item_selection.children[1].children[0].value;
-				var itemId = ItemLibrary.builtIn.IndexOf(itemName);
-				var item = ItemLibrary.builtIn.GetItem(itemId);
-				ViewerInventoryManager.AddItemCount(
-					source,
-					username,
-					item,
-					1
-				);
-				SaveIndicator.AddShowTime();
-				//Notifications.instance.Add(`Added ${itemName} to ${username}`);
-			}
-		);
-		this.e_btn_give.style.filter = "opacity(20%)";
-		this.e_btn_give.style.pointerEvents = "none";
-		this.e_btn_give.style.height = "2.5rem";
-		this.e_btn_give.style.lineHeight = "2.5rem";
-	}
-}
-
-
 
 
 WindowManager.instance.windowTypes.push(
@@ -708,17 +634,6 @@ WindowManager.instance.windowTypes.push(
 		shortcutKey: 'l'
 	}
 );
-WindowManager.instance.windowTypes.push(
-	{
-		key: ItemGiverWindow.window_kind,
-		icon: "card_giftcard",
-		desc: "Give an item to a specific viewer. (Better method TBA)",
-		model: (x, y) => { return new ItemGiverWindow(x, y); },
-		wip: true,
-		shortcutKey: 'g'
-	}
-);
-
 
 Rewards.Register(
 	"Add Random Item",

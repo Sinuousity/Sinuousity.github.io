@@ -286,6 +286,13 @@ export class ViewerInventoryWindow extends DraggableWindow
 		return valueRounded / 100;
 	}
 
+	GetValueStr(value = 0.0)
+	{
+		if (value > 1_000_000) return this.PrettyNum(value * 0.001 * 0.001).toLocaleString() + "M gp";
+		if (value > 1_000) return this.PrettyNum(value * 0.001).toLocaleString() + "k gp";
+		return this.PrettyNum(value).toLocaleString() + " gp";
+	}
+
 	GetWeightStr(weight = 0.0)
 	{
 		if (this.useImperialWeight === true) return this.GetWeightStrImperial(weight);
@@ -425,7 +432,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 			var e_summary = document.createElement("div");
 			e_summary.className = "viewer-info-summary";
-			e_summary.innerHTML = `<span>${totalItemCount} items</span>|<span>${this.PrettyNum(totalItemWeight)}kg</span>|<span>${this.PrettyNum(totalItemValue)}gp</span>`;
+			e_summary.innerHTML = `<span>${totalItemCount} items</span>|<span>${this.GetWeightStr(totalItemWeight)}</span>|<span>${this.GetValueStr(totalItemValue)}</span>`;
 
 			var e_arrow = document.createElement("span");
 			e_arrow.innerText = "➜";
@@ -494,9 +501,8 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 		this.CreateItemListColumns();
 		this.CreateItemListView();
-		this.CreateItemListTotals();
-
 		this.CreateItemAddUI();
+		this.CreateItemListTotals();
 	}
 
 	GetItemListColumnText(columnName = 'Column')
@@ -590,7 +596,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 		let e_total_values = addElement("div", "viewer-item-row ", this.e_viewer_info, null);
 		this.e_list_totalweight_val = this.CreateItemListTotal(e_total_values, this.GetWeightStr(ViewerInventory.GetTotalWeight(this.targetViewer)));
-		this.e_list_totalvalue_val = this.CreateItemListTotal(e_total_values, ViewerInventory.GetTotalTradeValue(this.targetViewer));
+		this.e_list_totalvalue_val = this.CreateItemListTotal(e_total_values, this.GetValueStr(ViewerInventory.GetTotalTradeValue(this.targetViewer)));
 		e_total_values.style.borderStyle = totals_borderStyle;
 		e_total_values.style.borderWidth = totals_borderWidth_bottom;
 		e_total_values.style.borderColor = totals_borderColor;
@@ -607,7 +613,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 		this.e_add_item_btn = addElement('button', 'window-content-button', e_add_item, null, e => e.innerText = 'Add Item');
 		this.e_add_item_btn.style.pointerEvents = 'none';
-		this.e_add_item_btn.style.opacity = '50%';
+		this.e_add_item_btn.style.opacity = '20%';
 
 		this.e_add_item_input.addEventListener(
 			'change',
@@ -627,7 +633,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 					this.e_add_item_match_name.style.color = "grey";
 					this.e_add_item_match_name.innerText = '---';
 					this.e_add_item_btn.style.pointerEvents = 'none';
-					this.e_add_item_btn.style.opacity = '50%';
+					this.e_add_item_btn.style.opacity = '20%';
 				}
 			}
 		);
@@ -674,6 +680,8 @@ export class ViewerInventoryWindow extends DraggableWindow
 				e.style.overflowY = "scroll";
 				e.style.flexGrow = "1.0";
 				e.style.flexShrink = "1.0";
+				e.style.borderTop = "solid #575757 2px";
+				e.style.borderBottom = "solid #575757 2px";
 			}
 		);
 
@@ -774,6 +782,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 			let e_slot_count = this.AddItemRowLabel(e_item_info, itemSlot.count);
 			e_slot_count.style.width = '2rem';
 			e_slot_count.style.flexGrow = '0.0';
+			e_slot_count.style.pointerEvents = "none";
 
 			addElement(
 				"div", "viewer-item-row-item", e_item_info, this.GetItemSlotString(itemSlot),
@@ -784,15 +793,19 @@ export class ViewerInventoryWindow extends DraggableWindow
 				}
 			);
 
+			const subValueSpan = '<span style="font-weight:normal;font-style:italic;font-size: 0.6825rem;padding-right:1rem;opacity:60%">';
+
 			let item_weight_ind = this.GetWeightStr(ViewerInventorySlot.GetItemWeight(itemSlot));
 			if (itemSlot.count > 1)
 			{
 				let item_weight_tot = this.GetWeightStr(ViewerInventorySlot.GetTotalWeight(itemSlot));
-				this.AddItemRowLabel(e_item_info, `<span style="font-size: 0.7rem;padding-right:0.5rem;opacity:75%">${item_weight_ind} /</span>${item_weight_tot}`);
+				this.AddItemRowLabel(e_item_info, `${subValueSpan}${item_weight_ind}</span>${item_weight_tot}`);
 			}
-			else
-				this.AddItemRowLabel(e_item_info, item_weight_ind);
-			this.AddItemRowLabel(e_item_info, `${this.PrettyNum(ViewerInventorySlot.GetTotalValue(itemSlot)).toLocaleString()} gp`);
+			else this.AddItemRowLabel(e_item_info, item_weight_ind);
+
+			let str_value_item = this.GetValueStr(ViewerInventorySlot.GetItemValue(itemSlot));
+			let str_value_slot = this.GetValueStr(ViewerInventorySlot.GetTotalValue(itemSlot));
+			this.AddItemRowLabel(e_item_info, `${subValueSpan}${str_value_item}</span>${str_value_slot}`);
 		}
 		else
 			e_item_info.innerText = "NULL ITEM :?";

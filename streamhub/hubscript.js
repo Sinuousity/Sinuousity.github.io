@@ -20,6 +20,7 @@ import { OpenAIWindow } from "./modules/openaiwindow.js";
 import "./modules/globaltooltip.js";
 import { GlobalTooltip } from "./modules/globaltooltip.js";
 import { UserInput } from "./modules/userinput.js";
+import { LocalStorageBrowserWindow } from "./modules/localstoragebrowser.js";
 
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
@@ -37,7 +38,7 @@ var e_doc_root = document.querySelector(':root');
 
 console.info("[ +Module ] Hub Core");
 OnBodyLoad();
-//(() => { OnBodyLoad(); })(); // lol nice
+// (() => { OnBodyLoad(); })();
 
 function OnBodyLoad()
 {
@@ -101,16 +102,16 @@ var global_time_seconds = 0.0;
 function anim_time_loop(timestamp)
 {
 	if (ts_time_prev == -1) ts_time_prev = timestamp;
-	if (ts_time_prev == timestamp) 
+	if (ts_time_prev == timestamp) // double call
 	{
-		requestAnimationFrame(t => { anim_time_loop(t); });
+		requestAnimationFrame(anim_time_loop);
 		return;
 	}
-	var dtMs = timestamp - ts_time_prev;
 
-	if (dtMs < 12) 
+	var dtMs = timestamp - ts_time_prev;
+	if (dtMs < 16) // too early
 	{
-		requestAnimationFrame(t => { anim_time_loop(t); });
+		requestAnimationFrame(anim_time_loop);
 		return;
 	}
 
@@ -128,9 +129,9 @@ function anim_time_loop(timestamp)
 	document.documentElement.style.setProperty('--time-angle-10s', (((global_time_seconds / 10.0) % 1.0) * 360.0) + 'deg');
 	document.documentElement.style.setProperty('--time-angle-1s', (((global_time_seconds / 1.0) % 1.0) * 360.0) + 'deg');
 
-	requestAnimationFrame(t => { anim_time_loop(t); });
+	requestAnimationFrame(anim_time_loop);
 }
-requestAnimationFrame(t => { anim_time_loop(t); });
+requestAnimationFrame(anim_time_loop); // initial req
 
 function FindBuiltInElements()
 {

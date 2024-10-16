@@ -353,7 +353,8 @@
 				{
 					"name": "Give Item Window",
 					"progress": 1.0,
-					"comment": "Manually give a specific item to a specific viewer"
+					"deprecated": true,
+					"comment": "You can add items directly at the bottom of viewer inventories now!"
 				},
 				{
 					"name": "Random Item Rewards",

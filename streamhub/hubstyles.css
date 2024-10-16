@@ -479,11 +479,11 @@ a:hover
 
 	font-size: 0.8rem;
 	font-weight: bold;
-	color: #e4b165;
+	color: #ffffff;
 	letter-spacing: 0.125rem;
 
-	background-color: #8d61386e;
-	border: 3px solid #6e3d6713;
+	background-color: #5757576e;
+	border: 3px solid #57575713;
 	border-radius: 0.5rem;
 
 	transition-property: color, background-color, border, opacity, width, height, padding;
@@ -496,9 +496,9 @@ a:hover
 	width: 14rem;
 	height: 26rem;
 	opacity: 100%;
-	background-color: #8d6538;
+	background-color: rgb(41, 41, 41);
 	border: 3px solid #00000079;
-	color: #ffdfa4;
+	color: #ffffff;
 
 	transition-timing-function: var(--bounce);
 	transition-duration: 0.25s;
@@ -668,7 +668,7 @@ a:hover
 {
 	transition-duration: 0.03s !important;
 	text-shadow: #00000042 -2px 2px 1px !important;
-	color: #ffbe73 !important;
+	color: var(--col-warn-bright) !important;
 	background-color: #0000007e !important;
 	transform: scale(100%, 100%) !important;
 }

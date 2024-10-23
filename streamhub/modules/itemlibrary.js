@@ -37,7 +37,6 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'cyan',
 		desc: "Create, edit, or remove items from the Item Library!",
 		model: (x, y) => { return new ItemLibraryWindow(x, y); },
-		wip: true,
 		shortcutKey: 'l'
 	}
 );

@@ -100,7 +100,10 @@ export class WindowManager
 		}
 
 		var windowStates = windowStatesObj.windowStates;
-		for (var wi = 0; wi < windowStates.length; wi++) this.GetNewWindowFromState(windowStates[wi]);
+		for (var wi = 0; wi < windowStates.length; wi++)
+		{
+			this.GetNewWindowFromState(windowStates[wi]);
+		}
 
 		for (var wi = 0; wi < this.windows.length; wi++)
 		{
@@ -153,9 +156,16 @@ export class WindowManager
 		{
 			var kvp = this.windowTypes[wti];
 			if (!kvp.model) continue;
-			if (kvp.key == window_kind) return kvp.model();
+			if (kvp.key == window_kind) 
+			{
+				let w = kvp.model();
+				if (kvp.icon_color) w.e_window_icon.style.color = kvp.icon_color;
+				return w;
+			}
 		}
-		return new DraggableWindow("Unknown Window", xPosition, yPosition);
+		let w = new DraggableWindow("Unknown Window", xPosition, yPosition);
+		if (wt.icon_color) w.e_window_icon.style.color = wt.icon_color;
+		return w;
 	}
 
 	GetNewWindowFromState(windowState)

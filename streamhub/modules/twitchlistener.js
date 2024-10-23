@@ -2,6 +2,7 @@ import { OptionManager } from "./globalsettings.js";
 import { ChatCollector } from "./chatcollector.js";
 import { Lookup } from "./lookup.js";
 import { EventSource } from "./eventsource.js";
+import { RemoteDataUsage } from "./remotedata.js";
 
 console.info("[ +Module ] Twitch Listener");
 
@@ -152,7 +153,6 @@ export class TwitchListener
 		if (newChannelValue !== '')
 		{
 			this.ws.send("JOIN #" + newChannelValue);
-			console.log("JOINED TWITCH CHANNEL NAME : " + newChannelValue);
 
 			this.joinedChannelUserData = await TwitchResources.SingleUserDataRequest(newChannelValue);
 			if (this.joinedChannelUserData == null)
@@ -163,10 +163,10 @@ export class TwitchListener
 			else
 			{
 				var channelId = this.joinedChannelUserData.id;
-				console.log("JOINED TWITCH CHANNEL ID : " + channelId);
+				console.log(`Joined Twitch Chat: ${newChannelValue} (${channelId})`);
 
 				this.joinedChannelData = await TwitchResources.SingleChannelDataRequest(channelId);
-				console.log(this.joinedChannelData);
+				console.log("Got Twitch Channel Data: ", this.joinedChannelData);
 			}
 		}
 		else
@@ -282,6 +282,14 @@ export class TwitchResources
 				method: "GET",
 				cache: "default",
 				headers: { 'Authorization': "Bearer " + authValue, 'Client-Id': clientIdValue }
+			}
+		).then(
+			x =>
+			{
+				let header_content_length = Number(x.headers.get('content-length'));
+				if (header_content_length > 0) RemoteDataUsage.RegisterBytesDownloaded(header_content_length);
+
+				return x;
 			}
 		).then(x => x.json()).then(
 			x =>

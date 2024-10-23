@@ -7,6 +7,7 @@ console.info("[ +Module ] About Window");
 export class AboutWindow extends DraggableWindow
 {
 	static window_kind = "About";
+	static window_icon = "info_outline";
 	static instance = null;
 
 	constructor(pos_x, pos_y)
@@ -15,7 +16,7 @@ export class AboutWindow extends DraggableWindow
 		this.e_window_root.style.minHeight = "564px";
 		this.e_window_root.style.minWidth = "520px";
 		this.SetTitle("About");
-		this.SetIcon("info_i");
+		this.SetIcon(AboutWindow.window_icon);
 		this.window_kind = AboutWindow.window_kind;
 		this.CreateContentContainer();
 		this.e_content.style.paddingLeft = "0.5rem";
@@ -83,7 +84,8 @@ export class AboutWindow extends DraggableWindow
 WindowManager.instance.windowTypes.push(
 	{
 		key: AboutWindow.window_kind,
-		icon: "info_i",
+		icon: AboutWindow.window_icon,
+		icon_color: 'white',
 		desc: "Find out more about this site and its creator.",
 		model: (x, y) => { return new AboutWindow(x, y); },
 		shortcutKey: '/'

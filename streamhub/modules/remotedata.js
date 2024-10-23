@@ -1,5 +1,15 @@
 console.info("[ +Module ] Remote Data");
 
+export class RemoteDataUsage
+{
+	static bytesDownloaded = 0;
+
+	static RegisterBytesDownloaded(byteCount)
+	{
+		RemoteDataUsage.bytesDownloaded += byteCount;
+	}
+}
+
 export class RemoteDataConnection
 {
 	constructor(dataConnectionName = "Unknown Data Connection", msRefreshDelay = 1000)
@@ -35,6 +45,8 @@ export class RemoteDataConnection
 			console.warn("fetch() error for : " + path);
 			return null;
 		}
+		let header_content_length = Number(resp.headers.get('content-length'));
+		if (header_content_length > 0) RemoteDataUsage.RegisterBytesDownloaded(header_content_length);
 		var obj = await resp.json();
 		return obj;
 	}

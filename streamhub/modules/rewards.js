@@ -4,9 +4,10 @@ console.info("[ +Module ] Rewards");
 
 export class RewardType
 {
-	constructor(name = "Participation Trophy", action = (user, options) => { })
+	constructor(name = "Participation Trophy", action = (user, options) => { }, description = '')
 	{
 		this.name = name;
+		this.description = description;
 		this.identifier = "";
 		this.action = action;
 
@@ -22,12 +23,12 @@ export class RewardType
 		}
 	}
 
-	static GetIdentifier(name) { return name.trim().toLowerCase().replace(" ", "_"); }
+	static GetIdentifier(name) { return name.toLowerCase().trim().replaceAll(" ", "_"); }
 }
 
 export class Rewards
 {
-	static kinds = [new RewardType("Participation Trophy", (user, options) => { })];
+	static kinds = [];
 	static onGiven = new EventSource();
 
 	static GetRewardKindID(name)
@@ -52,14 +53,13 @@ export class Rewards
 		}
 
 		let reward = Rewards.kinds[rewardIndex];
-		console.info("Reward Given : " + name + " to " + user.username);
+		console.info("Reward '" + name + "' given to " + user.username);
 		reward.AwardTo(user, options);
 	}
 
-	static Register(name = "Participation Trophy", action = (user, options) => { })
+	static Register(name = "Participation Trophy", action = (user, options) => { }, description = '')
 	{
-		Rewards.kinds.push(new RewardType(name, action));
-		console.info('  + Reward Kind Registered: ' + name);
+		Rewards.kinds.push(new RewardType(name, action, description));
 	}
 }
 

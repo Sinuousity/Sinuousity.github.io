@@ -95,7 +95,7 @@ export class OpenAIConnection
 	static StartListening()
 	{
 		if (OpenAIConnection.listening) return;
-		console.log('OpenAI Connector Listening To Chat...');
+		console.log('OpenAI Connector Ready');
 		ChatCollector.onMessageReceived.RequestSubscription(OpenAIConnection.OnNewMessage);
 		OpenAIConnection.listening = true;
 
@@ -515,6 +515,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: OpenAIWindow.window_kind,
 		icon: OpenAIWindow.window_icon,
+		icon_color: 'hotpink',
 		desc:
 			"Connect to OpenAI's API and use your bot to add interaction between viewers and ChatGPT.<br>"
 			+ "<span style='color:orange'>Warning! OpenAI's API is NOT free, but it is pretty cheap.</span><br>",

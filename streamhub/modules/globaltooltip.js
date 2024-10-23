@@ -1,5 +1,4 @@
 import { addElement } from "../hubscript.js";
-import { UserInput } from "./userinput.js";
 
 console.info("[ +Module ] Global Tooltip");
 
@@ -47,7 +46,6 @@ export class GlobalTooltip
 	static e_tooltip_arrow;
 	static e_tooltip_label;
 
-	//static timeoutId_showTimer = -1;
 	static timeoutId_showMoreTimer = -1;
 
 	static CleanHoveredList()
@@ -88,8 +86,6 @@ export class GlobalTooltip
 
 	static CheckVisibility()
 	{
-		//GlobalTooltip.CleanHoveredList();
-
 		if (GlobalTooltip.hovered.length > 0)
 		{
 			GlobalTooltip.Show();
@@ -135,7 +131,6 @@ export class GlobalTooltip
 		GlobalTooltip.e_tooltip_root.style.left = "0px";
 		GlobalTooltip.e_tooltip_root.style.padding = "0.5rem";
 		GlobalTooltip.e_tooltip_root.style.maxWidth = "21rem";
-		//GlobalTooltip.e_tooltip_root.style.transform = "translate(-50%,0%)";
 		GlobalTooltip.e_tooltip_root.style.transitionProperty = "opacity";
 		GlobalTooltip.e_tooltip_root.style.transitionDuration = "0.15s";
 		GlobalTooltip.e_tooltip_root.style.transitionTimingFunction = "ease-in-out";
@@ -206,7 +201,6 @@ export class GlobalTooltip
 		GlobalTooltip.showing = false;
 
 		if (GlobalTooltip.timeoutId_showMoreTimer != -1) window.clearTimeout(GlobalTooltip.timeoutId_showMoreTimer);
-		//if (GlobalTooltip.timeoutId_showTimer != -1) window.clearTimeout(GlobalTooltip.timeoutId_showTimer);
 		GlobalTooltip.e_tooltip_root.style.opacity = 0.0;
 	}
 
@@ -271,5 +265,3 @@ export class GlobalTooltip
 
 
 GlobalTooltip.CreateElements();
-
-//window.setInterval(() => { GlobalTooltip.CleanHoveredList(); }, 1234);

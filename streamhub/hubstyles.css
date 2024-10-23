@@ -183,6 +183,30 @@
 	}
 }
 
+@keyframes outline-flash
+{
+	0%
+	{
+		outline-style: none;
+	}
+	30%
+	{
+		outline-style: dashed;
+	}
+	50%
+	{
+		outline-style: dashed;
+	}
+	80%
+	{
+		outline-style: none;
+	}
+	100%
+	{
+		outline-style: none;
+	}
+}
+
 
 .fullscreen
 {
@@ -494,7 +518,7 @@ a:hover
 .twitchinfobox:hover
 {
 	width: 14rem;
-	height: 26rem;
+	height: 32rem;
 	opacity: 100%;
 	background-color: rgb(41, 41, 41);
 	border: 3px solid #00000079;

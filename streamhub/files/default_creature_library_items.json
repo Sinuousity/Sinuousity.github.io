@@ -1,0 +1,158 @@
+{
+	"items": [
+		{
+			"name": "Angel",
+			"description": "An angel, fallen from wherever they came from. Almost impossible to see, much less catch!",
+			"evasion_chance": "0.9",
+			"can_appear": true,
+			"rarity": "100000",
+			"image_source": "",
+			"duration": "15",
+			"se_points": "250",
+			"category": "creature"
+		},
+		{
+			"name": "Bunny",
+			"description": "A small, fluffy bunny.",
+			"evasion_chance": "0.05",
+			"can_appear": true,
+			"rarity": "10",
+			"image_source": "",
+			"duration": "20",
+			"se_points": "8",
+			"category": "creature"
+		},
+		{
+			"name": "Crab",
+			"description": "A small, hard-shell crab.",
+			"evasion_chance": "0.10",
+			"can_appear": true,
+			"rarity": "20",
+			"image_source": "",
+			"duration": "22",
+			"se_points": "12",
+			"category": "creature"
+		},
+		{
+			"name": "Dragon",
+			"description": "A surprisingly well tempered dragon.<br>Might be in love with you.",
+			"evasion_chance": "0.25",
+			"can_appear": true,
+			"rarity": "50000",
+			"image_source": "",
+			"duration": "15",
+			"se_points": "150",
+			"category": "creature"
+		},
+		{
+			"name": "Earthworm",
+			"description": "A tiny slimy tube thing.",
+			"evasion_chance": "0.0",
+			"can_appear": true,
+			"rarity": "1",
+			"image_source": "",
+			"duration": "7",
+			"se_points": "7",
+			"category": "creature"
+		},
+		{
+			"name": "Frog",
+			"description": "A small, slimy, green frog.",
+			"evasion_chance": "0.1",
+			"can_appear": true,
+			"rarity": "15",
+			"image_source": "",
+			"duration": "15",
+			"se_points": "11",
+			"category": "creature"
+		},
+		{
+			"name": "Goose",
+			"description": "A white bird with a long neck.",
+			"evasion_chance": "0.33333",
+			"can_appear": true,
+			"rarity": "55",
+			"image_source": "",
+			"duration": "16",
+			"se_points": "33",
+			"category": "creature"
+		},
+		{
+			"name": "Hen",
+			"description": "A mid-sized, brown bird, like a chicken but different.",
+			"evasion_chance": "0.1",
+			"can_appear": true,
+			"rarity": "3",
+			"image_source": "",
+			"duration": "12",
+			"se_points": "9",
+			"category": "creature"
+		},
+		{
+			"name": "Iguana",
+			"description": "A small green and orange lizard with little claw hands and a spiky beard. Looks mad at you.",
+			"evasion_chance": "0.2",
+			"can_appear": true,
+			"rarity": "9",
+			"image_source": "",
+			"duration": "11",
+			"se_points": "24",
+			"category": "creature"
+		},
+		{
+			"name": "Jackelope",
+			"description": "Like a rabbit, but it has antlers. Who comes up with this stuff?",
+			"evasion_chance": "0.1",
+			"can_appear": true,
+			"rarity": "29",
+			"image_source": "",
+			"duration": "13",
+			"se_points": "42",
+			"category": "creature"
+		},
+		{
+			"name": "Koala",
+			"description": "Endangered small fuzzy baby thing. Shockingly viscious.",
+			"evasion_chance": "0.05",
+			"can_appear": true,
+			"rarity": "22",
+			"image_source": "",
+			"duration": "17",
+			"se_points": "27",
+			"category": "creature"
+		},
+		{
+			"name": "Liger",
+			"description": "Rare offspring of a tiger and lion. Where did you find this?",
+			"evasion_chance": "0.35",
+			"can_appear": true,
+			"rarity": "1500",
+			"image_source": "",
+			"duration": "22",
+			"se_points": "82",
+			"category": "creature"
+		},
+		{
+			"name": "Monkey",
+			"description": "Basically a hyperactive toddler with built-in climbing gear. Hard to catch.",
+			"evasion_chance": "0.5",
+			"can_appear": true,
+			"rarity": "30",
+			"image_source": "",
+			"duration": "15",
+			"se_points": "32",
+			"category": "creature"
+		},
+		{
+			"name": "Nutcracker",
+			"description": "It's alive? Terrifying.",
+			"evasion_chance": "0.1",
+			"can_appear": true,
+			"rarity": "300000",
+			"image_source": "",
+			"duration": "23",
+			"se_points": "320",
+			"category": "creature"
+		}
+	]
+}

@@ -98,6 +98,26 @@ export class FeatureProgressWindow extends DraggableWindow
 			}
 		);
 
+		this.e_issue_area = addElement(
+			'div', null, this.e_content, null,
+			x => 
+			{
+				x.innerHTML = '<span style="color:red;">See something broken?</span><br>If you have a GitHub account, or are willing to make one, you can <a href="https://github.com/Sinuousity/Sinuousity.github.io/issues" target="_blank">submit an issue on the repo</a>.';
+				x.style.alignContent = 'center';
+				x.style.paddingLeft = '0.5rem';
+				x.style.paddingRight = '0.5rem';
+				x.style.letterSpacing = '0.05rem';
+				x.style.fontSize = '0.8rem';
+				x.style.lineHeight = '1.05rem';
+				x.style.textAlign = 'center';
+				x.style.height = '4rem';
+				x.style.flexShrink = '0';
+				x.style.borderTop = 'solid #575757 2px';
+			}
+
+		);
+		this.tip_issue_area = GlobalTooltip.RegisterReceiver(this.e_issue_area, "Click to view or submit issues on GitHub");
+
 
 		window.setTimeout(() => { this.RefreshContent(); }, 55);
 	}
@@ -116,7 +136,7 @@ export class FeatureProgressWindow extends DraggableWindow
 			e_feature.style.overflow = "hidden";
 			e_feature.style.textOverflow = "ellipsis";
 			e_feature.style.wordBreak = "break-all";
-			if (feature.desc) GlobalTooltip.RegisterReceiver(e_feature, feature.desc, null);
+			if (feature.desc) GlobalTooltip.RegisterReceiver(e_feature, feature.new === true ? ("<span style='color:#6f6;'>( NEW! )</span> " + feature.desc) : feature.desc, null);
 
 			for (var jj = 0; jj < feature.goals.length; jj++)
 			{
@@ -125,14 +145,14 @@ export class FeatureProgressWindow extends DraggableWindow
 				if (goal.comment) 
 				{
 					if (goal.deprecated === true)
-						GlobalTooltip.RegisterReceiver(e_goal, "[Feature Removed]<br>" + goal.comment, null);
+						GlobalTooltip.RegisterReceiver(e_goal, "[Feature Removed]<br><span style='color:orange'>" + goal.comment + "</span>", null);
 					else GlobalTooltip.RegisterReceiver(e_goal, goal.comment, null);
 				}
 
 				e_goal.style.color = "gray";
 				if (goal.deprecated === true) e_goal.style.color = "dimgray";
-				else if (goal.blocked === true) e_goal.style.color = "#f00";
-				else e_goal.style.color = (goal.progress >= 1.0) ? "#1f1" : (goal.progress >= 0.1) ? "yellow" : "gray";
+				else if (goal.blocked === true) e_goal.style.color = "crimson";
+				else e_goal.style.color = (goal.progress >= 1.0) ? (goal.new === true ? "#0f0" : "#9f9") : (goal.progress >= 0.1) ? "yellow" : "gray";
 
 				if (goal.progress > 0.0 && goal.progress < 1.0) e_goal.style.cursor = "progress";
 				else if (goal.progress <= 0.0) e_goal.style.cursor = "help";
@@ -143,7 +163,7 @@ export class FeatureProgressWindow extends DraggableWindow
 				e_goal.style.opacity = "0.5";
 				e_goal.style.flexShrink = "0";
 				e_goal.style.flexGrow = "0";
-				e_goal.style.fontSize = "0.8rem";
+				e_goal.style.fontSize = "0.825rem";
 				e_goal.style.fontWeight = "normal";
 				e_goal.style.height = "1.2rem";
 				e_goal.style.lineHeight = "1.2rem";
@@ -196,8 +216,20 @@ export class FeatureProgressWindow extends DraggableWindow
 					}
 				);
 
+				if (goal.new === true)
+				{
+					let e_new_label = addElement("div", "", e_goal);
+					e_new_label.style.fontSize = "0.625rem";
+					e_new_label.style.position = "absolute";
+					e_new_label.style.right = "20%";
+					e_new_label.style.top = "0";
+					e_new_label.style.bottom = "0";
+					e_new_label.style.color = "#0f0";
+					e_new_label.innerHTML = "NEW!";
+				}
+
 				let e_planned_label = addElement("div", "", e_goal);
-				e_planned_label.style.fontSize = "0.6rem";
+				e_planned_label.style.fontSize = "0.625rem";
 				e_planned_label.style.position = "absolute";
 				e_planned_label.style.right = "0.5rem";
 				e_planned_label.style.top = "0";
@@ -230,8 +262,7 @@ export class FeatureProgressWindow extends DraggableWindow
 			}
 		}
 
-		var e_bottom_space = addElement("div", null, this.e_controls_column);
-		e_bottom_space.style.minHeight = "2rem";
+		var e_bottom_space = addElement("div", null, this.e_controls_column, null, x => x.style.minHeight = '1rem');
 
 		/*
 		this.e_developer_info = addElement("div", null, this.e_controls_column);
@@ -249,6 +280,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: FeatureProgressWindow.windowKind,
 		icon: "assignment_turned_in",
+		icon_color: 'lightgreen',
 		desc: "See what has been completed and what is planned!",
 		model: (x, y) => { return new FeatureProgressWindow(x, y); },
 		shortcutKey: 'p'

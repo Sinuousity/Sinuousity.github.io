@@ -220,12 +220,11 @@ export class GlobalSettingsWindow extends DraggableWindow
 		super("Settings", position_x, position_y);
 		super.window_kind = GlobalSettings.window_kind;
 
-		this.e_window_root.style.maxHeight = "440px";
+		this.e_window_root.style.minHeight = "320px";
 		this.e_window_root.style.minWidth = "320px";
-		this.e_window_root.style.maxWidth = "640px";
 
 		this.SetIcon("settings");
-		this.SetTitle("Settings");
+		this.SetTitle("General Settings");
 
 		this.CreateContentContainer();
 		this.CreateControlsColumn();
@@ -240,6 +239,19 @@ export class GlobalSettingsWindow extends DraggableWindow
 	AddStoreResetControls()
 	{
 		this.AddSectionTitle("Settings Settings");
+
+		const optkey_showfps = 'hub.show.fps';
+		let optval_show_fps = OptionManager.GetOptionValue(optkey_showfps, false);
+		this.AddToggle(
+			'Show FPS', optval_show_fps,
+			e =>
+			{
+				let prev_val = OptionManager.GetOptionValue(optkey_showfps, false);
+				OptionManager.SetOptionValue(optkey_showfps, !prev_val);
+				window.RefreshFPSCounterVisibility();
+			}
+		);
+
 		this.AddToggle("Reset All Data", GlobalSettings.instance.bool_resetAllData,
 			(e) =>
 			{
@@ -297,9 +309,15 @@ export class GlobalSettingsWindow extends DraggableWindow
 
 	AddAuthSection()
 	{
-		this.AddSectionTitle("Extra Settings");
+		this.AddSectionTitle("Debug Windows");
 
 		var e_cntrl_creds = this.AddButton("Credentials", "Show", (e) => { WindowManager.instance.GetNewOrExistingWindow("hidden:Credentials") }, false);
+		e_cntrl_creds.style.height = "2rem";
+		e_cntrl_creds.style.lineHeight = "2rem";
+		var e_btn_creds = e_cntrl_creds.children[1].children[0];
+		e_btn_creds.style.backgroundColor = "#f707";
+
+		var e_cntrl_creds = this.AddButton("Viewer Cache", "Show", (e) => { WindowManager.instance.GetNewOrExistingWindow("hidden:ViewerCacheWindow") }, false);
 		e_cntrl_creds.style.height = "2rem";
 		e_cntrl_creds.style.lineHeight = "2rem";
 		var e_btn_creds = e_cntrl_creds.children[1].children[0];

@@ -1,12 +1,13 @@
 import { addElement } from "../hubscript.js";
 import { GlobalTooltip } from "./globaltooltip.js";
-import { ItemLibrary } from "./itemlibrary.js";
+import { RunningTimeout } from "./runningtimeout.js";
 import { StoredObject } from "./storedobject.js";
+import { TableListView, TableListViewColumn } from "./tablelistview.js";
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
+import { ItemStoreManager } from "./ItemStoreManager.js";
 
 console.info("[ +Module ] Viewer Inventories");
-
 
 export class ViewerInventorySlot
 {
@@ -63,6 +64,7 @@ export class ViewerInventorySlot
 	}
 }
 
+
 export class ViewerInventory
 {
 	constructor(viewerSource = "", username = "", itemSlots = [])
@@ -112,6 +114,7 @@ export class ViewerInventory
 	}
 }
 
+
 export class ViewerInventoryManager extends StoredObject
 {
 	static instance = new ViewerInventoryManager();
@@ -152,6 +155,45 @@ export class ViewerInventoryManager extends StoredObject
 		ViewerInventoryManager.EmitChange();
 	}
 
+	static TryRemoveItemByName(inventoryIndex = -1, itemName = '', count = 1)
+	{
+		if (inventoryIndex < 0) return;
+		let inv = ViewerInventoryManager.inventories[inventoryIndex];
+		let itemSlotIndex = ViewerInventoryManager.IndexOfItem(inv, itemName);
+		if (itemSlotIndex < 0) return;
+		var prevCount = inv.itemSlots[itemSlotIndex].count;
+		if (!prevCount || prevCount <= count) inv.itemSlots.splice(itemSlotIndex, 1);
+		else inv.itemSlots[itemSlotIndex].count -= count;
+		ViewerInventoryManager.EmitChange();
+	}
+
+	static TryAddItemByName(inventoryIndex = -1, itemName = '', count = 1)
+	{
+		if (inventoryIndex < 0) return;
+		let inv = ViewerInventoryManager.inventories[inventoryIndex];
+		let itemSlotIndex = ViewerInventoryManager.IndexOfItem(inv, itemName);
+		if (itemSlotIndex < 0)
+		{
+			let item = null;
+			for (let item_store_key in ItemStoreManager.stores)
+			{
+				let store = ItemStoreManager.stores[item_store_key];
+				let store_item_id = store.IndexOf(itemName);
+				if (store_item_id >= 0)
+				{
+					item = store.GetItem(store_item_id);
+					break;
+				}
+			}
+			if (item) inv.itemSlots.push(new ViewerInventorySlot(item, count));
+		}
+		else
+		{
+			inv.itemSlots[itemSlotIndex].count += count;
+		}
+		ViewerInventoryManager.EmitChange();
+	}
+
 
 
 	static UserMatch(inv = {}, viewerSource = "", username = "")
@@ -161,7 +203,7 @@ export class ViewerInventoryManager extends StoredObject
 
 	static IndexOfItem(inv = {}, item = {})
 	{
-		if (typeof item == 'string')
+		if (typeof item === 'string')
 		{
 			for (var ii = 0; ii < inv.itemSlots.length; ii++)
 			{
@@ -235,7 +277,6 @@ export class ViewerInventoryManager extends StoredObject
 }
 
 
-
 export class ViewerInventoryWindow extends DraggableWindow
 {
 	constructor(pos_x, pos_y)
@@ -244,12 +285,22 @@ export class ViewerInventoryWindow extends DraggableWindow
 		super.window_kind = "Viewer Inventories";
 
 		this.e_window_root.style.minWidth = "360px";
-		this.e_window_root.style.minHeight = "250px";
+		this.e_window_root.style.minHeight = "360px";
+
+		this.hide_content_while_dragging = true;
 
 		this.sortBy = "";
 		this.sortArrow = "↧";
 		this.sortDescending = false;
 		this.useImperialWeight = false;
+
+		this.table_viewers = new TableListView();
+		this.table_viewers.searchMethod = (entry, searchString) => entry.username.toLowerCase().includes(searchString);
+		this.RegisterViewerTableColumns();
+
+		this.table_inventory = new TableListView();
+		this.table_inventory.searchMethod = (entry, searchString) => entry.name.toLowerCase().includes(searchString);
+		this.RegisterInventoryTableColumns();
 
 		this.CreateContentContainer();
 
@@ -274,62 +325,233 @@ export class ViewerInventoryWindow extends DraggableWindow
 		e_section_title.innerText = "Viewers";
 		this.e_viewer_list_container.appendChild(e_section_title);
 
-		this.e_viewer_list = document.createElement("div");
-		this.e_viewer_list.className = "inventory-list-item";
-		this.e_viewer_list_container.appendChild(this.e_viewer_list);
+		//this.e_viewer_list = document.createElement("div");
+		//this.e_viewer_list.className = "inventory-list-item";
+		//this.e_viewer_list_container.appendChild(this.e_viewer_list);
+
+		this.table_viewers.CreateRoot(this.e_viewer_list_container);
 		this.RefreshViewerList();
 	}
 
-	PrettyNum(value = 0)
+	stackedValueColumnContentProvider =
+		(e_parent, column, entry, key) => 
+		{
+			return addElement(
+				"div", "tablelist-row-item", e_parent, null,
+				x =>
+				{
+					if (entry && key in entry)
+					{
+						let valstr1 = '';
+						if (column.toStringMethod) valstr1 = column.toStringMethod(entry[key]);
+						else valstr1 = entry[key];
+
+						if (entry.count < 2)
+						{
+							x.innerHTML = valstr1;
+						}
+						else
+						{
+							let valstr2 = '';
+							if (column.toStringMethod) valstr2 = column.toStringMethod(entry[key] * entry.count);
+							else valstr2 = entry[key] * entry.count;
+
+							const subValueSpan = '<span style="font-weight:normal;font-style:italic;font-size: 0.6825rem;padding-right:1rem;opacity:60%">';
+							x.innerHTML = subValueSpan + valstr1 + '</span>' + valstr2;
+						}
+					}
+					else
+					{
+						x.innerHTML = '-';
+					}
+					if (column.width) x.style.width = column.width;
+					if (column.fixedWidth) x.style.flexGrow = '0.0';
+					if (column.textAlign) x.style.textAlign = column.textAlign;
+					if (column.fontSize) x.style.fontSize = column.fontSize;
+					if (column.tooltipMethod) GlobalTooltip.RegisterReceiver(x, column.tooltipMethod(entry));
+				}
+			);
+		};
+
+	totalWeightColumnContentProvider =
+		(e_parent, column, entry, key) => 
+		{
+			return addElement(
+				"div", "tablelist-row-item", e_parent, null,
+				x =>
+				{
+					if (entry)
+					{
+						let str = ViewerInventory.GetTotalWeight(entry);
+						x.innerHTML = column.toStringMethod ? column.toStringMethod(str) : str;
+					}
+					else
+					{
+						x.innerHTML = '???';
+					}
+					if (column.width) x.style.width = column.width;
+					if (column.fixedWidth) x.style.flexGrow = '0.0';
+					if (column.textAlign) x.style.textAlign = column.textAlign;
+					if (column.fontSize) x.style.fontSize = column.fontSize;
+					if (column.tooltipMethod) GlobalTooltip.RegisterReceiver(x, column.tooltipMethod(entry));
+				}
+			);
+		};
+
+	totalValueColumnContentProvider =
+		(e_parent, column, entry, key) => 
+		{
+			return addElement(
+				"div", "tablelist-row-item", e_parent, null,
+				x =>
+				{
+					if (entry)
+					{
+						let str = ViewerInventory.GetTotalTradeValue(entry);
+						x.innerHTML = column.toStringMethod ? column.toStringMethod(str) : str;
+					}
+					else
+					{
+						x.innerHTML = '???';
+					}
+					if (column.width) x.style.width = column.width;
+					if (column.fixedWidth) x.style.flexGrow = '0.0';
+					if (column.textAlign) x.style.textAlign = column.textAlign;
+					if (column.fontSize) x.style.fontSize = column.fontSize;
+					if (column.tooltipMethod) GlobalTooltip.RegisterReceiver(x, column.tooltipMethod(entry));
+				}
+			);
+		};
+
+	CompareByCount = (a, b) => this.OrCompareByName(b.count - a.count, a, b);
+	CompareByValue = (a, b) => this.OrCompareByName(b.value * b.count - a.value * a.count, a, b);
+	CompareByCategory = (a, b) => this.OrCompareByName((b.category ?? '').localeCompare(a.category ?? ''), a, b);
+	CompareByWeight = (a, b) => this.OrCompareByName(b.weight * b.count - a.weight * a.count, a, b);
+	CompareByName = (a, b) => b.name.localeCompare(a.name);
+	OrCompareByName = (c, a, b) => c === 0 ? b.name.localeCompare(a.name) : c;
+
+	RegisterViewerTableColumns()
 	{
-		var valueRounded = Math.round(value * 100);
-		return valueRounded / 100;
+		this.table_viewers.ClearColumns();
+
+		let col_username = this.table_viewers.RegisterColumn('username', "Username", (a, b) => b.username.localeCompare(a.username));
+		col_username.buttonMethod = entry => this.StartViewingViewer(ViewerInventoryManager.IndexOfInventory(entry.viewerSource, entry.username));
+		col_username.default_descending = true;
+		col_username.textAlign = 'left';
+		col_username.width = '6rem';
+
+		let col_totalWeight = this.table_viewers.RegisterColumn(
+			'total_weight', "Total Weight", (a, b) => ViewerInventory.GetTotalWeight(b) - ViewerInventory.GetTotalWeight(a), TableListView.GetWeightStr,
+			this.totalWeightColumnContentProvider
+		);
+		col_totalWeight.default_descending = true;
+		col_totalWeight.textAlign = 'right';
+		col_totalWeight.fixedWidth = true;
+		col_totalWeight.width = '6rem';
+
+		let col_totalValue = this.table_viewers.RegisterColumn(
+			'total_value', "Total Value", (a, b) => ViewerInventory.GetTotalValue(b) - ViewerInventory.GetTotalValue(a), TableListView.GetValueStr,
+			this.totalValueColumnContentProvider
+		);
+		col_totalValue.default_descending = true;
+		col_totalValue.textAlign = 'right';
+		col_totalValue.fixedWidth = true;
+		col_totalValue.width = '6rem';
+
+		this.table_viewers.RegisterQuickFilter('workspaces', entry => entry.category && entry.category.indexOf('misc') > -1, 'blueviolet', 'Misc');
 	}
 
-	GetValueStr(value = 0.0)
+
+
+	RegisterInventoryTableColumns()
 	{
-		if (value > 1_000_000) return this.PrettyNum(value * 0.001 * 0.001).toLocaleString() + "M gp";
-		if (value > 1_000) return this.PrettyNum(value * 0.001).toLocaleString() + "k gp";
-		return this.PrettyNum(value).toLocaleString() + " gp";
+		this.table_inventory.ClearColumns();
+
+		let col_count = this.table_inventory.RegisterColumn('count', "Count", this.CompareByCount);
+		col_count.default_descending = true;
+		col_count.textAlign = 'right';
+		col_count.fixedWidth = true;
+		col_count.width = '3.2rem';
+
+		let col_name = this.table_inventory.RegisterColumn('name', "Name", this.CompareByName);
+		col_name.default_descending = true;
+		col_name.textAlign = 'left';
+		col_name.width = '4rem';
+
+		let col_weight = this.table_inventory.RegisterColumn('weight', "Weight", this.CompareByWeight, TableListView.GetWeightStr, this.stackedValueColumnContentProvider);
+		col_weight.textAlign = 'right';
+		col_weight.width = '3rem';
+
+		let col_value = this.table_inventory.RegisterColumn('tradeValue', "Value", this.CompareByValue, TableListView.GetValueStr, this.stackedValueColumnContentProvider);
+		col_value.textAlign = 'right';
+		col_value.width = '3rem';
+
+		let col_category = this.table_inventory.RegisterColumn('category', "Category", this.CompareByCategory);
+		col_category.textAlign = 'center';
+		col_category.width = '4rem';
+
+		let col_take = this.table_inventory.RegisterColumn('item_remove', "", null, null, TableListViewColumn.iconButtonContentProvider);
+		col_take.buttonIcon = 'exposure_neg_1';
+		col_take.buttonColor = '#500';
+		col_take.fontSize = '0.6rem';
+		col_take.textAlign = 'center';
+		col_take.fixedWidth = true;
+		col_take.width = '2rem';
+		col_take.tooltipMethod = entry => "Remove " + entry.name;
+		col_take.buttonMethod = entry =>
+		{
+			ViewerInventoryManager.TryRemoveItemByName(this.targetViewerIndex, entry.name);
+			this.RecreateViewerInfoContent();
+		};
+
+		let col_add = this.table_inventory.RegisterColumn('item_add', "", null, null, TableListViewColumn.iconButtonContentProvider);
+		col_add.buttonIcon = 'exposure_plus_1';
+		col_add.buttonColor = '#050';
+		col_add.fontSize = '0.6rem';
+		col_add.textAlign = 'center';
+		col_add.fixedWidth = true;
+		col_add.width = '2rem';
+		col_add.tooltipMethod = entry => "Add " + entry.name;
+		col_add.buttonMethod = entry =>
+		{
+			ViewerInventoryManager.TryAddItemByName(this.targetViewerIndex, entry.name);
+			this.RecreateViewerInfoContent();
+		};
+
+		this.table_inventory.RegisterQuickFilter('plumbing', entry => entry.category && entry.category.indexOf('tool') > -1, 'crimson', 'Tools');
+		this.table_inventory.RegisterQuickFilter('shield', entry => entry.category && entry.category.indexOf('clothing') > -1, 'gold', 'Clothing');
+		this.table_inventory.RegisterQuickFilter('egg', entry => entry.category && entry.category.indexOf('ingredient') > -1, 'lightgreen', 'Ingredients');
+		this.table_inventory.RegisterQuickFilter('fastfood', entry => entry.category && entry.category.indexOf('food') > -1, 'burlywood', 'Food');
+		this.table_inventory.RegisterQuickFilter('workspaces', entry => entry.category && entry.category.indexOf('misc') > -1, 'blueviolet', 'Misc');
+		this.table_inventory.RegisterQuickFilter('savings', entry => entry.category && entry.category.indexOf('currency') > -1, 'hotpink', 'Currency');
+		this.table_inventory.RegisterQuickFilter('pets', entry => entry.category && entry.category.indexOf('creature') > -1, 'orange', 'Creatures');
 	}
 
-	GetWeightStr(weight = 0.0)
+	RefreshViewerListData()
 	{
-		if (this.useImperialWeight === true) return this.GetWeightStrImperial(weight);
-		return this.GetWeightStrMetric(weight);
+		let viewer_data = [];
+		for (let ii = 0; ii < ViewerInventoryManager.inventories.length; ii++) 
+		{
+			let inv = ViewerInventoryManager.inventories[ii];
+			viewer_data.push(inv);
+		}
+		this.table_viewers.SetData(viewer_data);
 	}
 
-	GetWeightStrMetric(weight = 0.0)
+	RefreshInventoryListData()
 	{
-		const kilogram = 1.0;
-		const gram = 0.001;
-		const milligram = gram * gram;
-		const megagram = 1000;
-		const gigagram = megagram * megagram;
-
-		if (weight <= 0.0) return '0 mg';
-		if (weight < milligram * 0.01) return `< 0.01 mg`;
-		if (weight < milligram) return `${this.PrettyNum(weight * gigagram)} mg`;
-		if (weight < gram) return `${this.PrettyNum(weight * gigagram).toLocaleString()} mg`;
-		if (weight < kilogram) return `${this.PrettyNum(weight * megagram).toLocaleString()} g`;
-		if (weight < megagram) return `${this.PrettyNum(weight).toLocaleString()} kg`;
-		if (weight < gigagram) return `${this.PrettyNum(weight * gram).toLocaleString()} Mg`;
-		return `${this.PrettyNum(weight * milligram).toLocaleString()} Gg`;
-	}
-
-	GetWeightStrImperial(weight = 0.0)
-	{
-		const pound = 1.0;
-		const ounce = 1.0 / 16.0;
-		const ton = 2240;
-		const invton = 1.0 / ton;
-
-		if (weight <= 0.0) return '0 oz';
-		if (weight < ounce * 0.01) return `< 0.01 oz`;
-		if (weight <= ounce) return `${this.PrettyNum(weight)} oz`;
-		if (weight < pound) return `${this.PrettyNum(weight * ounce).toLocaleString()} oz`;
-		if (weight < ton) return `${this.PrettyNum(weight).toLocaleString()} lb`;
-		return `${this.PrettyNum(weight * invton).toLocaleString()} t`;
+		let slot_data = [];
+		for (let ii = 0; ii < this.targetViewer.itemSlots.length; ii++) 
+		{
+			const itemSlot = this.targetViewer.itemSlots[ii];
+			let slotData = { count: itemSlot.count };
+			for (const prop in itemSlot.item)
+			{
+				slotData[prop] = itemSlot.item[prop];
+			}
+			slot_data.push(slotData);
+		}
+		this.table_inventory.SetData(slot_data);
 	}
 
 	CreateAddViewerButton()
@@ -407,41 +629,8 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 	RefreshViewerList()
 	{
-		this.ClearViewerList();
-
-		for (var ii = 0; ii < ViewerInventoryManager.inventories.length; ii++)
-		{
-			const viewerIndex = ii;
-			var i = ViewerInventoryManager.inventories[ii];
-
-			var totalItemCount = ViewerInventory.GetTotalItemCount(i);
-			var totalItemWeight = ViewerInventory.GetTotalWeight(i);
-			var totalItemValue = ViewerInventory.GetTotalTradeValue(i);
-
-			var e_user = document.createElement("div");
-			e_user.className = "window-content-button inventory-list-item-button";
-			e_user.style.paddingBottom = "0.5rem";
-			var styleColor = "white";
-			switch (i.viewerSource)
-			{
-				case "twitch": styleColor = "#cc00ff"; break;
-				case "kick": styleColor = "#00ff00"; break;
-			}
-			e_user.innerHTML = i.username + "<span style='color:" + styleColor + "'>(" + i.viewerSource + ")</span>";
-			e_user.addEventListener("click", () => { this.StartViewingViewer(viewerIndex); });
-
-			var e_summary = document.createElement("div");
-			e_summary.className = "viewer-info-summary";
-			e_summary.innerHTML = `<span>${totalItemCount} items</span>|<span>${this.GetWeightStr(totalItemWeight)}</span>|<span>${this.GetValueStr(totalItemValue)}</span>`;
-
-			var e_arrow = document.createElement("span");
-			e_arrow.innerText = "➜";
-
-			e_user.appendChild(e_summary);
-			e_user.appendChild(e_arrow);
-			this.e_viewer_list.appendChild(e_user);
-			this.e_viewers.push(e_user);
-		}
+		this.RefreshViewerListData();
+		this.table_viewers.PopulateView();
 	}
 
 	ClearViewerList()
@@ -499,10 +688,14 @@ export class ViewerInventoryWindow extends DraggableWindow
 		e_section_title.innerHTML = "Inventory of " + this.targetViewer.username + "<span>( " + this.targetViewer.viewerSource + " )</span>";
 		this.e_viewer_info.appendChild(e_section_title);
 
-		this.CreateItemListColumns();
-		this.CreateItemListView();
+
+		this.RefreshInventoryListData();
+		this.table_inventory.CreateRoot(this.e_viewer_info);
+
 		this.CreateItemAddUI();
 		this.CreateItemListTotals();
+
+		window.setTimeout(() => this.table_inventory.PopulateView(), 20);
 	}
 
 	GetItemListColumnText(columnName = 'Column')
@@ -526,19 +719,6 @@ export class ViewerInventoryWindow extends DraggableWindow
 		});
 	}
 
-	CreateItemListColumn(e_columns = {}, columnName = 'Column', justifyContent = 'center', width = '5rem', defaultDescending = false)
-	{
-		return addElement("div", "viewer-item-row-item", e_columns, this.GetItemListColumnText(columnName), e =>
-		{
-			e.style.display = "flex";
-			e.style.justifyContent = justifyContent;
-			e.style.flexGrow = '1.0';
-			e.style.width = width;
-			e.style.cursor = "pointer";
-			e.addEventListener('click', e => this.SetSortBy(columnName, defaultDescending));
-		});
-	}
-
 	UpdateItemListColumnText(e_col = {}, text = '')
 	{
 		if (e_col)
@@ -554,29 +734,6 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.UpdateItemListColumnText(this.e_list_column_name, 'Item Name');
 		this.UpdateItemListColumnText(this.e_list_column_totalweight, 'Weight');
 		this.UpdateItemListColumnText(this.e_list_column_totalvalue, 'Value');
-	}
-
-	CreateItemListColumns()
-	{
-		let e_columns = addElement("div", "viewer-item-row window-section-title", this.e_viewer_info, null);
-		addElement("div", "viewer-item-row-item", e_columns, "", e =>
-		{
-			e.style.display = "flex";
-			e.style.width = "2rem";
-			e.style.flexGrow = "0.0";
-		});
-		this.e_list_column_name = this.CreateItemListColumn(e_columns, 'Item Name', 'left', '10rem', true);
-		this.e_list_column_totalweight = this.CreateItemListColumn(e_columns, 'Weight');
-		this.e_list_column_totalvalue = this.CreateItemListColumn(e_columns, 'Value');
-
-		addElement("div", "viewer-item-row-item", e_columns, "", e =>
-		{
-			e.style.display = "flex";
-			e.style.width = "1.7rem";
-			e.style.flexGrow = "0.0";
-		});
-
-		this.UpdateItemListColumns();
 	}
 
 	CreateItemListTotals()
@@ -595,8 +752,8 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_list_totalvalue = this.CreateItemListTotal(e_totals, 'Total Value');
 
 		let e_total_values = addElement("div", "viewer-item-row ", this.e_viewer_info, null);
-		this.e_list_totalweight_val = this.CreateItemListTotal(e_total_values, this.GetWeightStr(ViewerInventory.GetTotalWeight(this.targetViewer)));
-		this.e_list_totalvalue_val = this.CreateItemListTotal(e_total_values, this.GetValueStr(ViewerInventory.GetTotalTradeValue(this.targetViewer)));
+		this.e_list_totalweight_val = this.CreateItemListTotal(e_total_values, TableListView.GetWeightStr(ViewerInventory.GetTotalWeight(this.targetViewer)));
+		this.e_list_totalvalue_val = this.CreateItemListTotal(e_total_values, TableListView.GetValueStr(ViewerInventory.GetTotalTradeValue(this.targetViewer)));
 		e_total_values.style.borderStyle = totals_borderStyle;
 		e_total_values.style.borderWidth = totals_borderWidth_bottom;
 		e_total_values.style.borderColor = totals_borderColor;
@@ -620,7 +777,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 			x =>
 			{
 				let searchString = this.e_add_item_input.value.toLowerCase().trim();
-				let matchingItem = ItemLibrary.builtIn.GetFilteredItemFirst(searchString);
+				let matchingItem = ItemStoreManager.GetFilteredItemFirst(searchString);
 				if (matchingItem)
 				{
 					this.e_add_item_match_name.innerText = matchingItem.name;
@@ -643,81 +800,21 @@ export class ViewerInventoryWindow extends DraggableWindow
 			x =>
 			{
 				let searchString = this.e_add_item_input.value.toLowerCase().trim();
-				let matchingItem = ItemLibrary.builtIn.GetFilteredItemFirst(searchString);
+				let matchingItem = ItemStoreManager.GetFilteredItemFirst(searchString);
 				if (matchingItem) 
 				{
 					ViewerInventoryManager.AddItemCount(this.targetViewer.viewerSource, this.targetViewer.username, matchingItem, 1);
-					this.PopulateItemList();
+					this.RefreshInventoryListData();
+					this.table_inventory.PopulateView();
 				}
 			}
 		);
 	}
 
-	SetSortBy(sortBy = '', defaultDescending = false)
-	{
-		if (sortBy == this.sortBy)
-		{
-			this.sortDescending = !this.sortDescending;
-		}
-		else
-		{
-			this.sortBy = sortBy;
-			this.sortDescending = defaultDescending;
-		}
-
-		this.sortArrow = this.sortDescending ? '↧' : '↥';
-		this.PopulateItemList();
-		this.UpdateItemListColumns();
-	}
-
-	CreateItemListView()
-	{
-		this.e_viewer_info_scrollview = addElement(
-			"div", null, this.e_viewer_info, null,
-			e =>
-			{
-				e.style.overflowX = "hidden";
-				e.style.overflowY = "scroll";
-				e.style.flexGrow = "1.0";
-				e.style.flexShrink = "1.0";
-				e.style.borderTop = "solid #575757 2px";
-				e.style.borderBottom = "solid #575757 2px";
-			}
-		);
-
-		this.PopulateItemList();
-	}
-
-	PopulateItemList()
-	{
-		this.e_viewer_info_scrollview.innerText = '';
-
-		let targetItemSlots = this.targetViewer.itemSlots;
-		switch (this.sortBy)
-		{
-			case 'Item Name':
-				targetItemSlots.sort(ViewerInventorySlot.CompareName);
-				if (this.sortDescending) targetItemSlots.reverse();
-				break;
-			case 'Weight':
-				targetItemSlots.sort(ViewerInventorySlot.CompareTotalWeight);
-				if (this.sortDescending) targetItemSlots.reverse();
-				break;
-			case 'Value':
-				targetItemSlots.sort(ViewerInventorySlot.CompareTotalValue);
-				if (this.sortDescending) targetItemSlots.reverse();
-				break;
-		}
-
-		for (let ii = 0; ii < targetItemSlots.length; ii++)
-		{
-			const item_id = ii;
-			this.CreateItemRow(item_id, targetItemSlots[item_id]);
-		}
-	}
-
 	StopViewingViewer()
 	{
+		this.table_inventory.RemoveRoot();
+
 		this.targetViewer = {};
 		this.targetViewerIndex = -1;
 		this.targetBag = {};
@@ -759,71 +856,16 @@ export class ViewerInventoryWindow extends DraggableWindow
 		return slotStr;
 	}
 
-	AddItemRowLabel(e_parent, text = '')
+	onWindowResize()
 	{
-		return addElement(
-			"div", "viewer-item-row-item", e_parent, '',
-			e =>
+		if (this.resize_timeout) this.resize_timeout.ExtendTimer();
+		else this.resize_timeout = new RunningTimeout(
+			() =>
 			{
-				e.innerHTML = text;
-				e.style.justifyContent = "right";
-				e.style.width = '5rem';
-				e.style.flexGrow = "1.0";
-			}
+				if (this.table_viewers.e_root) this.table_viewers.PopulateView();
+				if (this.table_inventory.e_root) this.table_inventory.PopulateView();
+			}, 0.03, true, 20
 		);
-	}
-
-	CreateItemRow(item_id = 0, itemSlot = {})
-	{
-		let e_item_info = document.createElement("div");
-		e_item_info.className = "viewer-item-row";
-		if (itemSlot.item)
-		{
-			let e_slot_count = this.AddItemRowLabel(e_item_info, itemSlot.count);
-			e_slot_count.style.width = '2rem';
-			e_slot_count.style.flexGrow = '0.0';
-			e_slot_count.style.pointerEvents = "none";
-
-			addElement(
-				"div", "viewer-item-row-item", e_item_info, this.GetItemSlotString(itemSlot),
-				e =>
-				{
-					e.style.justifyContent = "left";
-					e.style.width = "8rem";
-				}
-			);
-
-			const subValueSpan = '<span style="font-weight:normal;font-style:italic;font-size: 0.6825rem;padding-right:1rem;opacity:60%">';
-
-			let item_weight_ind = this.GetWeightStr(ViewerInventorySlot.GetItemWeight(itemSlot));
-			if (itemSlot.count > 1)
-			{
-				let item_weight_tot = this.GetWeightStr(ViewerInventorySlot.GetTotalWeight(itemSlot));
-				this.AddItemRowLabel(e_item_info, `${subValueSpan}${item_weight_ind}</span>${item_weight_tot}`);
-			}
-			else this.AddItemRowLabel(e_item_info, item_weight_ind);
-
-			let str_value_item = this.GetValueStr(ViewerInventorySlot.GetItemValue(itemSlot));
-			let str_value_slot = this.GetValueStr(ViewerInventorySlot.GetTotalValue(itemSlot));
-			this.AddItemRowLabel(e_item_info, `${subValueSpan}${str_value_item}</span>${str_value_slot}`);
-		}
-		else
-			e_item_info.innerText = "NULL ITEM :?";
-
-
-		let e_btn_delete = addElement("div", "window-content-button viewer-item-button", e_item_info, "-1");
-		e_btn_delete.style.backgroundColor = "#ff000030";
-		e_btn_delete.style.outlineColor = "#f00";
-		e_btn_delete.style.color = "#f55";
-		e_btn_delete.addEventListener("click", () =>
-		{
-			ViewerInventoryManager.TryRemoveItem(this.targetViewerIndex, item_id);
-			this.RecreateViewerInfoContent();
-		});
-
-		this.e_viewer_info_scrollview.appendChild(e_item_info);
-
-		if (itemSlot.item) GlobalTooltip.RegisterReceiver(e_item_info, itemSlot.item.name, itemSlot.item.description);
 	}
 }
 
@@ -831,6 +873,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: "Viewer Inventories",
 		icon: "inbox",
+		icon_color: 'cyan',
 		desc: "View who has what and how much of it!",
 		model: (x, y) => { return new ViewerInventoryWindow(x, y); },
 		wip: true,

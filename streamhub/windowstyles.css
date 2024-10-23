@@ -26,8 +26,8 @@
 	scrollbar-color: #0005 #5552 !important;
 	scrollbar-width: thin;
 
-	transition-property: rotate, opacity, transform, scale, outline, outline-offset;
-	transition-duration: 0.1s;
+	transition-property: opacity, transform, outline, outline-offset, backdrop-filter;
+	transition-duration: 0.15s;
 	transition-timing-function: linear;
 }
 
@@ -241,6 +241,60 @@
 
 
 
+
+
+
+.window-content
+{
+	position: absolute;
+	z-index: 0;
+	cursor: default;
+	inset: 0rem;
+	margin-top: 2.1rem;
+	text-align: left;
+
+	color: #ffffff80;
+	background-color: #18181820;
+	background: linear-gradient(135deg, #0f0f0fa0, #2c2c2ca0);
+
+	backdrop-filter: blur(7px) saturate(80%);
+
+	opacity: 0%;
+
+	transform: translateZ(0);
+	transition-property: opacity;
+	transition-duration: 0.2s;
+	transition-timing-function: ease-in-out;
+}
+
+.window-content-overlay
+{
+	z-index: 15;
+	position: absolute;
+	inset: 0rem;
+	text-align: center;
+	opacity: 100%;
+	top: 2.15rem;
+
+	background-color: #181818e0;
+
+	transform: translateZ(0);
+}
+
+.window-content-overlay-label
+{
+	position: absolute;
+	top: 50%;
+	left: 0%;
+	width: 100%;
+	text-align: center;
+	transform: translate(0%, -50%);
+}
+
+
+
+
+
 .window-content-button
 {
 	position: relative;
@@ -311,26 +365,40 @@
 .window-content input[type="text"]
 {
 	border: unset !important;
-	color: #8a8a8a !important;
+	color: #8a8a8a;
 	appearance: none !important;
 	box-shadow: none !important;
 	border-image: none !important;
 	border-style: inset !important;
 	border: solid transparent 2px !important;
-	border-radius: 0.4rem;
+	border-radius: 0.25rem;
 	line-height: 1.5rem;
 
 	background-color: #00000030 !important;
+
+	outline-offset: -2px;
+	outline-width: 1px;
+	outline-color: orange;
+
+	animation-name: none;
+	animation-duration: 0s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
 }
 .window-content input[type="text"]:hover
 {
 	color: #e6e6e6 !important;
 	border: solid #4b4b4b 2px !important;
 }
-.window-content input[type="text"]:focus
+.window-content input[type="text"]:focus,
+.window-content input[type="text"]:focus-visible,
+.window-content input[type="text"]:active
 {
-	color: white !important;
-	outline-offset: -2px !important;
+	color: white;
+	opacity: 100%;
+
+	animation-name: outline-flash;
+	animation-duration: 0.8s;
 }
 
 
@@ -465,47 +533,6 @@
 
 
 
-
-.window-content
-{
-	position: absolute;
-	z-index: 0;
-	cursor: default;
-	inset: 0rem;
-	margin-top: 2.1rem;
-	text-align: left;
-
-	color: #ffffff80;
-	background-color: #18181820;
-	background: linear-gradient(135deg, #0f0f0fa0, #2c2c2ca0);
-
-	backdrop-filter: blur(7px) saturate(80%);
-	transform: translateZ(0);
-}
-
-.window-content-overlay
-{
-	z-index: 15;
-	position: absolute;
-	inset: 0rem;
-	text-align: center;
-	opacity: 100%;
-	top: 2.15rem;
-
-	background-color: #181818e0;
-
-	transform: translateZ(0);
-}
-
-.window-content-overlay-label
-{
-	position: absolute;
-	top: 50%;
-	left: 0%;
-	width: 100%;
-	text-align: center;
-	transform: translate(0%, -50%);
-}
 
 
 

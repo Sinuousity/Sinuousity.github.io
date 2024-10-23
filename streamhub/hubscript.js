@@ -1,47 +1,63 @@
-﻿import { GlobalSettings, OptionManager } from "./modules/globalsettings.js";
-import { DebugWindow } from "./modules/debugwindow.js";
+﻿import { OptionManager } from "./modules/globalsettings.js";
 import { AboutWindow } from "./modules/aboutwindow.js";
+import { GlobalSettings } from "./modules/globalsettings.js";
+import { SaveIndicator } from "./modules/saveindicator.js";
+import { DebugWindow } from "./modules/debugwindow.js";
 import { WindowManager } from "./modules/windowmanager.js";
 import "./modules/featureprogress.js";
 import { BackgroundSceneSettingsWindow } from "./modules/backgroundscene.js";
-import { StreamElements, StreamElementsWindow } from "./modules/streamelementslistener.js";
 import { TwitchListener } from "./modules/twitchlistener.js";
 import { KickState } from "./modules/kicklistener.js";
 import { RaffleState } from "./modules/raffle.js";
+import "./modules/communityfeud.js";
 import { SubathonWindow } from "./modules/subathon.js";
 import { MultiPlatformUserExplorer } from "./modules/multiplatformuser.js";
 import { ViewerInventoryManager } from "./modules/viewerinventory.js";
 import { ItemLibrary } from "./modules/itemlibrary.js";
 import { CreatureRoster } from "./modules/creatures.js";
-import { EventSource } from "./modules/eventsource.js";
 import { CreatureCatchingWindow } from "./modules/creaturecatch.js";
-import { SaveIndicator } from "./modules/saveindicator.js";
+import { EventSource } from "./modules/eventsource.js";
+import { StreamElements, StreamElementsWindow } from "./modules/streamelementslistener.js";
 import { OpenAIWindow } from "./modules/openaiwindow.js";
 import "./modules/globaltooltip.js";
 import { GlobalTooltip } from "./modules/globaltooltip.js";
 import { UserInput } from "./modules/userinput.js";
 import { LocalStorageBrowserWindow } from "./modules/localstoragebrowser.js";
+import "./modules/rewardbrowser.js";
+import "./modules/tablelistview.js";
+import { AnimJob } from "./modules/AnimJob.js";
+import { GLUtils } from "./modules/webglutils.js";
 
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
 
-window.hub_version = "v0.2.7";
-window.last_update_date = "October 15 2024";
+window.hub_version = "v0.3.0";
+window.last_update_date = "October 23 2024";
+
+window.targetFrameDeltaMs = 15;
+window.targetFrameRate = 1000 / window.targetFrameDeltaMs;
 
 const resetStoredState = false;
 var e_menu_windows = {};
 var e_site_tag = {};
 var e_save_indicator = {};
 var sub_mouse_motion;
-
 var e_doc_root = document.querySelector(':root');
 
 console.info("[ +Module ] Hub Core");
-OnBodyLoad();
-// (() => { OnBodyLoad(); })();
+
+window.RefreshFPSCounterVisibility = () =>
+{
+	let show_fps = OptionManager.GetOptionValue(opt_key_show_fps);
+	window.e_fps_stats_root.style.display = show_fps === true ? 'block' : 'none';
+}
 
 function OnBodyLoad()
 {
+	//extract browser standard font size
+	var style = window.getComputedStyle(document.body, null).getPropertyValue('font-size');
+	window.font_size_px = parseFloat(style) / 2; // body font-size is 2rem 
+
 	FindBuiltInElements();
 	SetWindowMenuOptions();
 	RestoreLocalStorageContent();
@@ -64,6 +80,7 @@ function OnBodyLoad()
 	);
 
 	CheckFirstTimeVisit();
+	CreateFPSCounter();
 }
 
 function CheckFirstTimeVisit()
@@ -97,41 +114,183 @@ function CheckFirstTimeVisit()
 	}
 }
 
-var ts_time_prev = -1;
 var global_time_seconds = 0.0;
-function anim_time_loop(timestamp)
+var last_dt = 0.0;
+var last_dt_ms = 0;
+var max_dt = -1.0;
+var min_dt = 1.0;
+var avg_dt = 0.02;
+
+function animstep_timeloop(dt)
 {
-	if (ts_time_prev == -1) ts_time_prev = timestamp;
-	if (ts_time_prev == timestamp) // double call
+	global_time_seconds += dt;
+	last_dt = dt;
+	last_dt_ms = Math.ceil(dt * 1000);
+
+	avg_dt += (dt - avg_dt) * 0.05;
+	max_dt = Math.max(max_dt, dt);
+	min_dt = Math.min(min_dt, dt);
+	if (global_time_seconds % 5.0 < 0.02) 
 	{
-		requestAnimationFrame(anim_time_loop);
-		return;
+		max_dt = -1.0;
+		min_dt = 1.0;
 	}
 
-	var dtMs = timestamp - ts_time_prev;
-	if (dtMs < 16) // too early
-	{
-		requestAnimationFrame(anim_time_loop);
-		return;
-	}
-
-	var dtSeconds = dtMs * 0.001;
-	ts_time_prev = timestamp;
-	global_time_seconds += dtSeconds;
+	UpdateFPSCounter();
 
 	document.documentElement.style.setProperty('--time', global_time_seconds + 's');
 	document.documentElement.style.setProperty('--time-percent-1s', ((global_time_seconds % 1.0) * 100.0) + '%');
-	document.documentElement.style.setProperty('--time-percent-10s', (((global_time_seconds * 0.1) % 1.0) * 100.0) + '%');
-	document.documentElement.style.setProperty('--time-percent-offset-1s', (((global_time_seconds + 0.5) % 1.0) * 100.0) + '%');
-	document.documentElement.style.setProperty('--time-percent-offset-10s', (((global_time_seconds * 0.1 + 0.5) % 1.0) * 100.0) + '%');
 	document.documentElement.style.setProperty('--time-angle', (((global_time_seconds / 60.0) % 1.0) * 360.0) + 'deg');
+	document.documentElement.style.setProperty('--time-percent-offset-1s', (((global_time_seconds + 0.5) % 1.0) * 100.0) + '%');
+
+	return;
+	document.documentElement.style.setProperty('--time-percent-10s', (((global_time_seconds * 0.1) % 1.0) * 100.0) + '%');
+	document.documentElement.style.setProperty('--time-percent-offset-10s', (((global_time_seconds * 0.1 + 0.5) % 1.0) * 100.0) + '%');
 	document.documentElement.style.setProperty('--time-angle-45s', (((global_time_seconds / 45.0) % 1.0) * 360.0) + 'deg');
 	document.documentElement.style.setProperty('--time-angle-10s', (((global_time_seconds / 10.0) % 1.0) * 360.0) + 'deg');
 	document.documentElement.style.setProperty('--time-angle-1s', (((global_time_seconds / 1.0) % 1.0) * 360.0) + 'deg');
-
-	requestAnimationFrame(anim_time_loop);
 }
-requestAnimationFrame(anim_time_loop); // initial req
+
+function CreateFPSCounter()
+{
+	window.e_fps_stats_root = addElement(
+		'div', null, document.body, null,
+		x =>
+		{
+			x.style.zIndex = '1000000';
+			x.style.position = 'fixed';
+			x.style.display = 'flex';
+			x.style.flexDirection = 'column';
+			x.style.top = '2rem';
+			x.style.right = '2rem';
+			x.style.width = '8rem';
+			x.style.minHeight = '3rem';
+			x.style.padding = '0';
+			x.style.margin = '0';
+		}
+	);
+
+	/*
+	window.e_frametime_graph = addElement(
+		'canvas', null, window.e_fps_stats_root, '---',
+		x => 
+		{
+			x.style.position = 'relative';
+			x.style.top = '0';
+			x.style.left = '0';
+
+			x.style.width = 'calc(100% - 4px)';
+			x.style.height = '2rem';
+			x.style.border = 'solid black 2px';
+			x.style.backgroundColor = '#fffa';
+			x.style.pointerEvents = 'none';
+			x.style.fontWeight = 'bold';
+			x.style.textAlign = 'right';
+			x.style.borderRadius = '0.2rem';
+		}
+	);
+	*/
+
+
+	window.e_fps_counter = addElement(
+		'div', null, window.e_fps_stats_root, '---',
+		x => 
+		{
+			x.style.position = 'relative';
+			x.style.top = '0';
+			x.style.left = '0';
+
+			x.style.minHeight = '1rem';
+			x.style.lineHeight = '1rem';
+			x.style.fontSize = '0.8rem';
+			x.style.color = 'red';
+			x.style.backgroundColor = '#000a';
+			x.style.pointerEvents = 'none';
+			x.style.fontWeight = 'bold';
+			x.style.textAlign = 'right';
+			x.style.padding = '0.25rem';
+			x.style.borderRadius = '0.2rem';
+			x.style.border = 'solid black 2px';
+		}
+	);
+
+	window.setTimeout(
+		() =>
+		{
+			window.RefreshFPSCounterVisibility();
+			//InitWebGL();
+		}, 30
+	); // wait until user settings are loading
+
+}
+
+
+
+function InitWebGL()
+{
+	let gfx =
+	{
+		gl: window.e_frametime_graph.getContext('webgl2')
+	};
+	window.gfx_ftgraph = gfx;
+
+	if (!gfx.gl) 
+	{
+		console.warn('Missing WebGL support!');
+		return;
+	}
+
+	let gfxw = gfx.gl.drawingBufferWidth;
+	let gfxh = gfx.gl.drawingBufferHeight;
+
+	// create a bound framebuffer with a bound texture2D
+	let tuid_maintex = 0;
+	gfx.textureBuffer = GLUtils.CreateFrameBufferTexture2D(gfx.gl, gfxw, gfxh, tuid_maintex);
+
+	// create rendering program
+	gfx.program = GLUtils.CreateProgram(gfx.gl, GLUtils.program_vs_core, GLUtils.program_fs_core, true);
+	gfx.uloc_color = GLUtils.GetULocation(gfx.gl, gfx.program, 'color');
+	gfx.uloc_maintex = GLUtils.GetULocation(gfx.gl, gfx.program, 'maintex');
+
+	GLUtils.SetColorParam(gfx.gl, gfx.uloc_color, [Math.random(), Math.random(), Math.random(), 1]);
+	GLUtils.SetTUForTextureParam(gfx.gl, gfx.uloc_maintex, tuid_maintex);
+
+	gfx.vattr_position = GLUtils.SetVertexAttributeArray(gfx.gl, gfx.program, 2, gfx.gl.FLOAT, GLUtils.vertex_list_quad);
+
+	// clear texture
+	gfx.gl.bindFramebuffer(gfx.gl.FRAMEBUFFER, gfx.textureBuffer.framebuffer);
+	GLUtils.ClearColor(gfx.gl, 0, 1, 0, 1);
+
+	// clear canvas
+	gfx.gl.bindFramebuffer(gfx.gl.FRAMEBUFFER, null);
+
+	gfx.gl.bindVertexArray(gfx.vattr_position.vao);
+
+	gfx.gl.disable(gfx.gl.CULL_FACE);
+	gfx.gl.drawArrays(gfx.gl.TRIANGLES, 0, 6);
+}
+
+function UpdateFPSCounter()
+{
+	let avg_fps = Math.round(1.0 / avg_dt);
+	let half_target_fps = window.targetFrameRate * 0.5;
+	let fps_phase = Math.max(0.0, 1.0 - (Math.max(0, avg_fps - half_target_fps) / half_target_fps));
+
+	if (window.e_fps_counter)
+	{
+		window.e_fps_counter.style.color = `rgb(${fps_phase * 255}, ${(1.0 - fps_phase) * 255}, 0)`;
+		window.e_fps_counter.innerHTML = `${Math.round(1.0 / max_dt)} - ${Math.round(1.0 / min_dt)} ||  ${avg_fps} fps`;
+		window.e_fps_counter.innerHTML += `<br>${Math.round(max_dt * 1000)} - ${Math.round(min_dt * 1000)} || ${Math.round(avg_dt * 1000)} ms`;
+		window.e_fps_counter.innerHTML += `<br>target ${Math.round(window.targetFrameRate)} fps`;
+	}
+}
+
+
+OnBodyLoad();
+// (() => { OnBodyLoad(); })();
+
+window.animjob_timeloop = new AnimJob(window.targetFrameDeltaMs - 1, dt => { animstep_timeloop(dt); });
+window.animjob_timeloop.Start();
 
 function FindBuiltInElements()
 {
@@ -204,9 +363,13 @@ function SetWindowMenuOptions()
 				if (e.key === wt.shortcutKey) 
 				{
 					if (document.activeElement !== document.body) return;
-					var w = WindowManager.instance.GetExistingWindow(wt.key);
-					if (w) w.Close();
-					else WindowManager.instance.GetNewWindowAnywhere(wt.key);
+					let existing_window = WindowManager.instance.GetExistingWindow(wt.key);
+					if (existing_window) existing_window.Close();
+					else 
+					{
+						WindowManager.instance.GetNewWindowAnywhere(wt.key);
+						//if (wt.icon_color) new_window.e_window_icon.style.color = wt.icon_color;
+					}
 				}
 			});
 		}
@@ -221,7 +384,14 @@ function SetWindowMenuOptions()
 			e_btn_open.className = "menu-windows-button menu-windows-button-disabled";
 		}
 		if (wt.wip) var e_wip = addElement("div", "menu-windows-button-band-wip", e_btn_open, "WIP");
-		if (wt.icon) addElement("i", "menu-windows-button-icon", e_btn_open, wt.icon, x => { x.setAttribute("draggable", "false"); });
+		if (wt.icon) 
+		{
+			addElement("i", "menu-windows-button-icon", e_btn_open, wt.icon, x =>
+			{
+				x.setAttribute("draggable", "false");
+				if (wt.icon_color) x.style.color = wt.icon_color;
+			});
+		}
 
 		if (wt.desc) 
 		{
@@ -265,3 +435,6 @@ function ReloadCss()
 		l.href += "";
 	}
 }
+
+var opt_key_show_fps = 'hub.show.fps';
+OptionManager.AppendOption(opt_key_show_fps, false, "Show FPS");

@@ -1,0 +1,273 @@
+{
+	"items": [
+		{
+			"name": "Apple",
+			"weight": "0.1",
+			"tradeValue": "1",
+			"description": "An apple from an apple tree.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Banana",
+			"weight": "0.08",
+			"tradeValue": "2",
+			"description": "A banana from an banana tree.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Carrot",
+			"weight": "0.1",
+			"tradeValue": "1",
+			"description": "A carrot from the ground.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Donut",
+			"weight": "0.05",
+			"tradeValue": "3",
+			"description": "A donut from the donut shop.",
+			"category": "food"
+		},
+		{
+			"name": "Egg",
+			"weight": "0.05",
+			"tradeValue": "5",
+			"description": "An egg from a bird.",
+			"category": "ingredient"
+		},
+		{
+			"name": "Fish",
+			"weight": "1.5",
+			"tradeValue": "5",
+			"description": "A fish out of water.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Garlic",
+			"weight": "0.05",
+			"tradeValue": "1",
+			"description": "A clove of garlic, for cooking and fighting vampires.",
+			"category": "ingredient"
+		},
+		{
+			"name": "Hotdog",
+			"weight": "0.35",
+			"tradeValue": "8",
+			"description": "A nicely grilled hotdog in a soft, bread-like bun.",
+			"category": "food"
+		},
+		{
+			"name": "Ice Cream",
+			"weight": "0.2",
+			"tradeValue": "6",
+			"description": "One pint of ice cream. 'Homemade' flavor.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Juice Box",
+			"weight": "0.4",
+			"tradeValue": "4",
+			"description": "A box of juice, actually too small to satisfy anyone. 'Purple' flavored.",
+			"category": "food,drink"
+		},
+		{
+			"name": "Kool Aid Packet",
+			"weight": "0.1",
+			"tradeValue": "2",
+			"description": "One packet of Kool Aid. 'Jamaica' flavored.",
+			"category": "ingredient"
+		},
+		{
+			"name": "Lemon",
+			"weight": "0.1",
+			"tradeValue": "2",
+			"description": "A lemon from a lemon tree.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Melon",
+			"weight": "2.2",
+			"tradeValue": "11",
+			"description": "A melon from a melon tree.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Noodle Pack",
+			"weight": "0.32",
+			"tradeValue": "1",
+			"description": "A cheap pack of dried noodles, ready to be boiled.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Orange",
+			"weight": "0.12",
+			"tradeValue": "2",
+			"description": "An orange from an orange tree.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Pear",
+			"weight": "0.1",
+			"tradeValue": "3",
+			"description": "A pear from a pear tree.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Quart of Milk",
+			"weight": "1.8",
+			"tradeValue": "7",
+			"description": "A quart of milk. Probably cow milk.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Raw Meat",
+			"weight": "1.2",
+			"tradeValue": "9",
+			"description": "A chunk of raw meat.",
+			"category": "ingredient"
+		},
+		{
+			"name": "Salt Packet",
+			"weight": "0.05",
+			"tradeValue": "0.1",
+			"description": "A packet of salt.",
+			"category": "ingredient"
+		},
+		{
+			"name": "Turnip",
+			"weight": "0.15",
+			"tradeValue": "1",
+			"description": "A turnip from the ground.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Unripe Banana",
+			"weight": "0.08",
+			"tradeValue": "1.5",
+			"description": "A banana from a banana tree, not yet ready to eat.",
+			"category": "ingredient"
+		},
+		{
+			"name": "Venison",
+			"weight": "1.5",
+			"tradeValue": "21",
+			"description": "A chunk of raw meat from a deer.",
+			"category": "ingredient"
+		},
+		{
+			"name": "Walnut",
+			"weight": "0.02",
+			"tradeValue": "0.1",
+			"description": "A good sized walnut.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Zuccini",
+			"weight": "0.25",
+			"tradeValue": "2",
+			"description": "A long, green zuccini.",
+			"category": "food,ingredient"
+		},
+		{
+			"name": "Gold Coin",
+			"weight": "0.03",
+			"tradeValue": "1",
+			"description": "A gold coin, used as currency. Worth 10 Silver Coins.",
+			"category": "currency"
+		},
+		{
+			"name": "Silver Coin",
+			"weight": "0.02",
+			"tradeValue": "0.1",
+			"description": "A silver coin, used as currency. Worth 10% of one Gold Coin.",
+			"category": "currency"
+		},
+		{
+			"name": "BeetCoin",
+			"weight": "0.0",
+			"tradeValue": "0.00001",
+			"description": "A virtual coin, used as currency. Worth whatever you are willing to believe it is.",
+			"category": "currency,misc"
+		},
+		{
+			"name": "Bottle Cap",
+			"weight": "0.0",
+			"tradeValue": "0.0125",
+			"description": "A bottle cap from a used soda. It's garbage now, but someday it will be the main currency, so stock up!",
+			"category": "currency,misc"
+		},
+		{
+			"name": "Hammer",
+			"weight": "3",
+			"tradeValue": "15",
+			"description": "A well made hammer, for hammering.",
+			"category": "tool,weapon",
+			"weaponDamage": 1
+		},
+		{
+			"name": "Sword",
+			"weight": "15",
+			"tradeValue": "252",
+			"description": "A finely crafted sword, for hitting other swords.",
+			"category": "tool,weapon",
+			"weaponDamage": 15
+		},
+		{
+			"name": "Hatchet",
+			"weight": "7",
+			"tradeValue": "52",
+			"description": "A sharp hand-axe, for axe things.",
+			"category": "tool,weapon",
+			"weaponDamage": 9
+		},
+		{
+			"name": "Mismatched Sock",
+			"weight": "0.2",
+			"tradeValue": "1",
+			"description": "A sock without a second sock. Pitiful.",
+			"category": "misc"
+		},
+		{
+			"name": "Skull",
+			"weight": "2.9",
+			"tradeValue": "155",
+			"description": "A skull. Looks human.",
+			"category": "misc"
+		},
+		{
+			"name": "Toothpick",
+			"weight": "0.01",
+			"tradeValue": "0.02",
+			"description": "A single toothpick.",
+			"category": "misc"
+		},
+		{
+			"name": "Sheet of Paper",
+			"weight": "0.01",
+			"tradeValue": "0.1",
+			"description": "A sheet of paper.",
+			"category": "resource,misc"
+		},
+		{
+			"name": "Grocery Receipt",
+			"weight": "0.01",
+			"tradeValue": "0",
+			"description": "It's faded. You can just barely make out the total: $42.69.<br>Nice.",
+			"category": "resource,misc"
+		},
+		{
+			"name": "Bowler Hat",
+			"weight": "1.1",
+			"tradeValue": "15",
+			"description": "A sturdy hat with a short, curved brim.",
+			"category": "clothing"
+		},
+		{
+			"name": "Top Hat",
+			"weight": "1.5",
+			"tradeValue": "22",
+			"description": "A tall hat with a short, flat brim.",
+			"category": "clothing"
+		}
+	]
+}

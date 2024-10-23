@@ -21,6 +21,12 @@
 					"comment": "Shows at the top left corner any time a data save operation is triggered"
 				},
 				{
+					"name": "FPS Counter Display",
+					"progress": 1.0,
+					"comment": "Available in the general settings window, a small frame-time and frames-per-second display at top right, for debugging.",
+					"new": true
+				},
+				{
 					"name": "Sub-Window Core",
 					"progress": 1.0,
 					"comment": "Flexible system of restoreable windows to be used by all aspects of the Hub"
@@ -29,6 +35,12 @@
 					"name": "Draggable Sub-Windows",
 					"progress": 1.0,
 					"comment": "Windows you can drag and resize. Should stay on screen"
+				},
+				{
+					"name": "Window Drag Animation",
+					"progress": 1.0,
+					"comment": "Windows now react physically as they are dragged. Windows would react to being dragged before, but not in a physically plausible way.",
+					"new": true
 				},
 				{
 					"name": "Sub-Window Hotkeys",
@@ -44,6 +56,12 @@
 					"name": "Global Tooltips",
 					"progress": 1.0,
 					"comment": "Custom tooltips for anything you hover your mouse over. Extra info for some items appears after a moment"
+				},
+				{
+					"name": "List Table Views",
+					"progress": 1.0,
+					"comment": "A reusable dynamic table format for viewing lists of anything. So far used by the Item Library and Inventories.",
+					"new": true
 				},
 				{
 					"name": "Fetch and File Utilities",
@@ -66,9 +84,14 @@
 					"comment": "See information about this site and its creator!"
 				},
 				{
+					"name": "First Time Message",
+					"progress": 1.0,
+					"comment": "Points new users to the Hub's menu, in case it is hard to see right away."
+				},
+				{
 					"name": "First Time Tutorial",
 					"progress": 0.0,
-					"comment": "Will be useful getting account connections and settings configured how you need"
+					"comment": "Will be useful getting account connections and settings configured how you need."
 				}
 			]
 		},
@@ -204,14 +227,17 @@
 				{
 					"name": "Auto-Reply To Mentions",
 					"progress": 1.0,
-					"comment": "Responds when other users use @ to mention your bot by username."
+					"comment": "Responds when other users use @ to mention your bot by username.",
+					"new": true
 				},
 				{
 					"name": "Use Channel Stream Info",
 					"progress": 1.0,
-					"comment": "Fetches the current livestream info for your broadcast from Twitch, to give ChatGPT more context."
+					"comment": "Fetches the current livestream info for your broadcast from Twitch, to give ChatGPT more context.",
+					"new": true
 				}
-			]
+			],
+			"new": true
 		},
 		{
 			"name": "API Integration: Extra Platforms",
@@ -296,7 +322,91 @@
 			]
 		},
 		{
-			"name": "Raffle Overlay",
+			"name": "Viewer Inventories",
+			"desc": "View and edit items in viewers' inventories.",
+			"goals": [
+				{
+					"name": "Item Library Window",
+					"progress": 1.0,
+					"comment": "Allows you to create and edit any number of custom items for viewers to earn or collect"
+				},
+				{
+					"name": "Viewer Inventory Viewer",
+					"progress": 1.0,
+					"comment": "See who has what and how much of it"
+				},
+				{
+					"name": "Give Item Window",
+					"progress": 1.0,
+					"deprecated": true,
+					"comment": "You can add items directly at the bottom of viewer inventories now!"
+				},
+				{
+					"name": "Random Item Rewards",
+					"progress": 1.0,
+					"comment": "Allows viewers to receive a random item from the Item Library as a reward"
+				},
+				{
+					"name": "Custom Item Properties",
+					"progress": 0.8,
+					"comment": "Allows you to add custom properties to items, which could be used by other Hub features"
+				},
+				{
+					"name": "Viewer Trading",
+					"progress": 0,
+					"comment": "Will allow viewers to initiate trades of items from their inventories"
+				},
+				{
+					"name": "Viewer Crafting",
+					"progress": 0,
+					"comment": "Will allow viewers to craft new items by combining items from their inventories"
+				},
+				{
+					"name": "Viewer Wallets",
+					"progress": 0,
+					"comment": "Holds any type of currency for each viewer, separate from the inventory and item systems"
+				},
+				{
+					"name": "Viewer Wagering",
+					"progress": 0,
+					"comment": "Will allow viewers to place bets using currency, SE points, and maybe even items from their inventory"
+				}
+			]
+		},
+		{
+			"name": "Community Feud",
+			"desc": "A community answer collecting tool, based on the 'Family Feud' board. ",
+			"goals": [
+				{
+					"name": "Answer Collection",
+					"progress": 1.0,
+					"comment": "Collect answers from viewers via chat."
+				},
+				{
+					"name": "Answer Keyphrase",
+					"progress": 0.75,
+					"comment": "Require a keyphrase for viewers to indicate their message is an answer for the Feud."
+				},
+				{
+					"name": "Answer Board",
+					"progress": 1.0,
+					"comment": "Display the most repeated answers in a board styled after the Family Feud answer board. Reveal answers by clicking them!"
+				},
+				{
+					"name": "Question Display",
+					"progress": 1.0,
+					"comment": "Displays the current question below the board. You can edit the question by clicking it!"
+				},
+				{
+					"name": "Random Question",
+					"progress": 1.0,
+					"comment": "Sets the current question to one randomly selected from a set of predefined Family Feud style questions"
+				}
+			],
+			"new": true
+		},
+		{
+			"name": "Raffle",
 			"desc": "Spin to choose one winner from whoever joined via keyphrase in chat",
 			"goals": [
 				{
@@ -337,65 +447,13 @@
 			]
 		},
 		{
-			"name": "Viewer Inventories",
-			"desc": "View and edit items in viewers' inventories.",
-			"goals": [
-				{
-					"name": "Item Library Window",
-					"progress": 1.0,
-					"comment": "Allows you to create and edit any number of custom items for viewers to earn or collect"
-				},
-				{
-					"name": "Viewer Inventory Viewer",
-					"progress": 1.0,
-					"comment": "See who has what and how much of it"
-				},
-				{
-					"name": "Give Item Window",
-					"progress": 1.0,
-					"deprecated": true,
-					"comment": "You can add items directly at the bottom of viewer inventories now!"
-				},
-				{
-					"name": "Random Item Rewards",
-					"progress": 1.0,
-					"comment": "Allows viewers to receive a random item from the Item Library as a reward"
-				},
-				{
-					"name": "Custom Item Properties",
-					"progress": 0.1,
-					"comment": "Allows you to add custom properties to items, which could be used by other Hub features"
-				},
-				{
-					"name": "Viewer Trading",
-					"progress": 0,
-					"comment": "Will allow viewers to initiate trades of items from their inventories"
-				},
-				{
-					"name": "Viewer Crafting",
-					"progress": 0,
-					"comment": "Will allow viewers to craft new items by combining items from their inventories"
-				},
-				{
-					"name": "Viewer Wallets",
-					"progress": 0,
-					"comment": "Holds any type of currency for each viewer, separate from the inventory and item systems"
-				},
-				{
-					"name": "Viewer Wagering",
-					"progress": 0,
-					"comment": "Will allow viewers to place bets using currency, SE points, and maybe even items from their inventory"
-				}
-			]
-		},
-		{
 			"name": "Creature Catching",
 			"desc": "Creatures that you customise will appear and can be caught by chatters.",
 			"goals": [
 				{
 					"name": "Creature Roster",
 					"progress": 1.0,
-					"comment": "Create, modify, and remove creatures."
+					"comment": "Create, modify, and remove creatures. Now improved!"
 				},
 				{
 					"name": "Creature Images",
@@ -453,7 +511,7 @@
 					"comment": "Sends chat messages as your bot, informing about creature events and outcomes"
 				},
 				{
-					"name": "Improved Settings Window",
+					"name": "Improved Appearance Window",
 					"progress": 0.8,
 					"comment": "View and manage various aspects of creature catching"
 				}

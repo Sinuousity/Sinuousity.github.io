@@ -1,5 +1,5 @@
 import { Lookup } from "./lookup.js";
-import { RemoteDataConnection } from "./remotedata.js";
+import { RemoteDataConnection, RemoteDataUsage } from "./remotedata.js";
 import { ChatCollector } from "./chatcollector.js";
 import { GlobalSettings, OptionManager } from "./globalsettings.js";
 import { EventSource } from "./eventsource.js";
@@ -36,6 +36,10 @@ export class KickChannelDataCache
 			console.warn("fetch() error for : " + channel);
 			return null;
 		}
+
+		let header_content_length = Number(resp.headers.get('content-length'));
+		if (header_content_length > 0) RemoteDataUsage.RegisterBytesDownloaded(header_content_length);
+
 		var obj = await resp.json();
 		KickChannelDataCache.cachedData.Set(channel, obj);
 

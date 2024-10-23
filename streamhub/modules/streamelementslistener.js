@@ -449,6 +449,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: StreamElementsWindow.window_kind,
 		icon: StreamElementsWindow.window_icon,
+		icon_color: 'hotpink',
 		desc: "Get stats from StreamElements! You can use this to make sure your SE credentials are working.",
 		model: (x, y) => { return new StreamElementsWindow(x, y); },
 		shortcutKey: 's'
@@ -467,5 +468,6 @@ Rewards.Register(
 		if (options.min && options.max) StreamElements.AddUserPoints(user.username, Math.random() * Math.abs(options.max - options.min) + options.min);
 		else if (options.points) StreamElements.AddUserPoints(user.username, options.points);
 		else console.warn("Unable to award SE Points : Needs either 'min'/'max' or 'points'");
-	}
+	},
+	'Give some StreamElements loyalty points to the winner.'
 );

@@ -3,6 +3,7 @@ import { WindowManager } from "./windowmanager.js";
 import { UserInput } from "./userinput.js";
 import { GlobalTooltip } from "./globaltooltip.js";
 import { addElement } from "../hubscript.js";
+import { AnimJob } from "./AnimJob.js";
 
 console.info("[ +Module ] Window Core");
 
@@ -217,10 +218,74 @@ export class WindowBase
 		this.e_window_root.id = "window-root";
 		this.e_window_root.className = "window-root";
 		this.e_window_root.setAttribute("draggable", "false");
-		this.e_window_root.addEventListener("mousedown", () => { WindowManager.instance.BringToFront(this); });
+
+		/*
+		this.e_window_root.addEventListener(
+			"mouseenter",
+			e => 
+			{
+				this.jiggleRed = 200;
+				this.jiggleGreen = 120;
+				this.jiggleBlue = 0;
+				this.Jiggle(0.25, 1.0);
+			}
+		);
+		this.e_window_root.addEventListener(
+			"mouseleave",
+			e =>
+			{
+				this.jiggleRed = 120;
+				this.jiggleGreen = 50;
+				this.jiggleBlue = 0;
+				this.Jiggle(0.5, -1.0);
+			}
+		);
+		*/
+
+		this.e_window_root.addEventListener("mousedown", e => { WindowManager.instance.BringToFront(this); });
 		this.e_window_root.style.maxWidth = (document.documentElement.clientWidth - 24) + "px";
 		this.e_window_root.style.maxHeight = (document.documentElement.clientHeight - 24) + "px";
 		this.ApplyPosition();
+
+		this.animjob_jiggle = new AnimJob(window.targetFrameDeltaMs, dt => this.animFrame_Jiggle(dt));
+	}
+
+	Jiggle(duration = 2.0, strength = 1.0)
+	{
+		this.jiggle_timer = duration;
+		this.jiggle_inv_duration = 1.0 / duration;
+
+		this.jiggle_speed = 1.0;//Math.random() * 1.5 + 1.5;
+		this.jiggle_strength = strength;// * (Math.round(Math.random()) * 2 - 1);
+
+		this.animjob_jiggle.Start();
+	}
+
+	animFrame_Jiggle(dt)
+	{
+		if (this.jiggle_timer > 0.0)
+		{
+			let flash_phase = Math.min(1.0, Math.max(0.0, this.jiggle_timer * this.jiggle_inv_duration));
+			//let jiggle_amt = (Math.cos((this.jiggle_timer * this.jiggle_speed + 0.25) * 6.28318));
+
+			//this.e_window_root.style.scale = (jiggle_amt * flash_phase * flash_phase * 0.1) + 1.0;
+			let flash = 0.5 - 0.5 * Math.cos(6.28318 * flash_phase);
+			let flashR = flash * this.jiggleRed + 76;
+			let flashG = flash * this.jiggleGreen + 76;
+			let flashB = flash * this.jiggleBlue + 76;
+			this.e_window_root.style.borderColor = `rgba(${flashR}, ${flashG}, ${flashB}, 1.0)`;
+
+			this.jiggle_timer -= dt;
+		}
+		else
+		{
+			this.jiggle_timer = 0.0;
+
+			//this.e_window_root.style.scale = 1.0;
+			this.e_window_root.style.borderColor = '#575757';
+
+			this.animjob_jiggle.Stop();
+		}
 	}
 
 	CreateTopBar()
@@ -433,6 +498,8 @@ export class WindowBase
 			this.e_content.className = "window-content hover-obscure";
 			this.e_window_root.addEventListener("mouseleave", () => { this.BlurRecursive(this.e_content); });
 		}
+
+		window.setTimeout(() => this.e_content.style.opacity = '100%', 1);
 	}
 
 	BlurRecursive(e)
@@ -846,6 +913,13 @@ export class DraggableWindow extends WindowBase
 		this.drag_start_pos_x = pos_x;
 		this.drag_start_pos_y = pos_y;
 
+		this.swing_angle = 0.0;
+		this.swing_angle_target = 0.0;
+		this.swing_velocity = 0.0;
+		this.animJob_swing = new AnimJob(window.targetFrameDeltaMs, dt => this.animFrame_Swing(dt));
+
+		this.hide_content_while_dragging = false;
+
 		this.CreateDragHandle();
 	}
 
@@ -857,6 +931,31 @@ export class DraggableWindow extends WindowBase
 		this.e_window_drag_handle.setAttribute("draggable", "false");
 		this.e_window_drag_handle.addEventListener("mousedown", () => { this.StartDrag(); });
 		this.e_window_top_bar.insertBefore(this.e_window_drag_handle, this.e_title);
+	}
+
+	animFrame_Swing(dt)
+	{
+		let speed = Math.abs(this.swing_velocity);
+		speed -= speed * 5.0 * dt; // air friction
+		speed = Math.max(0.0, speed); // impossible negative speed from air friction
+		this.swing_velocity = Math.sign(this.swing_velocity) * speed;
+
+		this.swing_velocity += (this.swing_angle_target - this.swing_velocity) * dt; // acceleration from window drag
+		this.swing_velocity -= this.swing_angle * 200.0 * dt; // gravity
+
+		this.swing_angle += this.swing_velocity * dt;
+
+		this.e_window_root.style.rotate = this.swing_angle + "deg";
+
+		if (Math.abs(this.swing_velocity) < 0.01 && Math.abs(this.swing_angle) < 0.01 && Math.abs(this.swing_angle_target) < 0.01)
+		{
+			this.swing_angle_target = 0.0;
+			this.swing_velocity = 0.0;
+			this.swing_angle = 0.0;
+
+			this.e_window_root.style.rotate = "0deg";
+			this.animJob_swing.Stop();
+		}
 	}
 
 	StartDrag()
@@ -873,11 +972,29 @@ export class DraggableWindow extends WindowBase
 		this.e_window_drag_handle.style.cursor = "grabbing";
 		document.addEventListener("mousemove", this.ContinueDrag.bind(this));
 		document.addEventListener("mouseup", this.EndDrag.bind(this));
+
+		this.jiggleRed = 200;
+		this.jiggleGreen = 120;
+		this.jiggleBlue = 0;
+		this.Jiggle(0.5, 1.0);
+
+		if (this.e_content && this.hide_content_while_dragging === true) 
+		{
+			this.previous_content_display_mode = this.e_content.style.display;
+
+			this.e_window_root.style.backdropFilter = 'blur(0.369rem) contrast(50%) brightness(50%)';
+			this.e_window_root.style.transitionDuration = '0s';
+			this.e_content.style.opacity = '0%';
+			this.e_content.style.pointerEvents = 'none';
+			this.e_content.style.display = 'none';
+		}
 	}
 
 	ContinueDrag()
 	{
 		if (!this.dragging) return;
+
+		this.animJob_swing.Start();
 
 		var dragDeltaX = UserInput.instance.mousePositionX - this.drag_start_pos_x;
 		var dragDeltaY = UserInput.instance.mousePositionY - this.drag_start_pos_y;
@@ -907,7 +1024,10 @@ export class DraggableWindow extends WindowBase
 		screenx = Math.min(Math.max(screenx, 0.0), 1.0);
 		screenx *= screenx;
 		this.e_window_root.style.transitionDuration = "0.06s";
-		this.e_window_root.style.rotate = (20.0 * screenx * xdeltasign) + "deg";
+
+		this.swing_angle_target = 2000.0 * screenx * xdeltasign;
+		//this.swing_angle = Math.sign(target_swing_angle) * Math.max(Math.abs(this.swing_angle), Math.abs(target_swing_angle));
+
 		//this.e_window_root.style.scale = "101%";
 		this.e_window_root.style.outlineOffset = "4px";
 		this.e_window_root.style.outline = "2px solid var(--col-warn-bright)";
@@ -920,10 +1040,26 @@ export class DraggableWindow extends WindowBase
 		if (!this.dragging) return;
 		this.dragging = false;
 
+		if (this.e_content && this.hide_content_while_dragging === true) 
+		{
+			this.e_content.style.display = this.previous_content_display_mode;
+			this.e_content.style.pointerEvents = 'all';
+
+			this.e_window_root.style.transitionDuration = '1s';
+			this.e_window_root.style.backdropFilter = 'none';
+
+			window.setTimeout(() => this.e_content.style.opacity = '100%', 1);
+		}
+
+		this.jiggleRed = 150;
+		this.jiggleGreen = 90;
+		this.jiggleBlue = 0;
+		this.Jiggle(0.8, -1.0);
+
 		//this.e_window_root.style.pointerEvents = "all";
+		this.swing_angle_target = 0.0;
 		this.e_window_drag_handle.style.cursor = "grab";
 		this.e_window_root.style.transitionDuration = "0.2s";
-		this.e_window_root.style.rotate = "0deg";
 		//this.e_window_root.style.scale = "100%";
 		this.e_window_root.style.outlineOffset = "1px";
 		this.e_window_root.style.outline = "2px solid transparent";

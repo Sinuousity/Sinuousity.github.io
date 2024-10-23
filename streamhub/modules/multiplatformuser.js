@@ -5,6 +5,7 @@ import { TwitchResources } from "./twitchlistener.js";
 import { DraggableWindow } from "./windowcore.js";
 import { WindowManager } from "./windowmanager.js";
 import { addElement } from "./../hubscript.js";
+import { RemoteDataUsage } from "./remotedata.js";
 
 console.info("[ +Module ] MutliPlatform Users");
 
@@ -210,10 +211,11 @@ export class MultiPlatformUserCache
 // Window that allows the user to see data cached for use in reference to a specific viewer
 export class MultiPlatformUserExplorer extends DraggableWindow
 {
-	static window_kind = 'Viewer Data Viewer';
+	static window_kind = 'hidden:ViewerCacheWindow';
+
 	constructor(posX, posY)
 	{
-		super('Viewer Data Viewer', posX, posY);
+		super('Viewer Cache', posX, posY);
 		this.window_kind = MultiPlatformUserExplorer.window_kind;
 
 		this.e_window_root.style.minWidth = "300px";
@@ -223,12 +225,21 @@ export class MultiPlatformUserExplorer extends DraggableWindow
 
 		this.CreateContentContainer();
 		this.SetIcon("assignment_ind");
-		this.SetTitle('Viewer Data Viewer');
+		this.SetTitle('Viewer Cache');
 
 		this.CreateTopBarButton("cyan", () => { this.RefreshData(); }, "Refresh", "autorenew");
 
 		this.e_viewerListRoot = addElement("div", "viewer-list-root", this.e_content);
 		this.e_viewerListCounter = addElement("div", "viewer-list-counter", this.e_content, 0);
+		this.e_dataDownloadCounter = addElement("div", "viewer-list-counter", this.e_content, 0, x => x.style.top = '1.4rem');
+		this.e_txt_viewerListFilter = addElement(
+			"input", "viewer-list-filter", this.e_content, null,
+			x =>
+			{
+				x.type = 'text';
+				x.placeholder = 'Filter by name...';
+			}
+		);
 
 		this.e_details = addElement("div", "viewer-details-root", this.e_content);
 		this.e_details.style.transitionDuration = "0s";
@@ -248,22 +259,48 @@ export class MultiPlatformUserExplorer extends DraggableWindow
 		MultiPlatformUser.onAnyDataCached.RemoveSubscription(this.newUserDataSub);
 	}
 
+	GetDataStr(bytes)
+	{
+		const inv8 = 1.0 / 8.0;
+		const inv1024 = 1.0 / 1024;
+
+		if (bytes > (1024 * 1024 * 1024)) return Math.ceil(bytes * (inv1024 * inv1024 * inv1024) * 8.0) * inv8 + 'gb';
+		if (bytes > (1024 * 1024)) return Math.ceil(bytes * (inv1024 * inv1024) * 8.0) * inv8 + 'mb';
+		if (bytes > 1024) return Math.ceil(bytes * inv1024 * 8.0) * inv8 + 'kb';
+		return bytes + 'b';
+	}
+
 	RefreshData()
 	{
 		this.e_viewerListCounter.innerText = MultiPlatformUserCache.users.values.length + " cached";
+		this.e_dataDownloadCounter.innerText = this.GetDataStr(RemoteDataUsage.bytesDownloaded);
 		this.e_viewerListRoot.innerHTML = "";
+
+		let searchString = this.e_txt_viewerListFilter.value.trim().toLowerCase();
 
 		for (var viewerIndex in MultiPlatformUserCache.users.values)
 		{
 			const vid = MultiPlatformUserCache.users.values.length - viewerIndex - 1;
 			const viewer = MultiPlatformUserCache.users.values[vid];
 
-			var e_viewer = addElement("div", "viewer-list-item", this.e_viewerListRoot);
-			e_viewer.innerHTML = `<span style='font-size:0.6rem; color:` + viewer.platformColor + `;'>${viewer.platform}</span>`;
-			e_viewer.innerHTML += ` ${viewer.displayName}`;
-			e_viewer.innerHTML += ` <span style='font-size:0.6rem; color:goldenrod;'>${viewer.dataMessage}</span>`;
-			e_viewer.style.color = viewer.color;
-			e_viewer.addEventListener("click", e => { this.SelectUser(vid); });
+			let add_item = true;
+			if (searchString !== '')
+			{
+				add_item = false;
+				if (viewer.username.includes(searchString)) add_item = true;
+				else if (viewer.displayName.includes(searchString)) add_item = true;
+				else if (viewer.platformId.toString().includes(searchString)) add_item = true;
+			}
+
+			if (add_item)
+			{
+				var e_viewer = addElement("div", "viewer-list-item", this.e_viewerListRoot);
+				e_viewer.innerHTML = `<span style='font-size:0.6rem; color:` + viewer.platformColor + `;'>${viewer.platform}</span>`;
+				e_viewer.innerHTML += ` ${viewer.displayName}`;
+				e_viewer.innerHTML += ` <span style='font-size:0.6rem; color:goldenrod;'>${viewer.dataMessage}</span>`;
+				e_viewer.style.color = viewer.color;
+				e_viewer.addEventListener("click", e => { this.SelectUser(vid); });
+			}
 		}
 	}
 

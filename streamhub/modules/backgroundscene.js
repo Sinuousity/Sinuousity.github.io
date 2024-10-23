@@ -1224,6 +1224,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: BackgroundSceneSettingsWindow.window_kind,
 		icon: "gradient",
+		icon_color: 'hotpink',
 		desc: "Customize the background!",
 		model: (x, y) => { return new BackgroundSceneSettingsWindow(x, y); },
 		shortcutKey: 'b'

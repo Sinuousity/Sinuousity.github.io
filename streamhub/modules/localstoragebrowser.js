@@ -8,7 +8,7 @@ export class LocalStorageBrowserWindow extends DraggableWindow
 {
 	static window_kind = "hidden:LocalStorage Browser";
 	static window_title = "LocalStorage Browser";
-	static window_icon = 'fact_check';
+	static window_icon = 'troubleshoot';
 	static instance = null;
 
 	constructor(pos_x, pos_y)
@@ -257,6 +257,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: LocalStorageBrowserWindow.window_kind,
 		icon: LocalStorageBrowserWindow.window_icon,
+		icon_color: 'red',
 		model: (x, y) => { return new LocalStorageBrowserWindow(x, y); },
 		shortcutKey: ';'
 	}

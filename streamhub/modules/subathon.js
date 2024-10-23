@@ -217,6 +217,7 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: SubathonWindow.window_kind,
 		icon: SubathonWindow.window_icon,
+		icon_color: 'darkorchid',
 		desc: "Initiate and manage a subathon.",
 		model: (x, y) => { return new SubathonWindow(x, y); },
 		comingSoon: true,
@@ -241,7 +242,8 @@ Rewards.Register(
 			SubathonStateManager.AddEvent(timeAddEvent);
 		}
 		else console.warn("Unable to add Subathon Time : Reward needs either 'min'/'max' or 'points'");
-	}
+	},
+	'Add some amount of time to the Subathon timer.'
 );
 
 Rewards.Register(
@@ -249,7 +251,8 @@ Rewards.Register(
 	(user, options) =>
 	{
 		SubathonStateManager.AddEvent(new RewardWheelEvent(user.username, options.spinCount ?? 1));
-	}
+	},
+	'Add 1 or more wheel spins to the queue.'
 );
 
 Rewards.Register(
@@ -257,5 +260,6 @@ Rewards.Register(
 	(user, options) =>
 	{
 		SubathonStateManager.AddEvent(new PlinkoDropEvent(user.username, options.dropCount ?? 1));
-	}
+	},
+	'Add 1 or more Plinko drops to the queue.'
 );

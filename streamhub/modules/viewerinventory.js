@@ -243,6 +243,9 @@ export class ViewerInventoryManager extends StoredObject
 
 	static EnsureInventory(viewerSource = "", username = "")
 	{
+		if (typeof viewerSource !== 'string') return -1;
+		if (typeof username !== 'string' || username.length < 2) return -1;
+
 		var inventoryId = ViewerInventoryManager.IndexOfInventory(viewerSource, username);
 		if (inventoryId < 0)
 		{
@@ -256,6 +259,7 @@ export class ViewerInventoryManager extends StoredObject
 	static AddItemCount(viewerSource = "", username = "", item = {}, count = 1)
 	{
 		var inventoryId = ViewerInventoryManager.EnsureInventory(viewerSource, username);
+		if (inventoryId < 0) return; // invalid user
 
 		var itemSlotId = ViewerInventoryManager.IndexOfItem(ViewerInventoryManager.inventories[inventoryId], item);
 		if (itemSlotId < 0)
@@ -265,12 +269,15 @@ export class ViewerInventoryManager extends StoredObject
 			return;
 		}
 
+		let invref = ViewerInventoryManager.inventories[inventoryId];
+		let itemslotref = invref.itemSlots[itemSlotId];
 
-		ViewerInventoryManager.inventories[inventoryId].itemSlots[itemSlotId].item = item;
-		if (ViewerInventoryManager.inventories[inventoryId].itemSlots[itemSlotId].count)
-			ViewerInventoryManager.inventories[inventoryId].itemSlots[itemSlotId].count += count;
-		else
-			ViewerInventoryManager.inventories[inventoryId].itemSlots[itemSlotId].count = count;
+		//overwrite item details, in case they changed since the last time this item was added to this inventory
+		itemslotref.item = item;
+
+		if (itemslotref.count) itemslotref.count += count;
+		else itemslotref.count = count;
+
 		ViewerInventoryManager.EmitChange();
 	}
 
@@ -608,7 +615,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_btn_add.addEventListener("click",
 			() =>
 			{
-				ViewerInventoryManager.EnsureInventory(this.e_field_source.value, this.e_field_username.value);
+				ViewerInventoryManager.EnsureInventory(this.e_field_source.value.trim().toLowerCase(), this.e_field_username.value.trim().toLowerCase());
 				this.RefreshViewerList();
 			}
 		);

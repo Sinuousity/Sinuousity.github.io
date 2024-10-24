@@ -68,15 +68,32 @@ function OnBodyLoad()
 	RestoreWindowState();
 	UpdateSiteTag();
 
+	window.mouse_position_x = 0;
+	window.mouse_position_y = 0;
+	window.mouse_position_x_opp = 0;
+	window.mouse_position_y_opp = 0;
+
 	sub_mouse_motion = UserInput.afterMousePositionChanged.RequestSubscription(
 		() =>
 		{
-			document.documentElement.style.setProperty('--mouse-x', UserInput.instance.mousePositionX + 'px');
-			document.documentElement.style.setProperty('--mouse-y', UserInput.instance.mousePositionY + 'px');
-			document.documentElement.style.setProperty('--mouse-x-neg', (document.documentElement.clientWidth - UserInput.instance.mousePositionX) + 'px');
-			document.documentElement.style.setProperty('--mouse-y-neg', (document.documentElement.clientHeight - UserInput.instance.mousePositionY) + 'px');
+			window.mouse_position_x = UserInput.instance.mousePositionX;
+			window.mouse_position_y = UserInput.instance.mousePositionY;
+			window.mouse_position_x_opp = (document.documentElement.clientWidth - UserInput.instance.mousePositionX);
+			window.mouse_position_y_opp = (document.documentElement.clientHeight - UserInput.instance.mousePositionY);
 		}
 	);
+
+	let animjob_update_mouse_position = new AnimJob(
+		window.targetFrameDeltaMs * 2,
+		() =>
+		{
+			document.documentElement.style.setProperty('--mouse-x', window.mouse_position_x + 'px');
+			document.documentElement.style.setProperty('--mouse-y', window.mouse_position_y + 'px');
+			document.documentElement.style.setProperty('--mouse-x-neg', window.mouse_position_x_opp + 'px');
+			document.documentElement.style.setProperty('--mouse-y-neg', window.mouse_position_y_opp + 'px');
+		}
+	);
+	animjob_update_mouse_position.Start();
 
 	CheckFirstTimeVisit();
 	CreateFPSCounter();
@@ -287,11 +304,6 @@ function UpdateFPSCounter()
 }
 
 
-OnBodyLoad();
-// (() => { OnBodyLoad(); })();
-
-window.animjob_timeloop = new AnimJob(window.targetFrameDeltaMs - 1, dt => { animstep_timeloop(dt); });
-window.animjob_timeloop.Start();
 
 function FindBuiltInElements()
 {
@@ -453,3 +465,14 @@ function ReloadCss()
 
 var opt_key_show_fps = 'hub.show.fps';
 OptionManager.AppendOption(opt_key_show_fps, false, "Show FPS");
+
+
+
+
+
+
+OnBodyLoad();
+// (() => { OnBodyLoad(); })();
+
+window.animjob_timeloop = new AnimJob(window.targetFrameDeltaMs - 1, dt => { animstep_timeloop(dt); });
+window.animjob_timeloop.Start();

@@ -134,6 +134,7 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'yellow',
 		desc: "View all the types of rewards viewers can earn.",
 		model: (x, y) => { return new RewardBrowserWindow(x, y); },
+		sort_order: 950,
 		shortcutKey: 'g'
 	}
 );

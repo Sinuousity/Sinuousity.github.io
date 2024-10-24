@@ -8,6 +8,14 @@ export class WindowManager
 {
 	static instance = new WindowManager();
 
+	static CompareWindowTypesByName = (a, b) => (a.key ? a.key : '').localeCompare(b.key ? b.key : '');
+
+	static CompareWindowTypesBySortOrder = (a, b) => 
+	{
+		let baseEquality = (b.sort_order ? b.sort_order : 0) - (a.sort_order ? a.sort_order : 0);
+		return (baseEquality === 0) ? WindowManager.CompareWindowTypesByName(a, b) : baseEquality;
+	};
+
 	constructor()
 	{
 		this.windowTypes = [];

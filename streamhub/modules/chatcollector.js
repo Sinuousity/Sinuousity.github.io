@@ -165,9 +165,10 @@ WindowManager.instance.windowTypes.push(
 	{
 		key: "MultiChat",
 		icon: "people",
-		icon_color: 'cyan',
+		icon_color: 'darkorchid',
 		desc: "Combines messages from all sources. You should check here to make sure messages are coming in!",
 		model: (x, y) => { return new MultiChatWindow(x, y); },
+		sort_order: -10,
 		shortcutKey: 'c'
 	}
 );

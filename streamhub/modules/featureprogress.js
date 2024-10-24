@@ -145,7 +145,7 @@ export class FeatureProgressWindow extends DraggableWindow
 				if (goal.comment) 
 				{
 					if (goal.deprecated === true)
-						GlobalTooltip.RegisterReceiver(e_goal, "[Feature Removed]<br><span style='color:orange'>" + goal.comment + "</span>", null);
+						GlobalTooltip.RegisterReceiver(e_goal, "<span style='color:crimson'>[Feature Removed]</span><br><span style='color:orange'>" + goal.comment + "</span>", null);
 					else GlobalTooltip.RegisterReceiver(e_goal, goal.comment, null);
 				}
 
@@ -283,6 +283,7 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'lightgreen',
 		desc: "See what has been completed and what is planned!",
 		model: (x, y) => { return new FeatureProgressWindow(x, y); },
+		sort_order: 1000,
 		shortcutKey: 'p'
 	}
 );

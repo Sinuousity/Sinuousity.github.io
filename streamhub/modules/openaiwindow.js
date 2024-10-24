@@ -520,6 +520,8 @@ WindowManager.instance.windowTypes.push(
 			"Connect to OpenAI's API and use your bot to add interaction between viewers and ChatGPT.<br>"
 			+ "<span style='color:orange'>Warning! OpenAI's API is NOT free, but it is pretty cheap.</span><br>",
 		model: (x, y) => { return new OpenAIWindow(x, y); },
+		sort_order: 150,
+		new: true,
 		shortcutKey: 'o'
 	}
 );

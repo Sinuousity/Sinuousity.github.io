@@ -31,7 +31,7 @@ import { GLUtils } from "./modules/webglutils.js";
 export function RequestWindow(windowKind) { WindowManager.instance.GetNewOrExistingWindow(windowKind); }
 
 
-window.hub_version = "v0.3.0";
+window.hub_version = "v0.3.1";
 window.last_update_date = "October 23 2024";
 
 window.targetFrameDeltaMs = 15;
@@ -66,7 +66,6 @@ function OnBodyLoad()
 	KickState.instance.RefreshChannel();
 
 	RestoreWindowState();
-	//AddCssReloadButton();
 	UpdateSiteTag();
 
 	sub_mouse_motion = UserInput.afterMousePositionChanged.RequestSubscription(
@@ -81,6 +80,7 @@ function OnBodyLoad()
 
 	CheckFirstTimeVisit();
 	CreateFPSCounter();
+	//AddCssReloadButton();
 }
 
 function CheckFirstTimeVisit()
@@ -158,6 +158,9 @@ function CreateFPSCounter()
 		x =>
 		{
 			x.style.zIndex = '1000000';
+			x.style.opacity = '0.75';
+			x.style.userSelect = 'none';
+			x.style.pointerEvents = 'none';
 			x.style.position = 'fixed';
 			x.style.display = 'flex';
 			x.style.flexDirection = 'column';
@@ -204,7 +207,7 @@ function CreateFPSCounter()
 			x.style.lineHeight = '1rem';
 			x.style.fontSize = '0.8rem';
 			x.style.color = 'red';
-			x.style.backgroundColor = '#000a';
+			x.style.backgroundColor = '#000';
 			x.style.pointerEvents = 'none';
 			x.style.fontWeight = 'bold';
 			x.style.textAlign = 'right';
@@ -223,8 +226,6 @@ function CreateFPSCounter()
 	); // wait until user settings are loading
 
 }
-
-
 
 function InitWebGL()
 {
@@ -352,6 +353,7 @@ function RestoreWindowState()
 
 function SetWindowMenuOptions()
 {
+	WindowManager.instance.windowTypes.sort(WindowManager.CompareWindowTypesBySortOrder);
 	for (var wti = 0; wti < WindowManager.instance.windowTypes.length; wti++)
 	{
 		const wt = WindowManager.instance.windowTypes[wti];
@@ -377,13 +379,26 @@ function SetWindowMenuOptions()
 		if (wt.key.startsWith("hidden:")) continue;
 
 		var e_btn_open = addElement("div", "menu-windows-button", null, "", x => { if (!wt.comingSoon) x.addEventListener("click", () => { RequestWindow(wt.key); }); });
-		var e_lbl = addElement("div", "menu-windows-button-label", e_btn_open, wt.key);
+		addElement("div", "menu-windows-button-label", e_btn_open, wt.key);
 		if (wt.comingSoon) 
 		{
-			var e_comingSoon = addElement("div", "menu-windows-button-band-coming-soon", e_btn_open, "COMING SOON");
+			addElement("div", "menu-windows-button-band-large", e_btn_open, "COMING SOON");
 			e_btn_open.className = "menu-windows-button menu-windows-button-disabled";
 		}
-		if (wt.wip) var e_wip = addElement("div", "menu-windows-button-band-wip", e_btn_open, "WIP");
+
+		if (wt.wip) addElement("div", "menu-windows-button-band-small", e_btn_open, "WIP");
+
+		if (wt.new)
+		{
+			addElement(
+				"div", "menu-windows-button-band-small", e_btn_open, "NEW!",
+				x =>
+				{
+					if (wt.wip) x.style.transform = 'translate(28%, -50%) rotateZ(38deg)';
+					x.style.backgroundColor = '#160';
+				}
+			);
+		}
 		if (wt.icon) 
 		{
 			addElement("i", "menu-windows-button-icon", e_btn_open, wt.icon, x =>
@@ -396,10 +411,10 @@ function SetWindowMenuOptions()
 		if (wt.desc) 
 		{
 			let desc = "";
-			if (wt.shortcutKey) desc += "[ Hotkey: " + wt.shortcutKey.toUpperCase() + " ] ";
+			if (wt.shortcutKey) desc += "[ Hotkey: " + wt.shortcutKey.toUpperCase() + " ]<br>";
 			desc += wt.desc;
-			if (wt.comingSoon) desc += " ( Coming Soon! )";
-			if (wt.wip) desc += " ( Work-In-Progress! )";
+			if (wt.comingSoon) desc += "<br>( Coming Soon! )";
+			if (wt.wip) desc += "<br>( Work-In-Progress! )";
 			GlobalTooltip.RegisterReceiver(e_btn_open, desc, null);
 		}
 

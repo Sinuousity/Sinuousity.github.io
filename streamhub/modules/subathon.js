@@ -221,6 +221,7 @@ WindowManager.instance.windowTypes.push(
 		desc: "Initiate and manage a subathon.",
 		model: (x, y) => { return new SubathonWindow(x, y); },
 		comingSoon: true,
+		sort_order: -1,
 		shortcutKey: 't'
 	}
 );

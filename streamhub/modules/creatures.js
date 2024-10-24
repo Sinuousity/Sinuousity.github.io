@@ -275,6 +275,7 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'cyan',
 		desc: "Create, modify, or remove creatures from the Creature Roster!",
 		model: (x, y) => { return new CreatureRosterWindow(x, y); },
+		sort_order: 0,
 		shortcutKey: 'm'
 	}
 );

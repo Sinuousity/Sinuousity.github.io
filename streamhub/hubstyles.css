@@ -598,23 +598,23 @@ a:hover
 }
 
 
-.menu-windows-button-band-wip
+.menu-windows-button-band-small
 {
 	position: absolute;
 	top: 50%;
 	right: 0;
 	width: 100%;
 
-	transform: translate(40%, -50%) rotateZ(30deg);
-	background-color: #00ccff5d;
+	transform: translate(42%, -50%) rotateZ(38deg);
+	background-color: hsl(192, 100%, 25%);
 	color: white !important;
-	box-shadow: #0000002c 0px 0px 5px 1px;
+	box-shadow: #0004 0px 3px 5px 1px;
 
 	text-align: center;
 	font-size: 0.6rem;
 }
 
-.menu-windows-button-band-coming-soon
+.menu-windows-button-band-large
 {
 	position: absolute;
 	opacity: 10%;

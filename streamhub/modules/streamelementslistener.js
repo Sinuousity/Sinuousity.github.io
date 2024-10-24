@@ -452,6 +452,7 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'hotpink',
 		desc: "Get stats from StreamElements! You can use this to make sure your SE credentials are working.",
 		model: (x, y) => { return new StreamElementsWindow(x, y); },
+		sort_order: 150,
 		shortcutKey: 's'
 	}
 );

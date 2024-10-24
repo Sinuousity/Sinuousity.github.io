@@ -858,6 +858,9 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'orange',
 		desc: "Manage a session of Community Feud, an answer collecting tool styled after Family Feud! Comes with some preset questions, or you can type your own!",
 		model: (x, y) => { return new CommunityFeudWindow(x, y); },
+		sort_order: -1,
+		new: true,
+		wip: true,
 		shortcutKey: 'f'
 	}
 );

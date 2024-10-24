@@ -337,6 +337,7 @@ WindowManager.instance.windowTypes.push(
 		icon: "settings",
 		desc: "General settings for the Hub",
 		model: (x, y) => { return new GlobalSettingsWindow(x, y); },
+		sort_order: -200,
 		shortcutKey: 'Escape'
 	}
 );

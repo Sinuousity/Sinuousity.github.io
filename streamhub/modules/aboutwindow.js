@@ -88,6 +88,7 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'white',
 		desc: "Find out more about this site and its creator.",
 		model: (x, y) => { return new AboutWindow(x, y); },
+		sort_order: -201,
 		shortcutKey: '/'
 	}
 );

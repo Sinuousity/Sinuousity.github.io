@@ -19,29 +19,29 @@ export class ViewerInventorySlot
 
 	static GetItemWeight(itemSlot = {})
 	{
-		if (itemSlot.item.weight) return itemSlot.item.weight;
+		if (itemSlot.weight) return itemSlot.weight;
 		return 0.0;
 	}
 
 	static GetItemValue(itemSlot = {})
 	{
-		if (itemSlot.item.tradeValue) return itemSlot.item.tradeValue;
+		if (itemSlot.tradeValue) return itemSlot.tradeValue;
 		return 0.0;
 	}
 
 	static GetTotalWeight(itemSlot = {})
 	{
-		if (itemSlot.item.weight) return itemSlot.count * itemSlot.item.weight;
+		if (itemSlot.weight) return itemSlot.count * itemSlot.weight;
 		return 0.0;
 	}
 
 	static GetTotalValue(itemSlot = {})
 	{
-		if (itemSlot.item.tradeValue) return itemSlot.count * itemSlot.item.tradeValue;
+		if (itemSlot.tradeValue) return itemSlot.count * itemSlot.tradeValue;
 		return 0.0;
 	}
 
-	static CompareName(a = {}, b = {}) { return b.item.name.localeCompare(a.item.name); }
+	static CompareName(a = {}, b = {}) { return b.name.localeCompare(a.name); }
 
 	static CompareWeight(a = {}, b = {})
 	{
@@ -112,6 +112,10 @@ export class ViewerInventory
 		}
 		return sum;
 	}
+
+
+	static CompareByTotalWeight = (a, b) => ViewerInventory.GetTotalWeight(b) - ViewerInventory.GetTotalWeight(a);
+	static CompareByTotalTradeValue = (a, b) => ViewerInventory.GetTotalTradeValue(b) - ViewerInventory.GetTotalTradeValue(a);
 }
 
 
@@ -237,15 +241,21 @@ export class ViewerInventoryManager extends StoredObject
 		return 1;
 	}
 
-	static AddItemCount(viewerSource = "", username = "", item = {}, count = 1)
+	static EnsureInventory(viewerSource = "", username = "")
 	{
 		var inventoryId = ViewerInventoryManager.IndexOfInventory(viewerSource, username);
 		if (inventoryId < 0)
 		{
-			ViewerInventoryManager.inventories.push(new ViewerInventory(viewerSource, username, [new ViewerInventorySlot(item, count)]));
+			ViewerInventoryManager.inventories.push(new ViewerInventory(viewerSource, username, []));
 			ViewerInventoryManager.EmitChange();
-			return;
+			return ViewerInventoryManager.inventories.length - 1;
 		}
+		return inventoryId;
+	}
+
+	static AddItemCount(viewerSource = "", username = "", item = {}, count = 1)
+	{
+		var inventoryId = ViewerInventoryManager.EnsureInventory(viewerSource, username);
 
 		var itemSlotId = ViewerInventoryManager.IndexOfItem(ViewerInventoryManager.inventories[inventoryId], item);
 		if (itemSlotId < 0)
@@ -318,7 +328,6 @@ export class ViewerInventoryWindow extends DraggableWindow
 		this.e_viewer_list_container.className = "inventory-window-content";
 		this.e_content.appendChild(this.e_viewer_list_container);
 
-		//this.CreateAddViewerButton();
 
 		var e_section_title = document.createElement("div");
 		e_section_title.className = "window-section-title";
@@ -331,6 +340,8 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 		this.table_viewers.CreateRoot(this.e_viewer_list_container);
 		this.RefreshViewerList();
+
+		this.CreateAddViewerButton();
 	}
 
 	stackedValueColumnContentProvider =
@@ -424,7 +435,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 		};
 
 	CompareByCount = (a, b) => this.OrCompareByName(b.count - a.count, a, b);
-	CompareByValue = (a, b) => this.OrCompareByName(b.value * b.count - a.value * a.count, a, b);
+	CompareByValue = (a, b) => this.OrCompareByName(b.tradeValue * b.count - a.tradeValue * a.count, a, b);
 	CompareByCategory = (a, b) => this.OrCompareByName((b.category ?? '').localeCompare(a.category ?? ''), a, b);
 	CompareByWeight = (a, b) => this.OrCompareByName(b.weight * b.count - a.weight * a.count, a, b);
 	CompareByName = (a, b) => b.name.localeCompare(a.name);
@@ -441,27 +452,23 @@ export class ViewerInventoryWindow extends DraggableWindow
 		col_username.width = '6rem';
 
 		let col_totalWeight = this.table_viewers.RegisterColumn(
-			'total_weight', "Total Weight", (a, b) => ViewerInventory.GetTotalWeight(b) - ViewerInventory.GetTotalWeight(a), TableListView.GetWeightStr,
+			'total_weight', "Total Weight", ViewerInventory.CompareByTotalWeight, TableListView.GetWeightStr,
 			this.totalWeightColumnContentProvider
 		);
-		col_totalWeight.default_descending = true;
 		col_totalWeight.textAlign = 'right';
 		col_totalWeight.fixedWidth = true;
 		col_totalWeight.width = '6rem';
 
 		let col_totalValue = this.table_viewers.RegisterColumn(
-			'total_value', "Total Value", (a, b) => ViewerInventory.GetTotalValue(b) - ViewerInventory.GetTotalValue(a), TableListView.GetValueStr,
+			'total_value', "Total Value", ViewerInventory.CompareByTotalTradeValue, TableListView.GetValueStr,
 			this.totalValueColumnContentProvider
 		);
-		col_totalValue.default_descending = true;
 		col_totalValue.textAlign = 'right';
 		col_totalValue.fixedWidth = true;
 		col_totalValue.width = '6rem';
 
 		this.table_viewers.RegisterQuickFilter('workspaces', entry => entry.category && entry.category.indexOf('misc') > -1, 'blueviolet', 'Misc');
 	}
-
-
 
 	RegisterInventoryTableColumns()
 	{
@@ -532,7 +539,7 @@ export class ViewerInventoryWindow extends DraggableWindow
 		let viewer_data = [];
 		for (let ii = 0; ii < ViewerInventoryManager.inventories.length; ii++) 
 		{
-			let inv = ViewerInventoryManager.inventories[ii];
+			const inv = ViewerInventoryManager.inventories[ii];
 			viewer_data.push(inv);
 		}
 		this.table_viewers.SetData(viewer_data);
@@ -556,66 +563,52 @@ export class ViewerInventoryWindow extends DraggableWindow
 
 	CreateAddViewerButton()
 	{
-		this.e_field_username = document.createElement("input");
-		this.e_field_username.type = "text";
-		this.e_field_username.spellcheck = false;
-		this.e_field_username.value = "sinuousity";
-		this.e_field_username.placeholder = "Username";
-		this.e_field_username.style.borderRadius = "0.4rem 0.4rem 0rem 0rem";
-		this.e_viewer_list_container.appendChild(this.e_field_username);
+		this.e_add_user_root = document.createElement('div');
+		this.e_add_user_root.style.display = 'flex';
+		this.e_add_user_root.style.flexDirection = 'row';
+		this.e_add_user_root.style.alignItems = 'center';
+		this.e_add_user_root.style.justifyContent = 'center';
+		this.e_add_user_root.style.justifyItems = 'center';
+		this.e_add_user_root.style.lineHeight = "2.5rem";
+		this.e_add_user_root.style.height = "2.5rem";
+		this.e_add_user_root.style.fontSize = "0.8rem";
+		this.e_add_user_root.style.paddingLeft = '0.5rem';
+		this.e_add_user_root.style.paddingRight = '0.5rem';
 
-		this.e_field_source = document.createElement("input");
+		this.e_field_source = document.createElement('input');
 		this.e_field_source.type = "text";
-		this.e_field_source.value = "twitch";
-		this.e_field_source.style.borderRadius = "0";
-		this.e_field_source.placeholder = "Source (e.g. 'twitch' or 'kick')";
-		this.e_viewer_list_container.appendChild(this.e_field_source);
+		this.e_field_source.value = "";
+		this.e_field_source.style.width = "12rem";
+		this.e_field_source.style.height = "1.8rem";
+		this.e_field_source.style.textAlign = "center";
+		this.e_field_source.style.flexGrow = "0.0";
+		this.e_field_source.style.flexShrink = "0.0";
+		this.e_field_source.placeholder = "Viewer Source ( twitch / kick )";
+		this.e_add_user_root.appendChild(this.e_field_source);
 
-		this.e_field_itemName = document.createElement("input");
-		this.e_field_itemName.type = "text";
-		this.e_field_itemName.value = "apple";
-		this.e_field_itemName.style.borderRadius = "0";
-		this.e_field_itemName.placeholder = "Item Name";
-		this.e_viewer_list_container.appendChild(this.e_field_itemName);
-
-		this.e_field_weight = document.createElement("input");
-		this.e_field_weight.type = "number";
-		this.e_field_weight.value = 1.0;
-		this.e_field_weight.step = 0.1;
-		this.e_field_weight.style.borderRadius = "0";
-		this.e_field_weight.name = "Weight (kg)";
-		this.e_viewer_list_container.appendChild(this.e_field_weight);
-
-		this.e_field_tradeValue = document.createElement("input");
-		this.e_field_tradeValue.type = "number";
-		this.e_field_tradeValue.value = 1.0;
-		this.e_field_tradeValue.step = 0.1;
-		this.e_field_tradeValue.style.borderRadius = "0";
-		this.e_field_tradeValue.name = "Trade Value (gp)";
-		this.e_viewer_list_container.appendChild(this.e_field_tradeValue);
+		this.e_field_username = document.createElement('input');
+		this.e_field_username.type = 'text';
+		this.e_field_username.spellcheck = false;
+		this.e_field_username.value = '';
+		this.e_field_username.placeholder = 'Viewer Username';
+		this.e_field_username.style.height = "1.8rem";
+		this.e_field_username.style.flexGrow = "1.0";
+		this.e_field_username.style.flexShrink = "1.0";
+		this.e_field_username.style.width = "7rem";
+		this.e_add_user_root.appendChild(this.e_field_username);
 
 		this.e_btn_add = document.createElement("div");
-		this.e_btn_add.className = "inventory-list-item-button"
+		this.e_btn_add.className = "window-content-button"
 		this.e_btn_add.innerText = "ADD";
-		this.e_btn_add.style.fontSize = "0.8rem";
-		this.e_btn_add.style.lineHeight = "1.5rem";
-		this.e_btn_add.style.height = "1.5rem";
+		this.e_btn_add.style.width = "4rem";
+		this.e_btn_add.style.flexGrow = "0.0";
+		this.e_btn_add.style.flexShrink = "0.0";
 		this.e_btn_add.style.backgroundColor = "#00ff0020";
-		this.e_btn_add.style.borderRadius = "0rem 0rem 0.4rem 0.4rem";
 		this.e_btn_add.style.color = "#00ff00";
 		this.e_btn_add.addEventListener("click",
 			() =>
 			{
-				ViewerInventoryManager.AddItemCount(
-					this.e_field_source.value,
-					this.e_field_username.value,
-					{
-						name: this.e_field_itemName.value,
-						weight: this.e_field_weight.value,
-						tradeValue: this.e_field_tradeValue.value,
-					},
-					1
-				);
+				ViewerInventoryManager.EnsureInventory(this.e_field_source.value, this.e_field_username.value);
 				this.RefreshViewerList();
 			}
 		);
@@ -624,7 +617,9 @@ export class ViewerInventoryWindow extends DraggableWindow
 		e_plus.innerText = "+";
 		this.e_btn_add.appendChild(e_plus);
 
-		this.e_viewer_list_container.appendChild(this.e_btn_add);
+		this.e_add_user_root.appendChild(this.e_btn_add);
+
+		this.e_viewer_list_container.appendChild(this.e_add_user_root);
 	}
 
 	RefreshViewerList()

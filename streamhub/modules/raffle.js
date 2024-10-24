@@ -1039,6 +1039,7 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'orange',
 		desc: "Spin a wheel! Kinda! Viewers can join! You can add any name! It twists!",
 		model: (x, y) => { return new RaffleSettingsWindow(x, y); },
+		sort_order: -1,
 		shortcutKey: 'r'
 	}
 );

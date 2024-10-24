@@ -894,6 +894,7 @@ WindowManager.instance.windowTypes.push(
 		icon_color: 'orange',
 		desc: "Edit creature appearance settings!",
 		model: (x, y) => { return new CreatureCatchingWindow(x, y); },
+		sort_order: -1,
 		wip: true,
 		shortcutKey: 'n'
 	}

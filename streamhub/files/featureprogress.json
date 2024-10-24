@@ -13,7 +13,7 @@
 					"name": "Notifications",
 					"progress": 1.0,
 					"deprecated": true,
-					"comment": "Shows some text information at the top of the screen"
+					"comment": "Showed some text information at the top of the screen. However, I remembered that I hate notifications."
 				},
 				{
 					"name": "Save Status Indicator",
